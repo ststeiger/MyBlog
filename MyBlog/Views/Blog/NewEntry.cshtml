@@ -1,0 +1,23 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>NewEntry</title>
+</head>
+<body>
+    <form action="@Url.Action("AddEntry", "Blog")" method="post" target="_self" >
+        <input type="text" id="txtTitle" name="txtTitle" value="" placeholder="Title" style="width: 300px;" />
+        <div style="clear: both; height: 10px;">&nbsp;</div>
+
+        <textarea id="taBody" name="taBody" rows="1" cols="1" style="width: 300px; height: 300px;" placeholder="content"></textarea>
+        
+        <div style="clear: both; height: 10px;">&nbsp;</div>
+
+        <input type="submit" value="submit" />
+    </form>
+</body>
+</html>

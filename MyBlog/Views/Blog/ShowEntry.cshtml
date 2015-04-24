@@ -1,0 +1,260 @@
+﻿@model MyBlog.Controllers.BlogController.T_BlogPost 
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>NewEntry</title>
+
+    <!--
+        http://stackoverflow.com/questions/5662735/stretch-background-image-css
+    -->
+
+    <style type="text/css" media="all">
+    
+        body 
+        {
+        
+            background: url(@Url.Content("~/Content/images/htc_hero_wallpaper_03.jpg")) no-repeat center center fixed;
+            
+            -webkit-background-size: cover;
+            -moz-background-size: cover;
+            -o-background-size: cover;
+            background-size: cover;
+        }
+
+        .divMiddle
+        {
+          width: 80%;
+          display: block;
+          margin-left: auto;
+          margin-right: auto;
+          background-color: White;
+        }
+    </style>
+
+    <script src="@Url.Content("~/Scripts/reqwest.js")" charset="utf-8" type="text/javascript"></script>
+    <script src="@Url.Content("~/Scripts/ajax_compat.js")" charset="utf-8" type="text/javascript"></script>
+    <script src="@Url.Content("~/Scripts/textHighlighting.js")" charset="utf-8" type="text/javascript"></script>
+
+</head>
+<body>
+
+    <style type="text/css" media="all">
+
+        .searchBox
+        {
+            background-color: rgba(255,255,255, 0.45);
+            color: rgb(182, 182, 157);
+            width: 300px;
+            height: 50px;
+            padding-left: 30px;
+            border: none;
+            border-top-left-radius: 20px;
+            border-bottom-left-radius: 20px;
+            -webkit-transition: width 1s, height 1s, background-color 1s, -webkit-transform 1s;
+            transition: width 1s, height 1s, background-color 1s, transform 1s;
+        }
+
+            .searchBox:focus
+            {
+                width: 500px;
+                background-color: white;
+                color: rgb(45, 60, 155);
+                -webkit-transition: width 1s, height 1s, background-color 1s, -webkit-transform 1s;
+                transition: width 1s, height 1s, background-color 1s, transform 1s;
+            }
+
+
+	    .searchButton
+	    {
+	    	box-sizing: content-box;
+	    	width: 80px;
+	    	height: 50px;
+	    	border: none;
+	    	border-top-right-radius: 20px;
+			border-bottom-right-radius: 20px;
+	    }
+
+	    .searchResult
+	    {
+	    	display: block; width: 80%; 
+	    	background-color: rgba(255,255,255, 0.5);
+	    	border-collapse: collapse;
+	    	border-top: 1px solid gray;
+	    	#border-bottom: 1px solid gray;
+	    	margin: auto;
+	    	padding-top: 20px;
+	    	padding-bottom: 20px;
+	    }
+
+
+        .highlight111 
+        {
+            background: #D3E18A;
+        }
+
+        .highlight
+        {
+            background-color: yellow;
+        }
+
+    </style>
+
+    <div style="background-color: rgba(200,194,84, 0.44); text-align: right;">
+    	<div >
+		    <div>
+		    	<form method="post" action="" >
+			    	<input id="txtSearchText" class="searchBox" type="text" value="" placeholder="Search" /><!---
+			     --><input class="searchButton" type="submit" value="Search" />
+		    	</form>
+		    </div>
+		</div>
+    </div>
+
+
+    <div id="wrapper" style="text-align: center; background-color: white;">    
+        <div id="yourdiv" style="display: inline-block; background-color: green; width: 80%;">
+            You text
+        </div>
+    </div>
+
+    <div id="divSR">&nbsp;</div>
+
+    <div id="template" style="display: none;">
+	    <div class="searchResult">
+	    	<span>Blog Entry dated {@@EntryDate}</span>
+	    	<h1>{@@Title}</h1>
+	    	<div style="clear: both; height: 10px;">&nbsp;</div>
+			<div>{@@Content}</div>
+	    </div>
+    </div>
+
+        
+
+        <script type="text/javascript">
+            //////////////////////////////////////////////////////////////////////
+            /*
+            $.post('/Blog/BBCode?foo=bar', function (data)
+            {
+                console.log("post data");
+                console.log(data);
+            });
+            */
+            //////////////////////////////////////////////////////////////////////
+            var params = [];
+
+            // assigning values to corresponding keys
+            params["q"] = "Search string";
+            params["abc"] = "def";
+            /*
+            $.jsonp('/Blog/CrossDomainSearch', params, "callback", "mycallback", function (data)
+            {
+                console.log("jsonp");
+                console.log(data);
+            });
+            */
+            //////////////////////////////////////////////////////////////////////
+
+            var InstaRequests = [];
+            var obj = document.getElementById("txtSearchText");
+
+            // name of event different, e.g. click vs. onclick
+            if (obj.addEventListener)
+            {
+                // param3: boolean - bubbling/capturing
+                // http://www.w3schools.com/jsref/met_document_addeventlistener.asp
+                obj.addEventListener("keyup", function (e)
+                {
+                    // e.preventDefault();
+                    // console.log("q: " + obj.value);
+                    
+
+                    if (InstaRequests[this.id])
+                    {
+                        InstaRequests[this.id].abort();
+                    }
+
+                    if(obj.value === null || obj.value === "" )
+                    {
+                        var divSR = document.getElementById("divSR"); //.parentNode;
+                        var lst; while (lst = divSR.lastChild) divSR.removeChild(lst);
+                        return;
+                    }
+                    
+
+
+                    InstaRequests[this.id] = $.getJSON("/Blog/Search", { q: obj.value }, function (data)
+                    {
+                        // console.log("getJSON: data:");
+                        // console.log(data);
+                        // obj.value = "Hello World";
+                        // obj.value = "my" + data.searched_for;
+                        // console.log("insta:");
+                        
+                        var div = document.getElementById("divSR"); //.parentNode;
+                        //console.log(div);
+
+                        // http://stackoverflow.com/questions/3955229/remove-all-child-elements-of-a-dom-node-in-javascript
+                        // div.innerHTML = "";
+                        // Much faster than innerHTML
+                        //while (div.firstChild) div.removeChild(div.firstChild);
+                        var last; while (last = div.lastChild) div.removeChild(last);
+
+                        var strTemplate = document.getElementById("template").innerHTML;
+
+            			for(var i = 0; i < data.searchResults.length; ++i)
+            			{
+            				// console.log(data.searchResults[i].BP_HtmlContent);
+            				// beforebegin
+	                        // afterbegin
+	                        // beforeend
+	                        // afterend
+
+						    var strHtml = strTemplate.replace("{@@EntryDate}", data.searchResults[i].BP_EntryDate);
+						    strHtml = strHtml.replace("{@@Title}", data.searchResults[i].BP_Title);
+						    strHtml = strHtml.replace("{@@Content}", data.searchResults[i].BP_HtmlContent);
+
+	                        div.insertAdjacentHTML('beforeend', strHtml);
+            			} // Next i 
+
+            			console.log("searched for: " + data.searched_for);
+            		    InstantSearch.highlight(div, data.searched_for);
+                    }).request;
+
+                    // console.log(InstaRequests[this.id]);
+                });
+            }
+            else if (obj.attachEvent)
+            {
+                // IE 8
+                // obj.attachEvent("onclick", setCheckedValues);
+            }
+            else
+                console.log("no event listener");
+
+        </script>
+
+        @Html.DropDownList("myList")
+        <div id="wrapper" style="text-align: center">
+
+            <div id="yourdiv" style="display: inline-block; width: 80%; text-align: left; background-color: rgba(255,255,255, 0.5); padding: 0.25cm;min-width: 800px;">
+                <input type="hidden" value="@Model.BP_UID" />
+                <span>Blog entry dated @Model.BP_EntryDate</span>
+                <div style="clear: both;">&nbsp;</div>
+                <h2 id="title">@Model.BP_Title</h2>
+
+                <div style="clear: both; height: 10px;">&nbsp;</div>
+
+                <span id="spContent">
+                    @Html.Raw(Model.BP_Content)
+                </span>
+
+                <div style="clear: both; height: 10px;">&nbsp;</div>
+            </div>
+        </div>
+</body>
+</html>

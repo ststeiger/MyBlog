@@ -1,0 +1,1283 @@
+﻿When you think about installing a nameserver, then you theoretically could just install bind9 from the repositories.
+
+[url]
+http://csharplzfcompression.codeplex.com/
+[/url]
+
+
+http://markitup.jaysalvat.com/examples/markitup/sets/bbcode/images/clean.png
+http://bbcode.codeplex.com/
+http://www.linguee.com/english-german?query=energiebezugsfl%E4che&source=german
+http://www.dict.cc/?s=Energiebezug
+
+
+
+[python]
+# -*- coding: utf-8 -*-
+# Python
+
+# find and replace in a dir by multiple pairs of regex
+
+import os, sys,shutil,re
+
+mydir= '/Users/xah/some'
+
+findreplace = [
+
+(re.compile(ur'''<a href="http://(?P<urlpart>(?:[^.]+\.)?wikipedia.org[^"]+)">http://([\w\.]+)+/(\w+/)+(?P<title>[^<]+)</a>''',re.U|re.M),
+ur'''<a href="http://\g<urlpart>">\g<title>↗</a>'''), # wikipedia
+
+# more regex pairs here
+]
+
+
+def replaceStringInFile(filePath):
+   "replaces all string by a regex substitution"
+   backupName=filePath+'~re~'
+
+   print 'reading:', filePath
+   input = open(filePath,'rb')
+   s=unicode(input.read(),'utf-8')
+   input.close()
+
+   numRep=None
+   for couple in findreplace:
+      if numRep == None:
+         numRep = re.search(couple[0],s)
+      outtext = re.sub(couple[0],couple[1], s)
+      s=outtext
+
+   if numRep:
+      print ' writing:', filePath
+      shutil.copy2(filePath,backupName)
+      outF = open(filePath,'r+b')
+      outF.read() # we do this way to preserve file creation date
+      outF.seek(0)
+      outF.write(outtext.encode('utf-8'))
+      outF.truncate()
+      outF.close()
+
+def myfun(dummy, curdir, filess):
+   for child in filess:
+      if re.search(r'.+\.html$',child,re.U) and os.path.isfile(curdir+'/'+child):
+         replaceStringInFile(curdir+'/'+child)
+
+os.path.walk(mydir, myfun, 3)
+[/python]
+
+[python]
+# Python
+
+import re
+text = r'''<p>look at this <img src="./some.gif" width="30" height="20"> ...</p>'''
+new = re.sub(r'src\s*=\s*"([^"]+)\.gif"', r'src="\1.png"', text)
+print new
+[/python]
+
+
+[sql]
+
+CREATE VIEW [dbo].[V_RPT_AL_Anlageninventar] 
+AS 
+WITH Anlagenbaum
+(
+	 AL_UID
+	,AL_Anlagenstamm
+	,AL_MDT_ID
+	,AL_ADR_UID
+	,AL_AK_UID
+	,AL_RM_UID
+	,AL_SO_UID
+	,AL_GB_UID
+	,AL_GS_UID
+	,AL_Nr
+	,AL_Hersteller
+	,AL_Modell
+	,AL_Typ
+	,AL_TypenNr
+	,AL_Baujahr
+	,AL_SerienNr
+	,AL_Beschreibung 
+	,AL_Bemerkung
+	,AL_DatumVon
+	,AL_DatumBis
+	,AL_Status
+	,AL_AL_UID 
+	,AL_IsBauteil
+	,Depth 
+	,CALC_AL_Count
+	,Sort
+) 
+AS
+(
+	SELECT 
+		 AL_UID
+		,AL_UID AS AL_Anlagenstamm
+		,AL_MDT_ID
+		,AL_ADR_UID
+		,AL_AK_UID
+		,AL_RM_UID
+		,AL_SO_UID
+		,AL_GB_UID
+		,AL_GS_UID
+		,CONVERT(varchar, AL_Nr)
+		,AL_Hersteller
+		,AL_Modell
+		,AL_Typ
+		,AL_TypenNr
+		,AL_Baujahr
+		,AL_SerienNr
+		,AL_Beschreibung 
+		,AL_Bemerkung
+		,AL_DatumVon
+		,AL_DatumBis
+		,AL_Status
+		,AL_AL_UID 
+		,0 AS AL_IsBauteil
+		,0 AS Depth 
+		,LEN((SELECT COUNT(*) FROM dbo.T_AP_Anlage)) as CALC_AL_Count -- e.g. 3 
+		--,ROW_NUMBER() OVER (ORDER BY AL_UID ASC) AS Depth 
+		--,CONVERT(varchar(15), ROW_NUMBER() OVER (ORDER BY AL_UID ASC)) AS Sort 
+		--, LEN((SELECT COUNT(*) FROM dbo.T_AP_Anlage WHERE AL_AL_UID IS NULL))
+		--,CONVERT(varchar(15), LEFT( REPLICATE( '0', 2 ), 2 - LEN( ROW_NUMBER() OVER (ORDER BY AL_UID ASC) ) ) + CAST( ROW_NUMBER() OVER (ORDER BY AL_UID ASC) as varchar(10) )) AS Sort 
+		
+		
+		,CONVERT(varchar(15), 
+			LEFT(
+					 REPLICATE( '0', 2 ), 
+						LEN((SELECT COUNT(*) FROM dbo.T_AP_Anlage)) -- e.g. 3
+						- 
+						LEN( ROW_NUMBER() OVER (ORDER BY AL_UID ASC) ) 
+			) 
+			
+			+ CAST( ROW_NUMBER() OVER (ORDER BY AL_UID ASC) AS varchar(10) )
+		) AS Sort 
+		
+		
+	FROM dbo.T_AP_Anlage 
+	WHERE AL_AL_UID IS NULL
+	
+	
+	
+	UNION ALL
+	
+	
+	
+	SELECT 
+		 Subanlage.AL_UID
+		,Parent.AL_Anlagenstamm AS AL_Anlagenstamm
+		,Subanlage.AL_MDT_ID
+		,Subanlage.AL_ADR_UID
+		,Subanlage.AL_AK_UID
+		,Subanlage.AL_RM_UID
+		,Subanlage.AL_SO_UID
+		,Subanlage.AL_GB_UID
+		,Subanlage.AL_GS_UID
+		,CONVERT(varchar, ISNULL(Parent.AL_Nr, '') + '''' + ISNULL(Subanlage.AL_Nr, ''))
+		,Subanlage.AL_Hersteller
+		,Subanlage.AL_Modell
+		,Subanlage.AL_Typ
+		,Subanlage.AL_TypenNr
+		,Subanlage.AL_Baujahr
+		,Subanlage.AL_SerienNr
+		,Subanlage.AL_Beschreibung 
+		,Subanlage.AL_Bemerkung
+		,Subanlage.AL_DatumVon
+		,Subanlage.AL_DatumBis
+		,Subanlage.AL_Status
+		,Subanlage.AL_AL_UID 
+		,1 AS AL_IsBauteil
+		,Parent.Depth + 1 AS Depth 
+		,Parent.CALC_AL_Count AS CALC_AL_Count
+		--,ROW_NUMBER() OVER (ORDER BY Subanlage.AL_UID ASC) AS Depth 
+		--,(Parent.Sort + CONVERT(varchar(15), Parent.Depth + 1)) AS Sort
+		--,CONVERT(varchar(15), CONVERT(varchar(15), Parent.Sort) + '.' + CONVERT(varchar(15), Parent.Depth + 1)) AS Sort
+		--,CONVERT(varchar(15), CONVERT(varchar(15), Parent.Sort) + '.' + CONVERT(varchar(15), ROW_NUMBER() OVER (ORDER BY Subanlage.AL_UID ASC))) AS Sort
+		
+		--,cast(1 as varchar(15)) as sort
+		
+		,CONVERT(varchar(15), 
+								CONVERT(varchar(15), Parent.Sort) + '.' + 
+									CONVERT(varchar(15), 
+										LEFT( REPLICATE( '0', 2 ), 
+											Parent.CALC_AL_Count --e.g. 3
+											- 
+											LEN( ROW_NUMBER() OVER (ORDER BY Subanlage.AL_UID ASC) )
+										) 
+										+ 
+										CAST( ROW_NUMBER() OVER (ORDER BY Subanlage.AL_UID ASC) AS varchar(10) )
+									)
+		) AS Sort
+		
+	FROM dbo.T_AP_Anlage Subanlage
+	
+	INNER JOIN Anlagenbaum AS Parent 
+		ON Parent.AL_UID = Subanlage.AL_AL_UID
+)
+
+
+SELECT 
+	 AL_UID 
+	,AL_Anlagenstamm
+	,AL_MDT_ID 
+	,AL_ADR_UID
+	,AL_AK_UID
+	,AL_RM_UID
+	,AL_SO_UID
+	,AL_GB_UID
+	,AL_GS_UID
+	,
+	 CASE 
+		WHEN AL_Nr = '''' 
+			THEN ''
+		ELSE AL_Nr
+	 END AS AL_Nr
+	,AL_Hersteller
+	,AL_Modell
+	,AL_Typ
+	,AL_TypenNr
+	,AL_Baujahr
+	,AL_SerienNr
+	,AL_Beschreibung 
+	,AL_Bemerkung
+	,AL_DatumVon
+	,AL_DatumBis
+
+	,AL_AL_UID
+	,AL_IsBauteil 
+	,Depth AS AL_Depth
+	,Sort AS AL_Sort
+	
+	
+	,dbo.T_AP_Ref_AnlageKategorie.AK_UID 
+	,dbo.T_AP_Ref_AnlageKategorie.AK_Lang_DE  
+	,dbo.T_AP_Ref_AnlageKategorie.AK_Lang_FR  
+	,dbo.T_AP_Ref_AnlageKategorie.AK_Lang_IT  
+	,dbo.T_AP_Ref_AnlageKategorie.AK_Lang_EN 
+	
+	
+	
+	,GB_UID
+	,GB_MDT_ID
+	,GB_SO_UID
+	,GB_EV_UID
+	,GB_GK_UID
+	,GB_ApertureKey
+	,GB_Nr
+	,GB_Strasse
+	,GB_StrasseNr
+	,GB_PLZ
+	,GB_Ort
+	,GB_Bezeichnung
+	,GB_Bemerkung
+	,GB_DatumVon
+	,GB_DatumBis
+	,GB_Status
+
+	,SO_UID
+	,SO_MDT_ID
+	,SO_ORT_UID
+	,SO_ApertureKey
+	,SO_Nr
+	,SO_Bezeichnung
+	,SO_Bemerkung
+	,SO_DatumVon
+	,SO_DatumBis
+	,SO_Status
+
+
+	,GS_UID
+	,GS_MDT_ID
+	,GS_GB_UID
+	,GS_GST_UID
+	,GS_ApertureKey
+	,GS_Nr
+	,GS_Bezeichnung
+	,GS_Hoehe
+	,GS_Sort
+	,GS_IsAussengeschoss
+	,GS_Bemerkung
+	,GS_DatumVon
+	,GS_DatumBis
+	,GS_Status
+	,GS_Sammelplatz
+
+	,RM_UID
+	,RM_MDT_ID
+	,RM_GS_UID
+	,RM_BB_UID
+	,RM_NA_UID_gebaut
+	,RM_RP_UID
+	,RM_FM_UID
+	,RM_ApertureKey
+	,RM_Nr
+	,RM_Bezeichnung
+	,RM_Bemerkung
+	,RM_Hoehe
+	,RM_Bodenbelastung
+     --,RM_IsFluchtweg
+	,RM_DatumVon
+	,RM_DatumBis
+	,RM_Status
+	,RM_TK_UID
+	,RM_IsVermietbar
+
+	,[TK_UID]
+	,[TK_MDT_ID]
+	,[TK_GB_UID]
+	,[TK_ApertureKey]
+	,[TK_Nr]
+	,[TK_Bezeichnung]
+	,[TK_Bemerkung]
+	,[TK_DatumVon]
+	,[TK_DatumBis]
+	,[TK_Status]
+
+	,GST_UID
+	,GST_MDT_ID
+	,GST_Code
+	,GST_Kurz_DE
+	,GST_Kurz_FR
+	,GST_Kurz_IT
+	,GST_Kurz_EN
+	,GST_Lang_DE
+	,GST_Lang_FR
+	,GST_Lang_IT
+	,GST_Lang_EN
+	,GST_Status
+	,GST_Sort 
+	
+FROM Anlagenbaum
+
+LEFT JOIN dbo.T_AP_Ref_AnlageKategorie 
+	ON Anlagenbaum.AL_AK_UID = dbo.T_AP_Ref_AnlageKategorie.AK_UID 
+	AND dbo.T_AP_Ref_AnlageKategorie.AK_Status = 1
+	
+LEFT JOIN dbo.T_AP_Raum
+	ON T_AP_Raum.RM_UID = Anlagenbaum.AL_RM_UID
+	
+LEFT JOIN dbo.T_AP_Trakt
+	ON T_AP_Trakt.TK_UID = T_AP_Raum.RM_TK_UID
+	
+LEFT JOIN dbo.T_AP_Geschoss 
+	ON T_AP_Geschoss.GS_UID = T_AP_Raum.RM_GS_UID 
+	OR T_AP_Geschoss.GS_UID = Anlagenbaum.AL_GS_UID
+	
+LEFT JOIN dbo.T_AP_Ref_Geschosstyp 
+	ON T_AP_Ref_Geschosstyp.GST_UID = T_AP_Geschoss.GS_GST_UID
+	AND T_AP_Ref_Geschosstyp.GST_Status = 1 
+	
+LEFT JOIN dbo.T_AP_Gebaeude 
+	ON dbo.T_AP_Gebaeude.GB_UID = T_AP_Geschoss.GS_GB_UID
+	OR T_AP_Gebaeude.GB_UID = Anlagenbaum.AL_GB_UID 
+	
+LEFT JOIN T_AP_Standort
+	ON T_AP_Standort.SO_UID = T_AP_Gebaeude.GB_SO_UID 
+	OR T_AP_Standort.SO_UID = Anlagenbaum.AL_SO_UID 
+	
+WHERE (Anlagenbaum.AL_Status = 1)
+--WHERE Depth < 2
+
+AND (SO_Bezeichnung IS NOT NULL OR GB_Bezeichnung IS NOT NULL OR RM_Bezeichnung IS NOT NULL)
+
+AND (T_AP_Raum.RM_Status     = 1 OR T_AP_Raum.RM_Status IS NULL)
+AND (T_AP_Trakt.TK_Status    = 1 OR T_AP_Trakt.TK_Status IS NULL)
+AND (T_AP_Geschoss.GS_Status = 1 OR T_AP_Geschoss.GS_Status IS NULL)
+AND (T_AP_Gebaeude.GB_Status = 1 OR T_AP_Gebaeude.GB_Status IS NULL)
+AND (T_AP_Standort.SO_Status = 1 OR T_AP_Standort.SO_Status IS NULL) 
+
+--ORDER BY Sort
+
+
+GO
+
+[/sql]
+
+
+[csharp]
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Security.Principal;
+using System.Web;
+using System.Web.Mvc;
+using System.Web.Routing;
+using System.Web.Security;
+using SqlWebAdmin.Models;
+
+namespace SqlWebAdmin.Controllers
+{
+    public class AccountController : Controller
+    {
+
+        public IFormsAuthenticationService FormsService { get; set; }
+        public IMembershipService MembershipService { get; set; }
+
+        protected override void Initialize(RequestContext requestContext)
+        {
+            if (FormsService == null) { FormsService = new FormsAuthenticationService(); }
+            if (MembershipService == null) { MembershipService = new AccountMembershipService(); }
+
+            base.Initialize(requestContext);
+        }
+
+        // **************************************
+        // URL: /Account/LogOn
+        // **************************************
+
+        public ActionResult LogOn()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public ActionResult LogOn(LogOnModel model, string returnUrl)
+        {
+            if (ModelState.IsValid)
+            {
+                if (MembershipService.ValidateUser(model.UserName, model.Password))
+                {
+                    FormsService.SignIn(model.UserName, model.RememberMe);
+                    if (Url.IsLocalUrl(returnUrl))
+                    {
+                        return Redirect(returnUrl);
+                    }
+                    else
+                    {
+                        return RedirectToAction("Index", "Home");
+                    }
+                }
+                else
+                {
+                    ModelState.AddModelError("", "Der angegebene Benutzername oder das angegebene Kennwort ist ungültig.");
+                }
+            }
+
+            // Wurde dieser Punkt erreicht, ist ein Fehler aufgetreten; Formular erneut anzeigen.
+            return View(model);
+        }
+
+        // **************************************
+        // URL: /Account/LogOff
+        // **************************************
+
+        public ActionResult LogOff()
+        {
+            FormsService.SignOut();
+
+            return RedirectToAction("Index", "Home");
+        }
+
+        // **************************************
+        // URL: /Account/Register
+        // **************************************
+
+        public ActionResult Register()
+        {
+            ViewBag.PasswordLength = MembershipService.MinPasswordLength;
+            return View();
+        }
+
+        [HttpPost]
+        public ActionResult Register(RegisterModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                // Versuch, den Benutzer zu registrieren
+                MembershipCreateStatus createStatus = MembershipService.CreateUser(model.UserName, model.Password, model.Email);
+
+                if (createStatus == MembershipCreateStatus.Success)
+                {
+                    FormsService.SignIn(model.UserName, false /* createPersistentCookie */);
+                    return RedirectToAction("Index", "Home");
+                }
+                else
+                {
+                    ModelState.AddModelError("", AccountValidation.ErrorCodeToString(createStatus));
+                }
+            }
+
+            // Wurde dieser Punkt erreicht, ist ein Fehler aufgetreten; Formular erneut anzeigen.
+            ViewBag.PasswordLength = MembershipService.MinPasswordLength;
+            return View(model);
+        }
+
+        // **************************************
+        // URL: /Account/ChangePassword
+        // **************************************
+
+        [Authorize]
+        public ActionResult ChangePassword()
+        {
+            ViewBag.PasswordLength = MembershipService.MinPasswordLength;
+            return View();
+        }
+
+        [Authorize]
+        [HttpPost]
+        public ActionResult ChangePassword(ChangePasswordModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                if (MembershipService.ChangePassword(User.Identity.Name, model.OldPassword, model.NewPassword))
+                {
+                    return RedirectToAction("ChangePasswordSuccess");
+                }
+                else
+                {
+                    ModelState.AddModelError("", "Das aktuelle Kennwort ist nicht korrekt, oder das Kennwort ist ungültig.");
+                }
+            }
+
+            // Wurde dieser Punkt erreicht, ist ein Fehler aufgetreten; Formular erneut anzeigen.
+            ViewBag.PasswordLength = MembershipService.MinPasswordLength;
+            return View(model);
+        }
+
+        // **************************************
+        // URL: /Account/ChangePasswordSuccess
+        // **************************************
+
+        public ActionResult ChangePasswordSuccess()
+        {
+            return View();
+        }
+
+    }
+}
+
+[/csharp]
+
+
+This also works fine, if you work with file-based configuration.
+But when you want to have a dynamic interface, e.g. your users can enter DNS names themselves, you don't want the dns server to be stopped and restarted at every entry, because this disrupts the service for everyone else.
+
+So you want to use dynamic loadable zones (DLZ, [url]http://bind-dlz.sourceforge.net/[/url]), which means bind9 uses a mysql/postgre/ODBC database as backend.
+Then you can add n entries at your leisure, without having to restart the server.
+
+But using bind9 with DLZ isn't that simple.
+When you try, you'll find that it doesn't work.
+
+Why that is, you see when you start the bind9 server [B]in debug mode[/B]
+[code]
+named -g -d 9
+[/code]
+
+You'll see this output
+[quote]
+22-Oct-2011 13:32:24.387 starting BIND 9.7.3 -g -d 9
+22-Oct-2011 13:32:24.387 built with '--prefix=/usr' '--mandir=/usr/share/man' '--infodir=/usr/share/info' '--sysconfdir=/etc/bind' '--localstatedir=/var' '--enable-threads' '--enable-largefile' '--with-libtool' '--enable-shared' '--enable-static' '--with-openssl=/usr' '--with-gssapi=/usr' '--with-gnu-ld' '--with-dlz-postgres=no' '--with-dlz-mysql=no' '--with-dlz-bdb=yes' '--with-dlz-filesystem=yes' '--with-dlz-ldap=yes' '--with-dlz-stub=yes' '--with-geoip=/usr' '--enable-ipv6' 'CFLAGS=-fno-strict-aliasing -DDIG_SIGCHASE -O2' 'LDFLAGS=-Wl,-Bsymbolic-functions' 'CPPFLAGS='
+[/quote]
+
+And you realize why it doesn't work.
+Because bind9 in the ubuntu repositories has been compiled without DLZ support...
+
+Of course, if bind9 doesn't load a SQL driver, it won't be able to access a SQL database...
+
+So you have to recompile bind9.
+And this is what this tutorial is about.
+
+For this tutorial, for convenience, simplicity and ease of use, I will suppose you work as root.
+However, this is not recommended for security reasons.
+So if you don't, just add sudo in front of every apt-get directive.
+
+[code]
+apt-get install bind9
+apt-get install bind9utils 
+apt-get remove bind9
+apt-get build-dep bind9
+mkdir /home/yourusername/bind9
+cd /home/yourusername/bind9
+apt-get source bind9
+[/code]
+
+The database dependencies (not included in build-dep bind9)
+[code]
+apt-get install libdb4.8-dev
+apt-get install libpq-dev 
+apt-get install libmysqlclient16-dev
+apt-get install unixodbc unixodbc-dev
+[/code]
+
+Install the databases themselves (you only need one of those)
+[code]
+apt-get install postgresql-9.1
+apt-get install mysql-server mysql-client
+apt-get install firebird2.5-superclassic 
+[/code]
+
+
+cd /home/yourusername/sources/bind9/bind9-9.7.3.dfsg
+
+[code]
+./configure --prefix=/usr --sysconfdir=/etc/bind --localstatedir=/var \
+--mandir=/usr/share/man --infodir=/usr/share/info \
+--enable-threads --enable-largefile --with-libtool --enable-shared --enable-static \
+--with-openssl=/usr --with-gssapi=/usr --with-gnu-ld \
+--with-dlz-postgres=yes --with-dlz-mysql=yes --with-dlz-bdb=no \
+--with-dlz-filesystem=yes --with-dlz-ldap=yes \
+--with-dlz-stub=yes --with-geoip=/usr --enable-ipv6 
+[/code]
+
+Now configure should run.
+
+While configure is running, have a look at the configure statement, especially this argument:
+[code]
+--with-dlz-bdb=no
+[/code]
+
+Note thatI have nothing against bdb (BerkeleyDB), as you see with "apt-get install libdb4.8-dev" but currently, configure doesn't like it:
+[quote]
+> checking for Berkeley DB DLZ driver... not found
+> configure: error: could not find Berkeley DB include directory
+> make: *** [configure-stamp] Error 1
+[/quote]
+([url]http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=634533[/url])
+So I just switched it off...
+
+
+Now, if configure ran and didn't output an error message, initiate the make (compilation) process:
+[code]
+make
+[/code]
+Otherwise, fix the error messages.
+
+Now, while your system is compiling, we can create the database tables.
+
+You can do this any way you like, I'll use pgamin3 for postgres, mysql-workbench for mysql, and flamerobin for firebird.
+[code]
+apt-get install pgadmin3
+apt-get install flamerobin
+[/code]
+
+For mysql-workbench, go to:
+[url]http://dev.mysql.com/downloads/workbench/[/url]
+
+and download the most appropriate version of mysql-workbench   
+
+Since I run Ubuntu 11.10 x64, and there is no such package, I downloaded mysql-workbench for ubuntu 11.04 x64.
+[url]http://dev.mysql.com/downloads/workbench/5.2.html#downloads[/url]
+
+Download it, then open a terminal, and change the current working directory to your download location.
+
+There should be this file in that location:
+[quote]
+mysql-workbench-gpl-5.2.35-1ubu1104-amd64.deb
+[/quote]
+
+
+Now install it with
+[code]
+apt-get install libzip1 libgtkmm-2.4-1c2a python-paramiko python-pysqlite2 libctemplate0
+
+dpkg -i mysql-workbench-gpl-5.2.35-1ubu1104-amd64.deb
+[/code]
+
+Now start it (applications-->programming-->MySQL workbench in gnome-classic).
+
+
+For those who use the 11.04 deb on 11.10, if your workbench freezes on the splash screen, just type alt+f4 and the workbench will show.
+
+Now once arrived in mysql-workbench, click on connect (to localhost) and use  user root plus the password you set for user root during the mysql-installation.
+
+Once you're connected (press alt+f4 if nothing happens)
+go in menu Edit->Preferences->SQL Editor and
+untick "Safe updates" (in order to be able to delete an entire table without where), then switch back to general (because you can't click OK here - bug) and then click OK. You may want to re-enable this options later on.
+
+
+If SQL-workbench doesn't work, remove it with
+[code]
+apt-get remove mysql-workbench-gpl
+[/code]
+
+and look out for another administration tool
+like 
+[code]
+apt-get install mysql-admin 
+[/code]
+
+
+Now, to connect to the postgres database, we first have to set the password:
+[code]
+su postgres
+psql
+ALTER USER postgres WITH ENCRYPTED PASSWORD 'your_password';
+\q
+exit
+[/code]
+
+
+Now open pgamin3, and login to the database ON LOCALHOST (default port: 5432)
+
+
+Now, enable remote access on your MySQL server:
+
+
+In
+[code]
+/etc/mysql/my.cnf
+[/code]
+
+change  
+[code]
+bind-address		= 127.0.0.1
+[/code]
+
+to
+[code]
+#bind-address		= 127.0.0.1
+bind-address		= 192.168.1.8
+[/code]
+(with 192.168.1.8 being the server's internal IP address)
+
+Add remote access:
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY 'your_password' WITH GRANT OPTION;
+
+
+If you can't access mysql, you may have to change the mysql root user password:
+[code]
+open /usr/bin/mysqld_safe --skip-grant-tables
+[/code]
+
+Start the mysql console:
+[code]
+mysql -u root -p mysql
+update user set Password=PASSWORD('your_password') WHERE User='root';
+[/code]
+then type exit to exit the mysql command line.
+
+
+
+
+In order to enable postgresql remote access, do this:
+
+Open 
+[code]
+/etc/postgresql/9.1/main/postgresql.conf
+[/code]
+in a text editor.
+
+Now change listen_addresses to your internal IP address, in this case 192.168.1.8
+[code]
+listen_addresses = 'localhost, 192.168.1.8'		# what IP address(es) to listen on;
+[/code]
+
+
+Then, edit this file
+[code]
+/etc/postgresql/9.1/main/pg_hba.conf
+[/code]
+
+and add
+[code] 
+host    all             all             192.168.1.0/0           md5
+[/code] 
+
+
+
+Once you can connect to your databases, create the DLZ database:
+
+
+MySQL
+[code]
+CREATE SCHEMA `bind9_dlz` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci ;
+[/code]
+
+
+PostGreSQL
+[code]
+
+-- Database: "bind9_dlz"
+
+-- DROP DATABASE "bind9_dlz";
+
+CREATE DATABASE "bind9_dlz"
+  WITH OWNER = postgres
+       ENCODING = 'UTF8'
+       TABLESPACE = pg_default
+       LC_COLLATE = 'en_US.UTF-8'
+       LC_CTYPE = 'en_US.UTF-8'
+       CONNECTION LIMIT = -1;
+[/code]
+
+
+
+Then, create the table-create scripts
+
+
+MySQL:
+[code]
+-- MySQL dump 10.13  Distrib 5.1.58, for debian-linux-gnu (x86_64)
+--
+-- Host: localhost    Database: bind9_dlz
+-- ------------------------------------------------------
+-- Server version	5.1.58-1ubuntu1
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `dns_records`
+--
+
+DROP TABLE IF EXISTS `dns_records`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `dns_records` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `zone` varchar(255) NOT NULL,
+  `host` varchar(255) NOT NULL DEFAULT '@',
+  `type` varchar(255) NOT NULL,
+  `data` text,
+  `ttl` int(11) NOT NULL DEFAULT '86400',
+  `mx_priority` int(11) DEFAULT NULL,
+  `refresh` int(11) DEFAULT NULL,
+  `retry` int(11) DEFAULT NULL,
+  `expire` int(11) DEFAULT NULL,
+  `minimum` int(11) DEFAULT NULL,
+  `serial` bigint(20) DEFAULT NULL,
+  `resp_person` varchar(255) DEFAULT NULL,
+  `primary_ns` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `type` (`type`),
+  KEY `host` (`host`),
+  KEY `zone` (`zone`),
+  KEY `zone_host_index` (`zone`(30),`host`(30)),
+  KEY `type_index` (`type`(8))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `dns_records`
+--
+
+LOCK TABLES `dns_records` WRITE;
+/*!40000 ALTER TABLE `dns_records` DISABLE KEYS */;
+/*!40000 ALTER TABLE `dns_records` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `xfr_table`
+--
+
+DROP TABLE IF EXISTS `xfr_table`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `xfr_table` (
+  `zone` varchar(255) NOT NULL,
+  `client` varchar(255) NOT NULL,
+  KEY `zone` (`zone`),
+  KEY `client` (`client`),
+  KEY `zone_client_index` (`zone`(30),`client`(30))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `xfr_table`
+--
+
+LOCK TABLES `xfr_table` WRITE;
+/*!40000 ALTER TABLE `xfr_table` DISABLE KEYS */;
+/*!40000 ALTER TABLE `xfr_table` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2011-10-19 23:04:01
+[/code]
+
+PostGre:
+[code]
+
+
+--
+-- PostgreSQL database dump
+--
+
+SET statement_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = off;
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+SET escape_string_warning = off;
+
+SET search_path = public, pg_catalog;
+
+SET default_tablespace = '';
+
+SET default_with_oids = false;
+
+--
+-- Name: dns_record; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE dns_record (
+    id integer NOT NULL,
+    zone character varying(255) NOT NULL,
+    ttl integer NOT NULL,
+    type character varying(255) NOT NULL,
+    host character varying(255) DEFAULT '@'::character varying NOT NULL,
+    mx_priority integer,
+    data text,
+    primary_ns character varying(255),
+    resp_contact character varying(255),
+    serial bigint,
+    refresh integer,
+    retry integer,
+    expire integer,
+    minimum integer
+);
+
+
+ALTER TABLE public.dns_record OWNER TO postgres;
+
+--
+-- Name: dns_record_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE dns_record_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.dns_record_id_seq OWNER TO postgres;
+
+--
+-- Name: dns_record_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE dns_record_id_seq OWNED BY dns_record.id;
+
+
+--
+-- Name: dns_record_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('dns_record_id_seq', 1, false);
+
+
+--
+-- Name: dns_xfr; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE dns_xfr (
+    zone character varying(255) NOT NULL,
+    client character varying(255) NOT NULL
+);
+
+
+ALTER TABLE public.dns_xfr OWNER TO postgres;
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE dns_record ALTER COLUMN id SET DEFAULT nextval('dns_record_id_seq'::regclass);
+
+
+--
+-- Name: dns_record_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY dns_record
+    ADD CONSTRAINT dns_record_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: dns_record_host_idx; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE INDEX dns_record_host_idx ON dns_record USING btree (host);
+
+
+--
+-- Name: dns_record_type_idx; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE INDEX dns_record_type_idx ON dns_record USING btree (type);
+
+
+--
+-- Name: dns_record_zone_idx; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE INDEX dns_record_zone_idx ON dns_record USING btree (zone);
+
+
+--
+-- Name: dns_xfr_client_idx; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE INDEX dns_xfr_client_idx ON dns_xfr USING btree (client);
+
+
+--
+-- Name: dns_xfr_zone_idx; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE INDEX dns_xfr_zone_idx ON dns_xfr USING btree (zone);
+
+
+--
+-- Name: public; Type: ACL; Schema: -; Owner: postgres
+--
+
+REVOKE ALL ON SCHEMA public FROM PUBLIC;
+REVOKE ALL ON SCHEMA public FROM postgres;
+GRANT ALL ON SCHEMA public TO postgres;
+GRANT ALL ON SCHEMA public TO PUBLIC;
+[/code]
+
+
+Then, insert the data
+
+MySQL:
+[code]
+
+INSERT INTO `bind9_dlz`.`dns_records`
+(`id`,`zone`,`host`,`type`,`data`,`ttl`,`mx_priority`,`refresh`,`retry`,`expire`,`minimum`,`serial`,`resp_person`,`primary_ns`)
+VALUES
+(1, 'example.com', '@', 'SOA', NULL, 180, NULL, 10800, 7200, 604800, 86400, 2011091101, 'admins.mail.hotmail.com', '77.84.21.84'), 
+(2, 'example.com', '@', 'NS', '77.84.21.84', 180, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL), 
+(3, 'example.com', '@', 'A', '77.84.21.84', 180, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL), 
+(4, 'example.com', 'www', 'A', '77.84.21.84', 180, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL), 
+(5, 'xn--unicode-example.com', '@', 'SOA', NULL, 180, NULL, 10800, 7200, 604800, 86400, 2011091101, 'admins.mail.hotmail.com', '77.84.21.84'), 
+(6, 'xn--unicode-example.com', '@', 'NS', '77.84.21.84', 180, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL), 
+(7, 'xn--unicode-example.com', '@', 'A', '77.84.21.84', 180, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL), 
+(8, 'xn--unicode-example.com', 'www', 'A', '77.84.21.84', 180, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) 
+;
+
+[/code]
+
+PostGre:
+[code]
+
+insert into dns_record (id, zone, ttl, type, host, mx_priority, data, primary_ns, resp_contact, serial, refresh, retry, expire, minimum)
+values
+(1, 'example.com', 180, 'SOA', '@', NULL, NULL, '77.84.21.84', 'admins.mail.hotmail.com', 2011091101, 10800, 7200, 604800, 86400), 
+(2, 'example.com', 180, 'NS', '@', NULL, '77.84.21.84', NULL, NULL, NULL, NULL, NULL, NULL, NULL), 
+(3, 'example.com', 180, 'A', '@', NULL, '77.84.21.84', NULL, NULL, NULL, NULL, NULL, NULL, NULL), 
+(4, 'example.com', 180, 'A', 'www', NULL, '77.84.21.84', NULL, NULL, NULL, NULL, NULL, NULL, NULL), 
+(5, 'xn--unicode-example.ch', 180, 'SOA', '@', NULL, NULL, '77.84.21.84', 'admins.mail.hotmail.com', 2011091101, 10800, 7200, 604800, 86400), 
+(6, 'xn--unicode-example.com', 180, 'NS', '@', NULL, '77.84.21.84', NULL, NULL, NULL, NULL, NULL, NULL, NULL), 
+(7, 'xn--unicode-example.com', 180, 'A', '@', NULL, '77.84.21.84', NULL, NULL, NULL, NULL, NULL, NULL, NULL), 
+(8, 'xn--unicode-example.com', 180, 'A', 'www', NULL, '77.84.21.84', NULL, NULL, NULL, NULL, NULL, NULL, NULL) 
+;
+[/code]
+
+
+Now comes the trickiest part:
+Create the bind9 config file.
+
+For MySQL (/etc/bind/named.conf):
+[code]
+// This is the primary configuration file for the BIND DNS server named.
+//
+// Please read /usr/share/doc/bind9/README.Debian.gz for information on the 
+// structure of BIND configuration files in Debian, *BEFORE* you customize 
+// this configuration file.
+//
+// If you are just adding zones, please do that in /etc/bind/named.conf.local
+#auskommentiert !!!
+#include "/etc/bind/named.conf.options";
+#include "/etc/bind/named.conf.local";
+#include "/etc/bind/named.conf.default-zones";
+
+
+key "rndc-key" {
+            // how was key encoded
+            algorithm hmac-md5;
+            // what is the pass-phrase for the key
+	        secret "4ptlffIBhVnZgfdT0CXIcLDZeONxA5bHUVT5W2NofC9O4FOfjps8FzghoQy4myXnJ0g9jrna9Sjl6uKt6c/22A==";
+             };
+
+
+#options {
+#default-key "rndc-key";
+#default-server 127.0.0.1;
+#default-port 953;
+#};
+
+controls {
+inet * port 953 allow { any; } keys { "rndc-key"; };
+#inet * port 53 allow { any; } keys { "rndc-key"; };
+};
+
+
+
+logging {
+    channel query.log {
+        file "/var/log/query.log";
+        // Set the severity to dynamic to see all the debug messages.
+        severity dynamic;
+    };
+
+    category queries { query.log; };
+};
+
+
+
+
+
+dlz "Mysql zone" {
+   database "mysql
+   {host=127.0.0.1 port=3306 dbname=bind9_dlz user=root password=your_password}
+   {SELECT zone FROM dns_records WHERE zone = '$zone$'}
+   {SELECT ttl, type, mx_priority, IF(type = 'TXT', CONCAT('\"',data,'\"'), data) AS data
+    FROM dns_records
+    WHERE zone = '$zone$' AND host = '$record$' AND type <> 'SOA' AND type <> 'NS'}
+   {SELECT ttl, type, data, primary_ns, resp_person, serial, refresh, retry, expire, minimum
+    FROM dns_records
+    WHERE zone = '$zone$' AND (type = 'SOA' OR type='NS')}
+   {SELECT ttl, type, host, mx_priority, IF(type = 'TXT', CONCAT('\"',data,'\"'), data) AS data, resp_person, serial, refresh, retry, expire, minimum
+    FROM dns_records
+    WHERE zone = '$zone$' AND type <> 'SOA' AND type <> 'NS'}
+   {SELECT zone FROM xfr_table where zone='$zone$' AND client = '$client$'}";
+};
+[/code]
+
+
+And PostgreSQL (/etc/bind/named.conf):
+[code]
+// This is the primary configuration file for the BIND DNS server named.
+//
+// Please read /usr/share/doc/bind9/README.Debian.gz for information on the 
+// structure of BIND configuration files in Debian, *BEFORE* you customize 
+// this configuration file.
+//
+// If you are just adding zones, please do that in /etc/bind/named.conf.local
+#auskommentiert !!!
+#include "/etc/bind/named.conf.options";
+#include "/etc/bind/named.conf.local";
+#include "/etc/bind/named.conf.default-zones";
+
+
+key "rndc-key" {
+            // how was key encoded
+            algorithm hmac-md5;
+            // what is the pass-phrase for the key
+	        secret "4ptlffIBhVnZgfdT0CXIcLDZeONxA5bHUVT5W2NofC9O4FOfjps8FzghoQy4myXnJ0g9jrna9Sjl6uKt6c/22A==";
+             };
+
+
+#options {
+#default-key "rndc-key";
+#default-server 127.0.0.1;
+#default-port 953;
+#};
+
+controls {
+inet * port 953 allow { any; } keys { "rndc-key"; };
+#inet * port 53 allow { any; } keys { "rndc-key"; };
+};
+
+
+
+logging {
+    channel query.log {
+        file "/var/log/query.log";
+        // Set the severity to dynamic to see all the debug messages.
+        severity dynamic;
+    };
+
+    category queries { query.log; };
+};
+
+
+
+dlz "Postgres Zone" {
+       database "postgres 2
+       {host=127.0.0.1 port=5432 dbname=bind9_dlz user=postgres password=your_password}
+       {SELECT zone FROM dns_record WHERE zone = '$zone$'}
+       {SELECT ttl, type, mx_priority, case when lower(type)='txt' then '\"' || data || '\"' else data end AS data FROM dns_record WHERE zone = '$zone$' AND host = '$record$' AND type <> 'SOA' AND type <> 'NS'}
+       {SELECT ttl, type, data, primary_ns, resp_contact, serial, refresh, retry, expire, minimum FROM dns_record WHERE zone = '$zone$' AND (type = 'SOA' OR type='NS')}
+	{SELECT ttl, type, host, mx_priority, case when lower(type)='txt' then '\"' || data || '\"' else data end AS data, resp_contact, serial, refresh, retry, expire, minimum FROM dns_record WHERE zone = '$zone$' AND type <> 'SOA' AND type <> 'NS'}
+       {SELECT zone FROM dns_xfr where zone='$zone$' AND client = '$client$'}";
+};
+
+[/code]
+
+
+Now start named
+[code]
+/etc/init.d/bind9 start
+[/code]
+
+Now test whether it works:
+[code]
+dig @127.0.0.1  example.com
+dig @127.0.0.1  www.example.com
+[/code]
+
+If it gives you the IP, then it works, else there is something wrong.
+
+
+Now you have to watch out.
+You might have already realized that the entire process isn't that simple.
+
+So let's come to the pitfalls, which foremost include:
+- wrong IP (timeout)
+- wrong database name (case-sensitive)
+- wrong database password (case-sensitive, nonsensical error message)
+- wrong order of columns in the named.conf file's SQL statements (since the column names are freely choosable, access depends on column indexes, and if they are wrong, but not of the wrong datatype, it won't throw an error, but resolving won't work)
+- wrong escape sequence for named.conf (the old % instead of the new $)
+
+But on top of all those obvious things, there is another thing that isn't that obvious.
+
+Now it (should) work/s fine, but you'll realize that your named daemon will be gone when you restart your server.
+
+This is because bind9 now depends on mysql/postgresql/firebird.
+And rebooting your system will start bind before mysql/pgsql which causes bind to exit. 
+
+Changing the boot order of init scripts is a bit involved, so stay tuned.
+
+
+
+Install insserv (service dependency resolver)
+[code]
+apt-get install insserv
+[/code]
+
+Now edit these mysql init scripts:
+[code]
+/etc/init.d/mysql-ndb
+/etc/init.d/mysql-ndb-mgm 
+/etc/init.d/mysql
+[/code]
+
+and remove the $named from the two lines beginning with # Should-Start: and # Should-Stop.
+
+Now edit
+[code]
+/etc/init.d/bind9
+[/code]
+and append mysql to the Should-Start and Should-Stop lines. The 3rd file does not exsist on Lucid. Ignore it.
+
+Dito for postgre/firebird.
+
+
+Now run insserv to set up the necessary symlinks in /etc/rcX.d.
+[code]
+insserv mysql
+insserv bind9
+[/code]
+and there you go.
