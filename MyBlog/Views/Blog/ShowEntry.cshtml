@@ -17,7 +17,6 @@
     
         body 
         {
-        
             background: url(@Url.Content("~/Content/images/htc_hero_wallpaper_03.jpg")) no-repeat center center fixed;
             
             -webkit-background-size: cover;
@@ -44,6 +43,27 @@
 <body>
 
     <style type="text/css" media="all">
+
+        ::-webkit-input-placeholder
+        {
+            color: red;
+        }
+
+        :-moz-placeholder
+        { /* Firefox 18- */
+            color: red;
+        }
+
+        ::-moz-placeholder
+        { /* Firefox 19+ */
+            color: red;
+        }
+
+        #txtSearchText:-ms-input-placeholder
+        {
+            color: red;
+        }
+
 
         .searchBox
         {
