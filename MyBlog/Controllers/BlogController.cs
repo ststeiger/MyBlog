@@ -170,10 +170,12 @@ AND
 		} // End Action Upload
 
 
-		public ContentResult Preview()
+		public ContentResult Preview(string id, string q)
 		{
-			string strHTML = RenderUtils.RenderMarkdown ();
-
+            q = System.Uri.UnescapeDataString(q);
+			// string strHTML = RenderUtils.RenderMarkdown (q);
+            string strHTML = RenderUtils.RenderBbCode(q);
+            
 			return Content (strHTML, "text/html", System.Text.Encoding.UTF8);
 		} // End Action Upload
 

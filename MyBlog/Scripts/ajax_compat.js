@@ -1,4 +1,7 @@
 
+  ////////////////////////////////////////////////
+ //   https://api.jquery.com/jquery.getjson/   //
+////////////////////////////////////////////////
 $.getJSON = function (u, d, s)
 {
     if (typeof (d) == "function")
@@ -16,7 +19,11 @@ $.getJSON = function (u, d, s)
            }
     });
 };
-////////////////
+
+
+  ////////////////////////////////////////////
+ //   https://api.jquery.com/jquery.get/   //
+////////////////////////////////////////////
 $.get = function (u, d, s, t)
 {
     if (typeof (d) == "function")
@@ -34,14 +41,18 @@ $.get = function (u, d, s, t)
       , dataType: t
     });
 };
-/////////
+
+
+  /////////////////////////////////////////////
+ //   https://api.jquery.com/jquery.post/   //
+/////////////////////////////////////////////
 $.post = function (u, d, s, t)
 {
     if (typeof (d) == "function")
     { t = s; s = d; d = null; }
 
     return $.ajax({
-        type: "POST"
+        method: "POST"
       , url: u
       , data: d
       , success: s
@@ -53,7 +64,7 @@ $.post = function (u, d, s, t)
       , dataType: t
     });
 };
-// 
+
 
 $.jsonp = function (u, params, cb, cbn, fn)
 {
@@ -80,6 +91,5 @@ $.jsonp = function (u, params, cb, cbn, fn)
       , jsonpCallbackName: cbn
      , success: fn
         //,error : function(err) { console.log("error $.jsonp");console.log(err);}
-    })
+    });
 };
-

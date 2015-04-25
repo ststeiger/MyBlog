@@ -14,7 +14,11 @@ namespace MyBlog
 					DB.Abstraction.cDAL.DataBaseEngine_t.MS_SQL);
 
 			csb.Server = System.Environment.MachineName;
-			csb.DataBase = "blogz";
+
+            if (System.StringComparer.InvariantCultureIgnoreCase.Equals(System.Environment.MachineName, "nvidiasucks"))
+                csb.Server= @"NVIDIASUCKS\MS_SQL_2014";
+            
+            csb.DataBase = "Blogz";
 			csb.IntegratedSecurity = true;
 			csb.Pooling = false;
 			csb.PersistSecurityInfo = false;
@@ -29,11 +33,7 @@ namespace MyBlog
 				DB.Abstraction.UniversalConnectionStringBuilder.CreateInstance (
 					DB.Abstraction.cDAL.DataBaseEngine_t.PostGreSQL);
 
-            if (System.StringComparer.OrdinalIgnoreCase.Equals("nvidiasucks", System.Environment.MachineName))
-                csb.Server = "192.168.1.11";
-            else
-			    csb.Server = "127.0.0.1";
-
+			csb.Server = "127.0.0.1";
 			csb.DataBase = "blogz";
 			csb.Port = 5432;
 			csb.UserName = "pgwebservices";
@@ -48,7 +48,11 @@ namespace MyBlog
             DB.Abstraction.UniversalConnectionStringBuilder retval; 
             bool bUsePG = false;
 
-            if (System.StringComparer.InvariantCultureIgnoreCase.Equals(System.Environment.MachineName, "COR-W81-101"))
+
+
+            if (System.StringComparer.InvariantCultureIgnoreCase.Equals(System.Environment.MachineName, "COR-W81-101")
+                    || System.StringComparer.OrdinalIgnoreCase.Equals("nvidiasucks", System.Environment.MachineName)    
+                )
             {
                 if (bUsePG)
                     retval = GetPgCSB();

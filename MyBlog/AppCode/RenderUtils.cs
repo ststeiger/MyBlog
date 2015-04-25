@@ -11,24 +11,37 @@ namespace MyBlog
 		{ }
 
 
-		public static string RenderWikiPlexMarkup()
+        public static void PartialRenderView()
+        {
+            // System.Web.Mvc.Html.PartialExtensions  )
+            // public static MvcHtmlString Partial(this HtmlHelper htmlHelper, string partialViewName);
+            // public static MvcHtmlString Partial(this HtmlHelper htmlHelper, string partialViewName, object model);
+            // public static MvcHtmlString Partial(this HtmlHelper htmlHelper, string partialViewName, ViewDataDictionary viewData);
+            // public static MvcHtmlString Partial(this HtmlHelper htmlHelper, string partialViewName, object model, ViewDataDictionary viewData);
+        }
+
+
+        public static string RenderWikiPlexMarkup(string input)
 		{
+                // string input = "This is my wiki source!";
 			WikiPlex.WikiEngine engine = new WikiPlex.WikiEngine();
-			string output = engine.Render("This is my wiki source!");
+            string HTML = engine.Render(input);
 
-			return output;
-		}
+            return HTML;
+		} // End Function RenderWikiPlexMarkup
 
 
-		public static string RenderBbCode()
+        public static string RenderBbCode(string input)
 		{
-			string strContent = Server.MapPath("~/DnsPost.txt");
-			strContent = System.IO.File.ReadAllText(strContent, System.Text.Encoding.UTF8);
+			// string strContent = Server.MapPath("~/DnsPost.txt");
+			// strContent = System.IO.File.ReadAllText(strContent, System.Text.Encoding.UTF8);
 
 			// strContent = "MonoPost.txt";
 
 			// http://bbcode.codeplex.com/
 			// strContent = "[url=http://codekicker.de]codekicker[url]";
+
+            string strContent = input;
 
 			CodeKicker.BBCode.BBCodeParser bbCodeParser = RenderUtils.InitBbCodeParser ();
 
@@ -63,18 +76,22 @@ namespace MyBlog
 		} // End Function RenderBbCode
 
 
-		public static string RenderMarkdown()
-		{
-			MarkdownSharp.Markdown m = new MarkdownSharp.Markdown();
-
-			string input = "code sample:\n\n    <head>\n    <title>page title</title>\n    </head>\n";
-			string actual = m.Transform(input);
-
-			string strHTML = @"<!doctype html>
+        public static string PageTemplate
+        {
+            get
+            {
+                return @"<!doctype html>
 <html itemscope="""" itemtype=""http://schema.org/WebPage"" lang=""en"">
 <head>
     <meta http-equiv=""X-UA-Compatible"" content=""IE=edge,chrome=1"" />
     <meta charset=""utf-8"" />
+    <meta http-equiv=""Content-Type"" content=""text/html; charset=utf-8"" />
+    <meta http-equiv=""cache-control"" content=""max-age=0"" />
+    <meta http-equiv=""cache-control"" content=""no-cache"" />
+    <meta http-equiv=""expires"" content=""0"" />
+    <meta http-equiv=""expires"" content=""Tue, 01 Jan 1980 1:00:00 GMT"" />
+    <meta http-equiv=""pragma"" content=""no-cache"" />
+    
     <title>Markdown Sample Rendering</title>
     <meta name=""viewport"" content=""width=device-width"" />
     <meta name=""viewport"" content=""width=device-width, initial-scale=1"" />
@@ -89,8 +106,16 @@ namespace MyBlog
 </html>
 ";
 
-			strHTML = string.Format(strHTML, actual);
+            }
+        }
 
+
+        public static string RenderMarkdown(string input)
+		{
+            // string input = "code sample:\n\n    <head>\n    <title>page title</title>\n    </head>\n";
+            MarkdownSharp.Markdown m = new MarkdownSharp.Markdown();
+            string strHTML = m.Transform(input);
+            // strHTML = string.Format(PageTemplate, strHTML);
 			m = null;
 
 			return strHTML;
@@ -136,20 +161,20 @@ namespace MyBlog
 				new CodeKicker.BBCode.BBTag("JavaScript", "<div>", "</div>", true, true, content => Server.HtmlDecode(new ColorCode.CodeColorizer().Colorize(content, ColorCode.Languages.JavaScript))),
 				new CodeKicker.BBCode.BBTag("PHP", "<div>", "</div>", true, true, content => Server.HtmlDecode(new ColorCode.CodeColorizer().Colorize(content, ColorCode.Languages.Php))),
 				new CodeKicker.BBCode.BBTag("PowerShell", "<div>", "</div>", true, true, content => Server.HtmlDecode(new ColorCode.CodeColorizer().Colorize(content, ColorCode.Languages.PowerShell))),
-				//new CodeKicker.BBCode.BBTag("SQL", "<code>", "</code>", true, true, content => Server.HtmlDecode(new ColorCode.CodeColorizer().Colorize(content, ColorCode.Languages.Sql))),
-				new CodeKicker.BBCode.BBTag("VBdotNET", "<div>", "</div>", true, true, content => Server.HtmlDecode(new ColorCode.CodeColorizer().Colorize(content, ColorCode.Languages.VbDotNet))),
+				// new CodeKicker.BBCode.BBTag("SQL", "<code>", "</code>", true, true, content => Server.HtmlDecode(new ColorCode.CodeColorizer().Colorize(content, ColorCode.Languages.Sql))),
+				new CodeKicker.BBCode.BBTag("VB", "<div>", "</div>", true, true, content => Server.HtmlDecode(new ColorCode.CodeColorizer().Colorize(content, ColorCode.Languages.VbDotNet))),
 				new CodeKicker.BBCode.BBTag("XML", "<div>", "</div>", true, true, content => Server.HtmlDecode(new ColorCode.CodeColorizer().Colorize(content, ColorCode.Languages.Xml))),
+                // new CodeKicker.BBCode.BBTag("XML", "<div>", "</div>", true, true, content => Server.HtmlDecode(new ColorCode.CodeColorizer().Colorize(content, ColorCode.Languages.Xml))),
 
 
 				// new CodeKicker.BBCode.BBTag("sql", "<pre class=\"prettyprint linenums lang-sql\">", "</pre>", true, true, content => Server.HtmlEncode(content).Replace("\t", "      ").Replace(" ", "&nbsp;")),
 				// new CodeKicker.BBCode.BBTag("python", "<pre class=\"prettyprint linenums lang-py\">", "</pre>", true, true, content => Server.HtmlEncode(content).Replace("\t", "      ").Replace(" ", "&nbsp;")),
 
 				// http://stackoverflow.com/questions/1219860/javascript-jquery-html-encoding
-				new CodeKicker.BBCode.BBTag("sql", "<pre class=\"prettyprint linenums lang-sql\">", "</pre>", true, true, content => PrettifyEncode(content)),
+				// new CodeKicker.BBCode.BBTag("sql", "<pre class=\"prettyprint linenums lang-sql\">", "</pre>", true, true, content => PrettifyEncode(content)),
 				new CodeKicker.BBCode.BBTag("python", "<pre class=\"prettyprint linenums lang-py\">", "</pre>", true, true, content => PrettifyEncode(content)),
 
 				//new CodeKicker.BBCode.BBTag("csharp", "<div>", "</div>", true, true, content => new ColorCode.CodeColorizer().Colorize(content, ColorCode.Languages.CSharp), new CodeKicker.BBCode.BBAttribute[] { CodeKicker.BBCode.HtmlEncodingMode.UnsafeDontEncode} ),
-
 
 				new CodeKicker.BBCode.BBTag("list", "<ul>", "</ul>", true, true),
 				new CodeKicker.BBCode.BBTag("*", "<li>", "</li>", true, false),
