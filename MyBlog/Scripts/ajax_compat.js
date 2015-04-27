@@ -66,6 +66,28 @@ $.post = function (u, d, s, t)
 };
 
 
+$foo = function ()
+{
+    return $.ajax({
+        url: 'path/to/data.jsonp?foo=bar'
+      , type: 'jsonp'
+      , jsonpCallback: 'foo'
+    })
+      .then(function (resp)
+      {
+          qwery('#content').html(resp.content)
+      }, function (err, msg)
+      {
+          qwery('#errors').html(msg)
+      })
+      .always(function (resp)
+      {
+          qwery('#hide-this').hide()
+      })
+}
+
+
+
 $.jsonp = function (u, params, cb, cbn, fn)
 {
     var sep = "?", ps = "";
