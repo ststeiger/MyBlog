@@ -156,7 +156,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppCode\HttpRedirectModule.cs" />
+    <Compile Include="AppCode\MediaWikiConverter.cs" />
     <Compile Include="AppCode\Settings.cs" />
+    <Compile Include="AppCode\XhtmlPrinter.cs" />
     <Compile Include="AppCode\yyyyyy.cs" />
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
@@ -166,6 +168,7 @@
     <Compile Include="Controllers\BlogController.cs" />
     <Compile Include="Controllers\ChartsController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\PostArchiveController.cs" />
     <Compile Include="Controllers\TestsController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -311,6 +314,9 @@
     <Content Include="Scripts\reqwest.js" />
     <Content Include="Scripts\textHighlighting.js" />
     <Content Include="Scripts\_references.js" />
+    <Content Include="Views\PostArchive\microphone.gif" />
+    <Content Include="Views\PostArchive\Search.html" />
+    <Content Include="Views\PostArchive\Search2.html" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
@@ -338,6 +344,8 @@
     <None Include="Libs\wem\IKVM.OpenJDK.Core.dll" />
     <None Include="Libs\wem\IKVM.Runtime.dll" />
     <None Include="Libs\wem\wem-2.0.6.dll" />
+    <Content Include="Views\Blog\Search.cshtml" />
+    <Content Include="Views\PostArchive\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Models\" />

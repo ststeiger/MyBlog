@@ -21,6 +21,12 @@ namespace MyBlog
         }
 
 
+        public static string RenderMediaWikiMarkup(string markup)
+        {
+            return MediaWikiConverter.MediaWikiToXHTML(markup);
+        }
+
+
         public static string RenderWikiPlexMarkup(string input)
 		{
                 // string input = "This is my wiki source!";

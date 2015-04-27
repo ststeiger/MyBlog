@@ -174,8 +174,9 @@ AND
 		{
             q = System.Uri.UnescapeDataString(q);
 			// string strHTML = RenderUtils.RenderMarkdown (q);
-            string strHTML = RenderUtils.RenderBbCode(q);
-            
+            // string strHTML = RenderUtils.RenderBbCode(q);
+            string strHTML = RenderUtils.RenderMediaWikiMarkup(q);
+
 			return Content (strHTML, "text/html", System.Text.Encoding.UTF8);
 		} // End Action Upload
 

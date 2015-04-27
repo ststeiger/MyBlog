@@ -27,6 +27,29 @@ namespace MyBlog
             */
 
 
+            // http://localhost:2681/2013/12/20/1000
+            
+            routes.MapRoute(
+                 "PostByDate"
+                , "{year}/{month}/{day}/{postid}"
+                , new { controller = "PostArchive", action = "Index"
+                ,
+                        year = UrlParameter.Optional,
+                        month = UrlParameter.Optional,
+                        day = UrlParameter.Optional,
+                        postid = UrlParameter.Optional
+                } // Parameterstandardwerte
+
+
+                
+
+                // , new { controller = @"^Archive$" }
+            );
+
+
+
+#if old 
+
             routes.MapRoute(
                 "Default" // Routenname
                 , "{controller}/{action}/{id}" // URL mit Parametern
@@ -50,6 +73,8 @@ namespace MyBlog
                 , new { controller = @"^Archive$" }
             );
 
+
+#endif
 
 #if false
             var xxx = new MyBlog.Trololololol.MySimpleMembershipProvider();
@@ -78,7 +103,7 @@ namespace MyBlog
             WebMatrix.WebData.WebSecurity.CreateUserAndAccount("username", "test");
 
             WebMatrix.WebData.WebSecurity.ChangePassword("username", "old", "new");
-			#endif	
+#endif
             //RouteDebug.RouteDebugger.RewriteRoutesForTesting(System.Web.Routing.RouteTable.Routes);
         }
 
