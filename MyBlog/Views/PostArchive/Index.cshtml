@@ -1,0 +1,186 @@
+﻿
+@model MyBlog.Controllers.BlogController.BlogIndex 
+
+@{
+    Layout = null;
+}
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="cache-control" content="max-age=0" />
+    <meta http-equiv="cache-control" content="no-cache" />
+    <meta http-equiv="expires" content="0" />
+    <meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT" />
+    <meta http-equiv="pragma" content="no-cache" />
+
+    <title>NewEntry</title>
+
+    <!--
+    <script src="@Url.Content("~/Scripts/reqwest.js")" charset="utf-8" type="text/javascript"></script>
+    <script src="@Url.Content("~/Scripts/ajax_compat.js")" charset="utf-8" type="text/javascript"></script>
+    -->
+
+    <style type="text/css" media="all">
+        html, body
+        {
+            margin: 0px;
+            padding: 0px;
+            width: 100%;
+            height: 100%;
+        }
+
+        body
+        {
+            margin: 5px;
+        }
+
+
+
+        .form-wrapper
+        {
+            /*width: 450px; float: left;*/
+            display: table;
+            padding: 15px;
+            margin: 150px auto 50px auto;
+            background: #444;
+            background: rgba(0,0,0,.2);
+            border-radius: 10px;
+            box-shadow: 0 1px 1px rgba(0,0,0,.4) inset, 0 1px 0 rgba(255,255,255,.2);
+        }
+
+
+            .form-wrapper input
+            {
+                box-sizing: border-box;
+                width: 400px;
+                height: 40px;
+                padding: 10px 15px;
+                #border: 1px solid blue;
+                border: 1px solid orange;
+                border-right: none;
+                font: bold 15px 'lucida sans', 'trebuchet MS', 'Tahoma';
+                background: #eee;
+                border-radius: 3px 0 0 3px;
+                -webkit-transition: width 0.5s, height 0.5s, background-color 0.5s, -webkit-transform 0.5s;
+                transition: width 0.5s, height 0.5s, background-color 0.5s, transform 0.5s;
+            }
+
+
+                .form-wrapper input:focus
+                {
+                    outline: 0;
+                    background: #fff;
+                    box-shadow: 0 0 2px rgba(0,0,0,.8) inset;
+                    -webkit-transition: width 0.5s, height 0.5s, background-color 0.5s, -webkit-transform 0.5s;
+                    transition: width 0.5s, height 0.5s, background-color 0.5s, transform 0.5s;
+                    border-color: rgba(229, 103, 23, 0.8);
+                    #border-color: rgba(23, 103, 229, 0.8);
+                    box-shadow: 0 5px 5px rgba(229, 103, 23, 0.075) inset, 0 0 8px rgba(229, 103, 23, 0.6);
+                    #box-shadow: 0 15px 15px rgba(23, 103, 229, 0.075) inset, 0 0 8px rgba(23, 103, 229, 0.6);
+                    outline: 0 none;
+                }
+
+
+
+                .form-wrapper input::-webkit-input-placeholder
+                {
+                    color: #999;
+                    font-weight: normal;
+                    font-style: italic;
+                }
+
+                .form-wrapper input:-moz-placeholder
+                {
+                    color: #999;
+                    font-weight: normal;
+                    font-style: italic;
+                }
+
+                .form-wrapper input:-ms-input-placeholder
+                {
+                    color: #999;
+                    font-weight: normal;
+                    font-style: italic;
+                }
+
+
+
+            .form-wrapper button
+            {
+                position: relative;
+                box-sizing: border-box;
+                background: #d83c3c;
+                height: 40px;
+                padding-left: 15px;
+                padding-right: 15px;
+                padding-top: 0px;
+                padding-bottom: 0px;
+                border: none;
+                font: bold 15px 'lucida sans', 'trebuchet MS', 'Tahoma';
+                cursor: pointer;
+                color: #fff;
+                text-transform: uppercase;
+                border-radius: 0 3px 3px 0;
+                text-shadow: 0 -1px 0 rgba(0, 0,0, .3);
+            }
+
+
+                .form-wrapper button:hover
+                {
+                    background: #e54040;
+                }
+
+
+                .form-wrapper button:before
+                { /* left arrow */
+                    content: '';
+                    position: absolute;
+                    border-width: 8px 8px 8px 0;
+                    border-style: solid solid solid none;
+                    border-color: transparent #d83c3c transparent;
+                    top: 12px;
+                    left: -6px;
+                }
+
+                .form-wrapper button:hover:before
+                {
+                    border-right-color: #e54040;
+                }
+
+                .form-wrapper button:focus:before,
+                .form-wrapper button:active:before
+                {
+                    border-right-color: #c42f2f;
+                }
+    </style>
+
+    <!--
+        http://www.codeguru.com/csharp/.net/net_asp/mvc/using-attribute-routing-in-asp.net-mvc.htm
+
+
+
+        https://www.udemy.com/the-css-and-css3-crash-course/?couponCode=half-off-for-blog&utm_source=blog&utm_medium=udemyads&utm_content=post79944&utm_campaign=content-marketing-blog&xref=blog
+
+        http://speckyboy.com/2012/02/15/how-to-build-a-stylish-css3-search-box/
+        http://speckyboy.com/2015/04/02/animating-css-only-hamburger-menu-icons/
+        https://www.codeofaninja.com/2014/03/textbox-with-search-icon-in-html-css.html
+        https://css-tricks.com/snippets/css/glowing-blue-input-highlights/
+    -->
+
+</head>
+<body>
+
+    <form class="form-wrapper cf">
+        <input type="text" value="" placeholder="Search here..." />
+        <!--
+        -->
+        <button type="submit">Search</button>
+    </form>
+
+</body>
+</html>
