@@ -179,7 +179,6 @@
     <Compile Include="AppCode\Server.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="AppCode\SQL\t_blogpost.sql" />
     <Content Include="App_Data\SqlData.sql" />
     <Content Include="Content\ajax-loader.gif" />
     <Content Include="Content\css.css" />
