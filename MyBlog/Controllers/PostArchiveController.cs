@@ -25,16 +25,16 @@ namespace MyBlog.Controllers
 			{}
 			catch(System.IndexOutOfRangeException ex)
 			{
+                System.Console.WriteLine(ex.Message);
 			}
-
 
 			System.DateTime dat = new DateTime (2012, 2, 28);
 
             return View();
-        }
+        } // End Action Index 
 
 
-    }
+    } // End Class PostArchiveController : Controller 
 
-
-}
+    
+} // End Namespace MyBlog.Controllers 

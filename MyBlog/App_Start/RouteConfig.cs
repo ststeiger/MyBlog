@@ -11,6 +11,60 @@ namespace MyBlog
 {
 
 
+
+    public class LocalhostConstraint : IRouteConstraint
+    {
+
+        public bool Match(HttpContextBase httpContext
+            , Route route
+            , string parameterName, RouteValueDictionary values
+            , RouteDirection routeDirection)
+        {
+            return httpContext.Request.IsLocal;
+        }
+    }
+
+
+    public class ValidDateConstraint : IRouteConstraint
+    {
+
+        public bool Match(HttpContextBase httpContext
+            , Route route, string parameterName
+            , RouteValueDictionary values
+            , RouteDirection routeDirection)
+        {
+            int year = 0;
+            int month = 0;
+            int day = 0;
+
+            bool validYear = Int32.TryParse(System.Convert.ToString(values["year"]), out year);
+            bool validMonth = Int32.TryParse(System.Convert.ToString(values["month"]), out month);
+            bool validDay = Int32.TryParse(System.Convert.ToString(values["day"]), out day);
+
+            if (!validYear || !validMonth || !validDay)
+                return false;
+
+            if (month < 1 || month > 12)
+                return false;
+
+            if (day < 1 || day > 31)
+                return false;
+
+            
+            try
+            {
+                System.DateTime dat = new System.DateTime(year, month, day);
+                return true;
+            }
+            catch(Exception)
+            {}
+
+            return false;
+        }
+    }
+
+
+
     public class RouteConfig
     {
 
@@ -44,10 +98,14 @@ namespace MyBlog
                         postid = UrlParameter.Optional
                 } // Parameterstandardwerte
 
+                /*
 				, new { year = @"\d{0,4}"
 						,month = "(1|2|3|4|5|6|7|8|9|10|11|12)"
 						,day = "((1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31))"
 				}
+                */
+                 , new { isValidDate = new ValidDateConstraint() }
+
             );
 
 
