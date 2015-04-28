@@ -215,7 +215,7 @@
                     
 
 
-                    InstaRequests[this.id] = $.getJSON(@Url.Action("Search", "Blog"), { q: obj.value }, function (data)
+                    InstaRequests[this.id] = $.getJSON("@Url.Action("Search", "Blog")", { q: obj.value }, function (data)
                     {
                         // console.log("getJSON: data:");
                         // console.log(data);

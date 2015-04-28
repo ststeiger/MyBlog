@@ -52,7 +52,7 @@ namespace MyBlog
 
 
 
-#if old 
+
 
             routes.MapRoute(
                 "Default" // Routenname
@@ -77,7 +77,7 @@ namespace MyBlog
                 , new { controller = @"^Archive$" }
             );
 
-
+#if old 
 #endif
 
 #if false
