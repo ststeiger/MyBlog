@@ -25,7 +25,13 @@
     <script src="@Url.Content("~/Scripts/ajax_compat.js")" charset="utf-8" type="text/javascript"></script>
     -->
 
+    <!--
+        https://www.youtube.com/watch?v=Mx-uguPT2YM
+        https://css-tricks.com/snippets/css/css-triangle/
+    -->
+
     <style type="text/css" media="all">
+
         html, body
         {
             margin: 0px;
@@ -34,11 +40,11 @@
             height: 100%;
         }
 
+
         body
         {
             margin: 5px;
         }
-
 
 
         .form-wrapper
@@ -54,141 +60,145 @@
         }
 
 
-            .form-wrapper input
-            {
-                box-sizing: border-box;
-                width: 400px;
-                height: 40px;
-                padding: 10px 15px;
-                #border: 1px solid blue;
-                #border: 1px solid orange;
-                #border: 1px solid rgb(122, 202, 122);
-                border: 1px solid rgb(122, 202, 122);
-                border-right: none;
-                font: bold 15px 'lucida sans', 'trebuchet MS', 'Tahoma';
-                background: #eee;
-                color: rgb(161, 166, 161);
-                border-radius: 3px 0 0 3px;
-                -webkit-transition: width 0.5s, height 0.5s, background-color 0.5s, -webkit-transform 0.5s;
-                transition: width 0.5s, height 0.5s, background-color 0.5s, transform 0.5s;
-
-            }
-
-
-                .form-wrapper input:focus
-                {
-                    outline: 0;
-                    background: #fff;
-                    #box-shadow: 0 0 2px rgba(0,0,0,.8) inset;
-                    -webkit-transition: width 0.5s, height 0.5s, background-color 0.5s, -webkit-transform 0.5s;
-                    transition: width 0.5s, height 0.5s, background-color 0.5s, transform 0.5s;
-                    #border-color: rgba(229, 103, 23, 0.8);
-                    border-color: rgba(122, 202, 122, 0.08)
-                    #border-color: rgba(23, 103, 229, 0.8);
-                    #box-shadow: 0 5px 5px rgba(229, 103, 23, 0.075) inset, 0 0 8px rgba(229, 103, 23, 0.6);
-                    #box-shadow: 0 15px 15px rgba(122, 202, 122, 0.075) inset, 0 0 18px rgba(122, 202, 122, 0.6);
-                    #box-shadow: 0 15px 15px rgba(23, 103, 229, 0.075) inset, 0 0 8px rgba(23, 103, 229, 0.6);
-                    outline: 0 none;
-
-                    box-shadow: 0 0 110px rgba(122, 252, 122, 1);
-                }
+        .form-wrapper input
+        {
+            box-sizing: border-box;
+            width: 400px;
+            height: 40px;
+            padding: 10px 15px;
+            #border: 1px solid blue;
+            #border: 1px solid orange;
+            #border: 1px solid rgb(122, 202, 122);
+            border: 1px solid rgb(122, 202, 122);
+            border-right: none;
+            font: bold 15px 'lucida sans', 'trebuchet MS', 'Tahoma';
+            background: #eee;
+            color: rgb(161, 166, 161);
+            border-radius: 3px 0 0 3px;
+            -webkit-transition: width 0.5s, height 0.5s, background-color 0.5s, -webkit-transform 0.5s;
+            transition: width 0.5s, height 0.5s, background-color 0.5s, transform 0.5s;
+        }
 
 
+        .form-wrapper input:focus
+        {
+            outline: 0;
+            background: #fff;
+            #box-shadow: 0 0 2px rgba(0,0,0,.8) inset;
+            -webkit-transition: width 0.5s, height 0.5s, background-color 0.5s, -webkit-transform 0.5s;
+            transition: width 0.5s, height 0.5s, background-color 0.5s, transform 0.5s;
+            #border-color: rgba(229, 103, 23, 0.8);
+            border-color: rgba(122, 202, 122, 0.08)
+            #border-color: rgba(23, 103, 229, 0.8);
+            #box-shadow: 0 5px 5px rgba(229, 103, 23, 0.075) inset, 0 0 8px rgba(229, 103, 23, 0.6);
+            #box-shadow: 0 15px 15px rgba(122, 202, 122, 0.075) inset, 0 0 18px rgba(122, 202, 122, 0.6);
+            #box-shadow: 0 15px 15px rgba(23, 103, 229, 0.075) inset, 0 0 8px rgba(23, 103, 229, 0.6);
+            outline: 0 none;
 
-                .form-wrapper input::-webkit-input-placeholder
-                {
-                    color: #999;
-                    font-weight: normal;
-                    font-style: italic;
-                }
-
-                .form-wrapper input:-moz-placeholder
-                {
-                    color: #999;
-                    font-weight: normal;
-                    font-style: italic;
-                }
-
-                .form-wrapper input:-ms-input-placeholder
-                {
-                    color: #999;
-                    font-weight: normal;
-                    font-style: italic;
-                }
+            box-shadow: 0 0 110px rgba(122, 252, 122, 1);
+        }
 
 
-
-            .form-wrapper button
-            {
-                position: relative;
-                box-sizing: border-box;
-                #background: #d83c3c;
-                background: rgb(122, 202, 122);
-                height: 40px;
-                padding-left: 15px;
-                padding-right: 15px;
-                padding-top: 0px;
-                padding-bottom: 0px;
-                border: none;
-                font: bold 15px 'lucida sans', 'trebuchet MS', 'Tahoma';
-                cursor: pointer;
-                color: #fff;
-                text-transform: uppercase;
-                border-radius: 0 3px 3px 0;
-                text-shadow: 0 -1px 0 rgba(0, 0,0, .3);
-            }
+        .form-wrapper input::-webkit-input-placeholder
+        {
+            color: #999;
+            font-weight: normal;
+            font-style: italic;
+        }
 
 
-                .form-wrapper button:hover
-                {
-                    #background: #e54040;
-                    background: rgb(81, 168, 81);
-                }
+        .form-wrapper input:-moz-placeholder
+        {
+            color: #999;
+            font-weight: normal;
+            font-style: italic;
+        }
 
 
-                .form-wrapper button:before
-                { /* left arrow */
-                    content: '';
-                    position: absolute;
-                    border-width: 8px 8px 8px 0;
-                    border-style: solid solid solid none;
-                    #border-color: transparent #d83c3c transparent;
-                    border-color: transparent rgb(122, 202, 122) transparent;
-
-                    top: 12px;
-                    left: -6px;
-                }
-
-                .form-wrapper button:after
-                { /* left arrow */
-                    content: '';
-                    position: absolute;
-                    #border-width: 0px 8px 8px 8px; #top-right;
-                    #border-width: 8px 8px 0px 8px; #bottom-right;
-                    border-width: 8px 0px 0px 8px;
-
-                    border-style: solid solid solid none;
-                    #border-color: transparent #d83c3c transparent;
-                    border-color: transparent rgb(255, 202, 122) transparent;
-
-                    top: 12px;
-                    right: 6px;
-                }
+        .form-wrapper input:-ms-input-placeholder
+        {
+            color: #999;
+            font-weight: normal;
+            font-style: italic;
+        }
 
 
+        .form-wrapper button
+        {
+            position: relative;
+            box-sizing: border-box;
+            #background: #d83c3c;
+            background: rgb(122, 202, 122);
+            height: 40px;
+            padding-left: 15px;
+            padding-right: 15px;
+            padding-top: 0px;
+            padding-bottom: 0px;
+            border: none;
+            font: bold 15px 'lucida sans', 'trebuchet MS', 'Tahoma';
+            cursor: pointer;
+            color: #fff;
+            text-transform: uppercase;
+            border-radius: 0 3px 3px 0;
+            text-shadow: 0 -1px 0 rgba(0, 0,0, .3);
+        }
 
-                .form-wrapper button:hover:before
-                {
-                    #border-right-color: #e54040;
-                    border-right-color: rgb(81, 168, 81);
-                }
 
-                .form-wrapper button:focus:before,
-                .form-wrapper button:active:before
-                {
-                    #border-right-color: #c42f2f;
-                    border-right-color: rgb(81, 168, 81);
-                }
+        .form-wrapper button:hover
+        {
+            #background: #e54040;
+            background: rgb(81, 168, 81);
+        }
+
+
+        .form-wrapper button:before
+        { /* left arrow */
+            content: '';
+            position: absolute;
+            border-width: 8px 8px 8px 0;
+            border-style: solid solid solid none;
+            #border-color: transparent #d83c3c transparent;
+            border-color: transparent rgb(122, 202, 122) transparent;
+
+            top: 12px;
+            left: -6px;
+        }
+
+
+        .form-wrapper button:after
+        { /* right arrow */
+            content: '';
+            position: absolute;
+
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+            border-left: 8px solid rgb(122, 202, 122);
+            border-right: none;
+            top: 12px;
+            right: -6px;
+        }
+
+
+        .form-wrapper button:hover:after
+        {
+            border-left-color: rgb(81, 168, 81);
+        }
+
+
+        .form-wrapper button:hover:before
+        {
+            #border-right-color: #e54040;
+            border-right-color: rgb(81, 168, 81);
+        }
+
+
+        .form-wrapper button:focus:before,
+        .form-wrapper button:active:before
+        {
+            #border-right-color: #c42f2f;
+            border-right-color: rgb(81, 168, 81);
+        }
+
     </style>
 
     <!--
