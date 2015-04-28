@@ -16,9 +16,19 @@ namespace MyBlog.Controllers
 
         //
         // GET: /PostArchive/
-        public ActionResult Index(int? year, int? month, int? day, int? postid)
+		//[HttpPost, HttpGet]
+		public ActionResult Index(int? year, int? month, int? day, int? postid)
         {
             System.Console.WriteLine(year);
+
+			try
+			{}
+			catch(System.IndexOutOfRangeException ex)
+			{
+			}
+
+
+			System.DateTime dat = new DateTime (2012, 2, 28);
 
             return View();
         }

@@ -66,26 +66,17 @@ $.post = function (u, d, s, t)
 };
 
 
-$foo = function ()
+$.http = function (method, url, d)
 {
     return $.ajax({
-        url: 'path/to/data.jsonp?foo=bar'
-      , type: 'jsonp'
-      , jsonpCallback: 'foo'
-    })
-      .then(function (resp)
-      {
-          qwery('#content').html(resp.content)
-      }, function (err, msg)
-      {
-          qwery('#errors').html(msg)
-      })
-      .always(function (resp)
-      {
-          qwery('#hide-this').hide()
-      })
+        url: url // '/2013/12/01/1234'
+      //,method: 'get'
+		,method: method
+		,data: d
+      // , type: 'jsonp'
+      // , jsonpCallback: 'foo'
+    });
 }
-
 
 
 $.jsonp = function (u, params, cb, cbn, fn)
