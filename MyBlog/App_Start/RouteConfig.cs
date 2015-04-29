@@ -24,8 +24,76 @@ namespace MyBlog
         }
     }
 
+	public class RouteConstraintFactory
+	{
+		public static IRouteConstraint CreateDateTimeConstraint()
+		{
+			bool c1 = false;
 
-    public class ValidDateConstraint : IRouteConstraint
+			if (c1)
+				return new LocalhostConstraint ();
+
+			if (c1)
+				return new ValidMsDateConstraint ();
+
+			return new ValidPgDateConstraint ();
+		}
+
+	}
+
+
+	// 01.12.4714 BC
+	// SELECT '4714-12-01T00:00:00 BC'::timestamp
+	// SELECT '294277-01-09T04:00:54.775'::timestamp
+	public class ValidPgDateConstraint : IRouteConstraint
+	{
+
+		public bool Match(HttpContextBase httpContext
+			, Route route, string parameterName
+			, RouteValueDictionary values
+			, RouteDirection routeDirection)
+		{
+			int year = 0;
+			int month = 0;
+			int day = 0;
+
+			bool validYear = Int32.TryParse(System.Convert.ToString(values["year"]), out year);
+			bool validMonth = Int32.TryParse(System.Convert.ToString(values["month"]), out month);
+			bool validDay = Int32.TryParse(System.Convert.ToString(values["day"]), out day);
+
+			if (!validYear || !validMonth || !validDay)
+				return false;
+
+			if (year < -4713 || year > 294276)
+				return false;
+
+			if (month < 1 || month > 12)
+				return false;
+
+			if (day < 1 || day > 31)
+				return false;
+
+
+			try
+			{
+				if(year > 9999) 
+					return true;
+
+				if(year < 1)
+					return true;
+
+				System.DateTime dat = new System.DateTime(year, month, day);
+				return true;
+			}
+			catch(Exception)
+			{}
+
+			return false;
+		}
+	}
+
+
+    public class ValidMsDateConstraint : IRouteConstraint
     {
 
         public bool Match(HttpContextBase httpContext
@@ -43,6 +111,9 @@ namespace MyBlog
 
             if (!validYear || !validMonth || !validDay)
                 return false;
+
+			if (year < 1753 || year > 9999)
+				return false;
 
             if (month < 1 || month > 12)
                 return false;
@@ -104,11 +175,9 @@ namespace MyBlog
 						,day = "((1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31))"
 				}
                 */
-                 , new { isValidDate = new ValidDateConstraint() }
+				, new { isValidDate = RouteConstraintFactory.CreateDateTimeConstraint () }
 
             );
-
-
 
 
 
