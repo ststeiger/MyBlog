@@ -165,6 +165,7 @@
     <Compile Include="Controllers\ArchiveController.cs" />
     <Compile Include="Controllers\BlogController.cs" />
     <Compile Include="Controllers\ChartsController.cs" />
+    <Compile Include="Controllers\DevController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\PostArchiveController.cs" />
     <Compile Include="Controllers\TestsController.cs" />
