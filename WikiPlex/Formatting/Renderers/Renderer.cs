@@ -1,17 +1,17 @@
-﻿﻿using System;
-using System.Collections.Generic;
-using WikiPlex.Common;
-
+﻿
 namespace WikiPlex.Formatting.Renderers
 {
+
+
     /// <summary>
     /// The base class for a <see cref="IRenderer"/>.
     /// </summary>
-    public abstract class Renderer : IRenderer
+    public abstract class Renderer 
+        : IRenderer
     {
         private const string UnresolvedError = @"<span class=""unresolved"">{0}</span>";
         private string rendererId;
-        private HashSet<string> scopeNames;
+        private System.Collections.Generic.HashSet<string> scopeNames;
 
         /// <summary>
         /// Gets the id of a renderer.
@@ -30,7 +30,7 @@ namespace WikiPlex.Formatting.Renderers
         /// <summary>
         /// Gets the collection of scope names for this <see cref="IRenderer"/>.
         /// </summary>
-        protected abstract ICollection<string> ScopeNames
+        protected abstract System.Collections.Generic.ICollection<string> ScopeNames
         {
             get;
         }
@@ -59,7 +59,7 @@ namespace WikiPlex.Formatting.Renderers
         public bool CanExpand(string scopeName)
         {
             if (scopeNames == null)
-                scopeNames = new HashSet<string>(ScopeNames);
+                scopeNames = new System.Collections.Generic.HashSet<string>(ScopeNames);
 
             return scopeNames.Contains(scopeName);
         }
@@ -72,20 +72,20 @@ namespace WikiPlex.Formatting.Renderers
         /// <param name="htmlEncode">Function that will html encode the output.</param>
         /// <param name="attributeEncode">Function that will html attribute encode the output.</param>
         /// <returns>The expanded content.</returns>
-        public string Expand(string scopeName, string input, Func<string, string> htmlEncode, Func<string, string> attributeEncode)
+        public string Expand(string scopeName, string input, System.Func<string, string> htmlEncode, System.Func<string, string> attributeEncode)
         {
             if (!CanExpand(scopeName))
-                throw new ArgumentException("Invalid scope name for this renderer.", "scopeName");
+                throw new System.ArgumentException("Invalid scope name for this renderer.", "scopeName");
 
             try
             {
                 return PerformExpand(scopeName, input, htmlEncode, attributeEncode);
             }
-            catch (ArgumentException ex)
+            catch (System.ArgumentException ex)
             {
                 return string.Format(UnresolvedError, string.Format(InvalidArgumentError, ex.ParamName));
             }
-            catch (RenderException ex)
+            catch (WikiPlex.Common.RenderException ex)
             {
                 return string.Format(UnresolvedError, string.IsNullOrEmpty(ex.Message) ? InvalidMacroError : ex.Message);
             }
@@ -103,6 +103,8 @@ namespace WikiPlex.Formatting.Renderers
         /// <param name="htmlEncode">Function that will html encode the output.</param>
         /// <param name="attributeEncode">Function that will html attribute encode the output.</param>
         /// <returns>The expanded content.</returns>
-        protected abstract string PerformExpand(string scopeName, string input, Func<string, string> htmlEncode, Func<string, string> attributeEncode);
+        protected abstract string PerformExpand(string scopeName, string input, System.Func<string, string> htmlEncode, System.Func<string, string> attributeEncode);
     }
+
+
 }

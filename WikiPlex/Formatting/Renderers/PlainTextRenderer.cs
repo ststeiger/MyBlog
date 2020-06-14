@@ -1,11 +1,11 @@
-﻿﻿using System;
-
+﻿
 namespace WikiPlex.Formatting.Renderers
 {
     /// <summary>
     /// Will render all scopes as their plain text variant.
     /// </summary>
-    public class PlainTextRenderer : IRenderer
+    public class PlainTextRenderer 
+        : IRenderer
     {
         /// <summary>
         /// Gets the id of a renderer.
@@ -33,7 +33,7 @@ namespace WikiPlex.Formatting.Renderers
         /// <param name="htmlEncode">Function that will html encode the output.</param>
         /// <param name="attributeEncode">Function that will html attribute encode the output.</param>
         /// <returns>The expanded content.</returns>
-        public string Expand(string scopeName, string input, Func<string, string> htmlEncode, Func<string, string> attributeEncode)
+        public string Expand(string scopeName, string input, System.Func<string, string> htmlEncode, System.Func<string, string> attributeEncode)
         {
             if (ShouldRenderAsEmpty(scopeName))
                 return string.Empty;
@@ -43,7 +43,7 @@ namespace WikiPlex.Formatting.Renderers
 
             if (ShouldRenderAsFriendlyText(scopeName))
             {
-                string[] parts = input.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
+                string[] parts = input.Split(new[] { '|' }, System.StringSplitOptions.RemoveEmptyEntries);
                 if (parts.Length == 2 || parts.Length == 3)
                     return parts[0];
             }

@@ -7,17 +7,21 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyBlog", "MyBlog\MyBlog.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAL", "..\DAL\DAL\DAL.csproj", "{102A421D-C917-495B-83ED-422B771996C2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyBlogCore", "MyBlogCore\MyBlogCore.csproj", "{C7A8ABC2-2371-4772-9A75-5F883157B7F0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyBlogCore", "MyBlogCore\MyBlogCore.csproj", "{C7A8ABC2-2371-4772-9A75-5F883157B7F0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyBlogAPI", "MyBlogAPI\MyBlogAPI.csproj", "{D5F9C394-8EBA-4EDC-9482-6A9C2FBF12ED}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyBlogAPI", "MyBlogAPI\MyBlogAPI.csproj", "{D5F9C394-8EBA-4EDC-9482-6A9C2FBF12ED}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyBlogEmpty", "MyBlogEmpty\MyBlogEmpty.csproj", "{46424D64-3A69-409B-8D73-D85C7C011D31}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyBlogEmpty", "MyBlogEmpty\MyBlogEmpty.csproj", "{46424D64-3A69-409B-8D73-D85C7C011D31}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dapper", "Dapper\Dapper.csproj", "{6A5BB878-3845-4E3D-ACB2-8DE860734CE1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WikiPlex", "WikiPlex\WikiPlex.csproj", "{7A4DF3EC-4B72-498A-9FC2-260012C84D5D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WikiPlex", "WikiPlex\WikiPlex.csproj", "{7A4DF3EC-4B72-498A-9FC2-260012C84D5D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeKicker.BBCode", "CodeKicker.BBCode\CodeKicker.BBCode.csproj", "{87A91A03-BA9C-4616-B3CC-7D66A92B0BE7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeKicker.BBCode", "CodeKicker.BBCode\CodeKicker.BBCode.csproj", "{87A91A03-BA9C-4616-B3CC-7D66A92B0BE7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevTests", "DevTests\DevTests.csproj", "{FE0C96C9-4EE5-49C1-8BFA-83080E60F122}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ColorCode.Core", "ColorCode.Core\ColorCode.Core.csproj", "{087048E2-257F-4A3C-84D7-B80E80B1C104}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -57,6 +61,14 @@ Global
 		{87A91A03-BA9C-4616-B3CC-7D66A92B0BE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{87A91A03-BA9C-4616-B3CC-7D66A92B0BE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{87A91A03-BA9C-4616-B3CC-7D66A92B0BE7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FE0C96C9-4EE5-49C1-8BFA-83080E60F122}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE0C96C9-4EE5-49C1-8BFA-83080E60F122}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE0C96C9-4EE5-49C1-8BFA-83080E60F122}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FE0C96C9-4EE5-49C1-8BFA-83080E60F122}.Release|Any CPU.Build.0 = Release|Any CPU
+		{087048E2-257F-4A3C-84D7-B80E80B1C104}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{087048E2-257F-4A3C-84D7-B80E80B1C104}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{087048E2-257F-4A3C-84D7-B80E80B1C104}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{087048E2-257F-4A3C-84D7-B80E80B1C104}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

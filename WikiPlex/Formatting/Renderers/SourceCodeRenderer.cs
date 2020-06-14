@@ -1,25 +1,23 @@
-﻿﻿using System;
-using System.Collections.Generic;
-using System.Threading;
-using ColorCode;
-
+﻿
 namespace WikiPlex.Formatting.Renderers
 {
+
+
     /// <summary>
     /// Will render all source code scopes.
     /// </summary>
-    public class SourceCodeRenderer : Renderer
+    public class SourceCodeRenderer 
+        : Renderer
     {
-        
-        
-        
-        private readonly ICodeColorizer codeColorizer;
+
+
+        private readonly Legacy.Colorizer.ICodeColorizer codeColorizer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SourceCodeRenderer"/> class.
         /// </summary>
         public SourceCodeRenderer()
-            : this(new CodeColorizer())
+            : this(new Legacy.Colorizer.CodeColorizer())
         {
         }
 
@@ -27,7 +25,7 @@ namespace WikiPlex.Formatting.Renderers
         /// Initializes a new instance of the <see cref="SourceCodeRenderer"/> class.
         /// </summary>
         /// <param name="codeColorizer">The <see cref="ICodeColorizer"/> to use for syntax highlighting.</param>
-        public SourceCodeRenderer(ICodeColorizer codeColorizer)
+        public SourceCodeRenderer(Legacy.Colorizer.ICodeColorizer codeColorizer)
         {
             this.codeColorizer = codeColorizer;
         }
@@ -35,7 +33,7 @@ namespace WikiPlex.Formatting.Renderers
         /// <summary>
         /// Gets the collection of scope names for this <see cref="IRenderer"/>.
         /// </summary>
-        protected override ICollection<string> ScopeNames
+        protected override System.Collections.Generic.ICollection<string> ScopeNames
         {
             get
             {
@@ -58,7 +56,7 @@ namespace WikiPlex.Formatting.Renderers
         /// <param name="htmlEncode">Function that will html encode the output.</param>
         /// <param name="attributeEncode">Function that will html attribute encode the output.</param>
         /// <returns>The expanded content.</returns>
-        protected override string PerformExpand(string scopeName, string input, Func<string, string> htmlEncode, Func<string, string> attributeEncode)
+        protected override string PerformExpand(string scopeName, string input, System.Func<string, string> htmlEncode, System.Func<string, string> attributeEncode)
         {
             switch (scopeName)
             {
@@ -67,49 +65,49 @@ namespace WikiPlex.Formatting.Renderers
                 case ScopeName.MultiLineCode:
                     return FormatSyntax(input, htmlEncode);
                 case ScopeName.ColorCodeAshx:
-                    return Colorize(input, Languages.Ashx, htmlEncode);
+                    return Colorize(input, ColorCode.Languages.Ashx, htmlEncode);
                 case ScopeName.ColorCodeAspxCs:
-                    return Colorize(input, Languages.AspxCs, htmlEncode);
+                    return Colorize(input, ColorCode.Languages.AspxCs, htmlEncode);
                 case ScopeName.ColorCodeAspxVb:
-                    return Colorize(input, Languages.AspxVb, htmlEncode);
+                    return Colorize(input, ColorCode.Languages.AspxVb, htmlEncode);
                 case ScopeName.ColorCodeCpp:
-                    return Colorize(input, Languages.Cpp, htmlEncode);
+                    return Colorize(input, ColorCode.Languages.Cpp, htmlEncode);
                 case ScopeName.ColorCodeCSharp:
-                    return Colorize(input, Languages.CSharp, htmlEncode);
+                    return Colorize(input, ColorCode.Languages.CSharp, htmlEncode);
                 case ScopeName.ColorCodeHtml:
-                    return Colorize(input, Languages.Html, htmlEncode);
+                    return Colorize(input, ColorCode.Languages.Html, htmlEncode);
                 case ScopeName.ColorCodeJava:
-                    return Colorize(input, Languages.Java, htmlEncode);
+                    return Colorize(input, ColorCode.Languages.Java, htmlEncode);
                 case ScopeName.ColorCodeJavaScript:
-                    return Colorize(input, Languages.JavaScript, htmlEncode);
+                    return Colorize(input, ColorCode.Languages.JavaScript, htmlEncode);
                 case ScopeName.ColorCodeSql:
-                    return Colorize(input, Languages.Sql, htmlEncode);
+                    return Colorize(input, ColorCode.Languages.Sql, htmlEncode);
                 case ScopeName.ColorCodeVbDotNet:
-                    return Colorize(input, Languages.VbDotNet, htmlEncode);
+                    return Colorize(input, ColorCode.Languages.VbDotNet, htmlEncode);
                 case ScopeName.ColorCodeXml:
-                    return Colorize(input, Languages.Xml, htmlEncode);
+                    return Colorize(input, ColorCode.Languages.Xml, htmlEncode);
                 case ScopeName.ColorCodePhp:
-                    return Colorize(input, Languages.Php, htmlEncode);
+                    return Colorize(input, ColorCode.Languages.Php, htmlEncode);
                 case ScopeName.ColorCodeCss:
-                    return Colorize(input, Languages.Css, htmlEncode);
+                    return Colorize(input, ColorCode.Languages.Css, htmlEncode);
                 case ScopeName.ColorCodePowerShell:
-                    return Colorize(input, Languages.PowerShell, htmlEncode);
+                    return Colorize(input, ColorCode.Languages.PowerShell, htmlEncode);
                 default:
                     return null;
             }
         }
 
-        private static string FormatSyntax(string input, Func<string, string> htmlEncode)
+        private static string FormatSyntax(string input, System.Func<string, string> htmlEncode)
         {
-            if (input.EndsWith(Environment.NewLine))
-                input = input.Substring(0, input.Length - Environment.NewLine.Length);
+            if (input.EndsWith(System.Environment.NewLine))
+                input = input.Substring(0, input.Length - System.Environment.NewLine.Length);
             return string.Format("<pre>{0}</pre>", htmlEncode(input));
         }
 
-        private string Colorize(string input, ILanguage language, Func<string, string> htmlEncode)
+        private string Colorize(string input, ColorCode.ILanguage language, System.Func<string, string> htmlEncode)
         {
-            var colorizeThread = new Thread(InvokeColorize) {IsBackground = true};
-            var data = new ColorizeData {Input = input, Language = language};
+            System.Threading.Thread colorizeThread = new System.Threading.Thread(InvokeColorize) {IsBackground = true};
+            ColorizeData data = new ColorizeData {Input = input, Language = language};
 
             colorizeThread.Start(data);
             if (!colorizeThread.Join(5000)) // wait 5 seconds before killing it  
@@ -123,7 +121,7 @@ namespace WikiPlex.Formatting.Renderers
 
         private void InvokeColorize(object data)
         {
-            var colorizeData = data as ColorizeData;
+            ColorizeData colorizeData = data as ColorizeData;
             colorizeData.Output = codeColorizer.Colorize(colorizeData.Input, colorizeData.Language);
         }
 
@@ -131,7 +129,11 @@ namespace WikiPlex.Formatting.Renderers
         {
             public string Input { get; set; }
             public string Output { get; set; }
-            public ILanguage Language { get; set; }
+            public ColorCode.ILanguage Language { get; set; }
         }
+
+
     }
+
+
 }

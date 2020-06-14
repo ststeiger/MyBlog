@@ -1,274 +1,260 @@
 
-﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Copyright (c) Microsoft Corporation.  All rights reserved.
 
-using ColorCode.Common;
 
- 
- // namespace WikiPlex.Legacy
-namespace ColorCode.Styling.StyleSheets
+namespace WikiPlex.Legacy.Colorizer
 {
-    
-    /// <summary>
-    /// Provides easy access to ColorCode's built-in formatters.
-    /// </summary>
-    public static class Formatters
+
+
+    public class DefaultStyleSheet 
+        : IStyleSheet
     {
-        /// <summary>
-        /// Gets the default formatter.
-        /// </summary>
-        /// <remarks>
-        /// The default formatter produces HTML with inline styles.
-        /// </remarks>
-        public static IFormatter Default { get { return new ColorCode.Formatting.HtmlFormatter(); } }
-    }
-    
-    public class DefaultStyleSheet : IStyleSheet
-    {
-        public static readonly string DullRed = "rgb(163, 21, 21)"; // FromArgb(163, 21, 21);
-        private static readonly StyleDictionary styles;
+        //public static readonly string DullRed = "rgb(163, 21, 21)"; // FromArgb(163, 21, 21);
+        public static readonly string DullRed = "#A31515";
+        private static readonly ColorCode.Styling.StyleDictionary styles;
 
         static DefaultStyleSheet()
         {
-            styles = new StyleDictionary
+            styles = new ColorCode.Styling.StyleDictionary
                          {
-                             new Style(ScopeName.PlainText)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.PlainText)
                                  {
-                                     Foreground = "Black",
-                                     Background = "White",
+                                     Foreground = "black",
+                                     Background = "white",
                                      ReferenceName = "plainText"
                                  },
-                             new Style(ScopeName.HtmlServerSideScript)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.HtmlServerSideScript)
                                  {
-                                     Background = "Yellow",
+                                     Background = "yellow",
                                      ReferenceName = "htmlServerSideScript"
                                  },
-                             new Style(ScopeName.HtmlComment)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.HtmlComment)
                                  {
-                                     Foreground = "Green",
+                                     Foreground = "green",
                                      ReferenceName = "htmlComment"
                                  },
-                             new Style(ScopeName.HtmlTagDelimiter)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.HtmlTagDelimiter)
                                  {
-                                     Foreground = "Blue",
+                                     Foreground = "blue",
                                      ReferenceName = "htmlTagDelimiter"
                                  },
-                             new Style(ScopeName.HtmlElementName)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.HtmlElementName)
                                  {
-                                     Foreground = "DullRed",
+                                     Foreground = "dullred",
                                      ReferenceName = "htmlElementName"
                                  },
-                             new Style(ScopeName.HtmlAttributeName)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.HtmlAttributeName)
                                  {
-                                     Foreground = "Red",
+                                     Foreground = "red",
                                      ReferenceName = "htmlAttributeName"
                                  },
-                             new Style(ScopeName.HtmlAttributeValue)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.HtmlAttributeValue)
                                  {
-                                     Foreground = "Blue",
+                                     Foreground = "blue",
                                      ReferenceName = "htmlAttributeValue"
                                  },
-                             new Style(ScopeName.HtmlOperator)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.HtmlOperator)
                                  {
-                                     Foreground = "Blue",
+                                     Foreground = "blue",
                                      ReferenceName = "htmlOperator"
                                  },
-                             new Style(ScopeName.Comment)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.Comment)
                                  {
-                                     Foreground = "Green",
+                                     Foreground = "green",
                                      ReferenceName = "comment"
                                  },
-                             new Style(ScopeName.XmlDocTag)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.XmlDocTag)
                                  {
-                                     Foreground = "Gray",
+                                     Foreground = "gray",
                                      ReferenceName = "xmlDocTag"
                                  },
-                             new Style(ScopeName.XmlDocComment)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.XmlDocComment)
                                  {
-                                     Foreground = "Green",
+                                     Foreground = "green",
                                      ReferenceName = "xmlDocComment"
                                  },
-                             new Style(ScopeName.String)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.String)
                                  {
-                                     Foreground = "DullRed",
+                                     Foreground = "dullred",
                                      ReferenceName = "string"
                                  },
-                             new Style(ScopeName.StringCSharpVerbatim)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.StringCSharpVerbatim)
                                  {
-                                     Foreground = "DullRed",
+                                     Foreground = "dullred",
                                      ReferenceName = "stringCSharpVerbatim"
                                  },
-                             new Style(ScopeName.Keyword)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.Keyword)
                                  {
-                                     Foreground = "Blue",
+                                     Foreground = "blue",
                                      ReferenceName = "keyword"
                                  },
-                             new Style(ScopeName.PreprocessorKeyword)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.PreprocessorKeyword)
                                  {
-                                     Foreground = "Blue",
+                                     Foreground = "blue",
                                      ReferenceName = "preprocessorKeyword"
                                  },
-                             new Style(ScopeName.HtmlEntity)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.HtmlEntity)
                                  {
-                                     Foreground = "Red",
+                                     Foreground = "red",
                                      ReferenceName = "htmlEntity"
                                  },
-                             new Style(ScopeName.XmlAttribute)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.XmlAttribute)
                                  {
-                                     Foreground = "Red",
+                                     Foreground = "red",
                                      ReferenceName = "xmlAttribute"
                                  },
-                             new Style(ScopeName.XmlAttributeQuotes)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.XmlAttributeQuotes)
                                  {
-                                     Foreground = "Black",
+                                     Foreground = "black",
                                      ReferenceName = "xmlAttributeQuotes"
                                  },
-                             new Style(ScopeName.XmlAttributeValue)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.XmlAttributeValue)
                                  {
-                                     Foreground = "Blue",
+                                     Foreground = "blue",
                                      ReferenceName = "xmlAttributeValue"
                                  },
-                             new Style(ScopeName.XmlCDataSection)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.XmlCDataSection)
                                  {
-                                     Foreground = "Gray",
+                                     Foreground = "gray",
                                      ReferenceName = "xmlCDataSection"
                                  },
-                             new Style(ScopeName.XmlComment)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.XmlComment)
                                  {
-                                     Foreground = "Green",
+                                     Foreground = "green",
                                      ReferenceName = "xmlComment"
                                  },
-                             new Style(ScopeName.XmlDelimiter)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.XmlDelimiter)
                                  {
-                                     Foreground = "Blue",
+                                     Foreground = "blue",
                                      ReferenceName = "xmlDelimiter"
                                  },
-                             new Style(ScopeName.XmlName)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.XmlName)
                                  {
-                                     Foreground = "DullRed",
+                                     Foreground = "dullred",
                                      ReferenceName = "xmlName"
                                  },
-                             new Style(ScopeName.ClassName)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.ClassName)
                                  {
-                                     Foreground = "MediumTurquoise",
+                                     Foreground = "mediumturquoise",
                                      ReferenceName = "className"
                                  },
-                             new Style(ScopeName.CssSelector)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.CssSelector)
                                  {
-                                     Foreground = "DullRed",
+                                     Foreground = "dullred",
                                      ReferenceName = "cssSelector"
                                  },
-                             new Style(ScopeName.CssPropertyName)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.CssPropertyName)
                                  {
-                                     Foreground = "Red",
+                                     Foreground = "red",
                                      ReferenceName = "cssPropertyName"
                                  },
-                             new Style(ScopeName.CssPropertyValue)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.CssPropertyValue)
                                  {
-                                     Foreground = "Blue",
+                                     Foreground = "blue",
                                      ReferenceName = "cssPropertyValue"
                                  },
-                             new Style(ScopeName.SqlSystemFunction)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.SqlSystemFunction)
                                  {
-                                     Foreground = "Magenta",
+                                     Foreground = "magenta",
                                      ReferenceName = "sqlSystemFunction"
                                  },
-                             new Style(ScopeName.PowerShellAttribute)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.PowerShellAttribute)
                                  {
-                                     Foreground = "PowderBlue",
+                                     Foreground = "powderblue",
                                      ReferenceName = "powershellAttribute"
                                  },
-                             new Style(ScopeName.PowerShellOperator)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.PowerShellOperator)
                                  {
-                                     Foreground = "Gray",
+                                     Foreground = "gray",
                                      ReferenceName = "powershellOperator"
                                  },
-                             new Style(ScopeName.PowerShellType)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.PowerShellType)
                                  {
-                                     Foreground = "Teal",
+                                     Foreground = "teal",
                                      ReferenceName = "powershellType"
                                  },
-                             new Style(ScopeName.PowerShellVariable)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.PowerShellVariable)
                                  {
-                                     Foreground = "OrangeRed",
+                                     Foreground = "orangered",
                                      ReferenceName = "powershellVariable"
                                  },
 
-                             new Style(ScopeName.Type)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.Type)
                                 {
-                                    Foreground = "Teal",
+                                    Foreground = "teal",
                                     ReferenceName = "type"
                                 },
-                             new Style(ScopeName.TypeVariable)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.TypeVariable)
                                 {
-                                    Foreground = "Teal",
+                                    Foreground = "teal",
                                     Italic = true,
                                     ReferenceName = "typeVariable"
                                 },
-                             new Style(ScopeName.NameSpace)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.NameSpace)
                                 {
-                                    Foreground = "Navy",
+                                    Foreground = "navy",
                                     ReferenceName = "namespace"
                                 },
-                             new Style(ScopeName.Constructor)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.Constructor)
                                 {
-                                    Foreground = "Purple",
+                                    Foreground = "purple",
                                     ReferenceName = "constructor"
                                 },
-                             new Style(ScopeName.Predefined)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.Predefined)
                                 {
-                                    Foreground = "Navy",
+                                    Foreground = "navy",
                                     ReferenceName = "predefined"
                                 },
-                             new Style(ScopeName.PseudoKeyword)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.PseudoKeyword)
                                 {
-                                    Foreground = "Navy",
+                                    Foreground = "navy",
                                     ReferenceName = "pseudoKeyword"
                                 },
-                             new Style(ScopeName.StringEscape)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.StringEscape)
                                 {
-                                    Foreground = "Gray",
+                                    Foreground = "gray",
                                     ReferenceName = "stringEscape"
                                 },
-                             new Style(ScopeName.ControlKeyword)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.ControlKeyword)
                                 {
-                                    Foreground = "Blue",
+                                    Foreground = "blue",
                                     ReferenceName = "controlKeyword"
                                 },
-                             new Style(ScopeName.Number)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.Number)
                                 {
                                     ReferenceName = "number"
                                 },
-                             new Style(ScopeName.Operator)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.Operator)
                                 {
                                     ReferenceName = "operator"
                                 },
-                             new Style(ScopeName.Delimiter)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.Delimiter)
                                 {
                                     ReferenceName = "delimiter"
                                 },
 
-                             new Style(ScopeName.MarkdownHeader)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.MarkdownHeader)
                                 {
                                     // Foreground = "Blue,
                                     Bold = true,
                                     ReferenceName = "markdownHeader"
                                 },
-                             new Style(ScopeName.MarkdownCode)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.MarkdownCode)
                                 {
-                                    Foreground = "Teal",
+                                    Foreground = "teal",
                                     ReferenceName = "markdownCode"
                                 },
-                             new Style(ScopeName.MarkdownListItem)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.MarkdownListItem)
                                 {
                                     Bold = true,
                                     ReferenceName = "markdownListItem"
                                 },
-                             new Style(ScopeName.MarkdownEmph)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.MarkdownEmph)
                                 {
                                     Italic = true,
                                     ReferenceName = "italic"
                                 },
-                             new Style(ScopeName.MarkdownBold)
+                             new ColorCode.Styling.Style(ColorCode.Common.ScopeName.MarkdownBold)
                                 {
                                     Bold = true,
                                     ReferenceName = "bold"
@@ -281,9 +267,13 @@ namespace ColorCode.Styling.StyleSheets
             get { return "DefaultStyleSheet"; }
         }
 
-        public StyleDictionary Styles
+        public ColorCode.Styling.StyleDictionary Styles
         {
             get { return styles; }
         }
+
+
     }
+
+
 }

@@ -15,9 +15,9 @@ namespace MyBlog
 
 			csb.Server = System.Environment.MachineName;
 
-            if (System.StringComparer.InvariantCultureIgnoreCase.Equals(System.Environment.MachineName, "nvidiasucks"))
-                csb.Server= @"NVIDIASUCKS\MS_SQL_2014";
-            
+            if (System.Environment.OSVersion.Platform == System.PlatformID.Unix)
+                csb.Server += ",2019";
+
             csb.DataBase = "Blogz";
 			csb.IntegratedSecurity = true;
 			csb.Pooling = false;
@@ -48,10 +48,8 @@ namespace MyBlog
             DB.Abstraction.UniversalConnectionStringBuilder retval; 
             bool bUsePG = false;
 
-
-
-            if (System.StringComparer.InvariantCultureIgnoreCase.Equals(System.Environment.MachineName, "COR-W81-101")
-                    || System.StringComparer.OrdinalIgnoreCase.Equals("nvidiasucks", System.Environment.MachineName)    
+            if(
+                "COR".Equals(System.Environment.UserDomainName, System.StringComparison.InvariantCultureIgnoreCase)
                 )
             {
                 if (bUsePG)
@@ -61,8 +59,9 @@ namespace MyBlog
             }
             else if (System.Environment.OSVersion.Platform == System.PlatformID.Unix)
                 retval = GetPgCSB();
-            else 
-                retval = GetPgCSB();
+            else
+                retval = GetMsCSB();
+            //retval = GetPgCSB();
 
             return retval;
         } // End Function GetCSB

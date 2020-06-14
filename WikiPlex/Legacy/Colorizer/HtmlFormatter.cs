@@ -1,48 +1,30 @@
 
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 
-using System.Collections.Generic;
-using System.IO;
-using System.Web;
-using ColorCode.Common;
-using ColorCode.Parsing;
-using ColorCode.Styling;
-
-// namespace WikiPlex.Legacy.Colorizer
-
-namespace ColorCode.Formatting
+namespace WikiPlex.Legacy.Colorizer
 {
 
-    public static class stringext
-    {
 
-        public static string ToHtmlColor(this string t)
-        {
-            return t;
-        }
-
-    }
-
-
-    public class HtmlFormatter : IFormatter
+    public class HtmlFormatter 
+        : IFormatter
     {
         public void Write(string parsedSourceCode,
-                          IList<Scope> scopes,
+                          System.Collections.Generic.IList<ColorCode.Parsing.Scope> scopes,
                           IStyleSheet styleSheet,
-                          TextWriter textWriter)
+                          System.IO.TextWriter textWriter)
         {
-            var styleInsertions = new List<TextInsertion>();
+            System.Collections.Generic.List<ColorCode.Common.TextInsertion> styleInsertions = new System.Collections.Generic.List<ColorCode.Common.TextInsertion>();
 
-            foreach (Scope scope in scopes)
+            foreach (ColorCode.Parsing.Scope scope in scopes)
                 GetStyleInsertionsForCapturedStyle(scope, styleInsertions);
 
-            styleInsertions.SortStable((x, y) => x.Index.CompareTo(y.Index));
+            ColorCode.Common.ExtensionMethods.SortStable(styleInsertions, (x, y) => x.Index.CompareTo(y.Index));
 
             int offset = 0;
 
-            foreach (TextInsertion styleInsertion in styleInsertions)
+            foreach (ColorCode.Common.TextInsertion styleInsertion in styleInsertions)
             {
-                textWriter.Write(HttpUtility.HtmlEncode(parsedSourceCode.Substring(offset, styleInsertion.Index - offset)));
+                textWriter.Write(System.Web.HttpUtility.HtmlEncode(parsedSourceCode.Substring(offset, styleInsertion.Index - offset)));
                 if (string.IsNullOrEmpty(styleInsertion.Text))
                     BuildSpanForCapturedStyle(styleInsertion.Scope, styleSheet, textWriter);
                 else
@@ -50,15 +32,15 @@ namespace ColorCode.Formatting
                 offset = styleInsertion.Index;
             }
 
-            textWriter.Write(HttpUtility.HtmlEncode(parsedSourceCode.Substring(offset)));
+            textWriter.Write(System.Web.HttpUtility.HtmlEncode(parsedSourceCode.Substring(offset)));
         }
 
         public void WriteFooter(IStyleSheet styleSheet,
-                                ILanguage language,
-                                TextWriter textWriter)
+                                ColorCode.ILanguage language,
+                                System.IO.TextWriter textWriter)
         {
-            Guard.ArgNotNull(styleSheet, "styleSheet");
-            Guard.ArgNotNull(textWriter, "textWriter");
+            ColorCode.Common.Guard.ArgNotNull(styleSheet, "styleSheet");
+            ColorCode.Common.Guard.ArgNotNull(textWriter, "textWriter");
             
             textWriter.WriteLine();
             WriteHeaderPreEnd(textWriter);
@@ -66,37 +48,38 @@ namespace ColorCode.Formatting
         }
 
         public void WriteHeader(IStyleSheet styleSheet,
-                                ILanguage language,
-                                TextWriter textWriter)
+                                ColorCode.ILanguage language,
+                                System.IO.TextWriter textWriter)
         {
-            Guard.ArgNotNull(styleSheet, "styleSheet");
-            Guard.ArgNotNull(textWriter, "textWriter");
+            ColorCode.Common.Guard.ArgNotNull(styleSheet, "styleSheet");
+            ColorCode.Common.Guard.ArgNotNull(textWriter, "textWriter");
             
             WriteHeaderDivStart(styleSheet, textWriter);
             WriteHeaderPreStart(textWriter);
             textWriter.WriteLine();
         }
 
-        private static void GetStyleInsertionsForCapturedStyle(Scope scope, ICollection<TextInsertion> styleInsertions)
+        private static void GetStyleInsertionsForCapturedStyle(ColorCode.Parsing.Scope scope
+            , System.Collections.Generic.ICollection<ColorCode.Common.TextInsertion> styleInsertions)
         {
-            styleInsertions.Add(new TextInsertion {
+            styleInsertions.Add(new ColorCode.Common.TextInsertion {
                                                       Index = scope.Index,
                                                       Scope = scope
                                                   });
 
 
-            foreach (Scope childScope in scope.Children)
+            foreach (ColorCode.Parsing.Scope childScope in scope.Children)
                 GetStyleInsertionsForCapturedStyle(childScope, styleInsertions);
 
-            styleInsertions.Add(new TextInsertion {
+            styleInsertions.Add(new ColorCode.Common.TextInsertion {
                                                       Index = scope.Index + scope.Length,
                                                       Text = "</span>"
                                                   });
         }
 
-        private static void BuildSpanForCapturedStyle(Scope scope,
+        private static void BuildSpanForCapturedStyle(ColorCode.Parsing.Scope scope,
                                                         IStyleSheet styleSheet,
-                                                        TextWriter writer)
+                                                        System.IO.TextWriter writer)
         {
             string foreground = string.Empty;
             string background = string.Empty;
@@ -105,7 +88,7 @@ namespace ColorCode.Formatting
 
             if (styleSheet.Styles.Contains(scope.Name))
             {
-                Style style = styleSheet.Styles[scope.Name];
+                ColorCode.Styling.Style style = styleSheet.Styles[scope.Name];
 
                 foreground = style.Foreground;
                 background = style.Background;
@@ -116,36 +99,36 @@ namespace ColorCode.Formatting
             WriteElementStart(writer, "span", foreground, background, italic, bold);
         }
 
-        private static void WriteHeaderDivEnd(TextWriter writer)
+        private static void WriteHeaderDivEnd(System.IO.TextWriter writer)
         {
             WriteElementEnd("div", writer);
         }
 
         private static void WriteElementEnd(string elementName,
-                                            TextWriter writer)
+                                            System.IO.TextWriter writer)
         {
             writer.Write("</{0}>", elementName);
         }
 
-        private static void WriteHeaderPreEnd(TextWriter writer)
+        private static void WriteHeaderPreEnd(System.IO.TextWriter writer)
         {
             WriteElementEnd("pre", writer);
         }
 
-        private static void WriteHeaderPreStart(TextWriter writer)
+        private static void WriteHeaderPreStart(System.IO.TextWriter writer)
         {
             WriteElementStart(writer,"pre");
         }
 
         private static void WriteHeaderDivStart(IStyleSheet styleSheet,
-                                                TextWriter writer)
+                                                System.IO.TextWriter writer)
         {
             string foreground = string.Empty;
             string background = string.Empty;
 
-            if (styleSheet.Styles.Contains(ScopeName.PlainText))
+            if (styleSheet.Styles.Contains(ColorCode.Common.ScopeName.PlainText))
             {
-                Style plainTextStyle = styleSheet.Styles[ScopeName.PlainText];
+                ColorCode.Styling.Style plainTextStyle = styleSheet.Styles[ColorCode.Common.ScopeName.PlainText];
 
                 foreground = plainTextStyle.Foreground;
                 background = plainTextStyle.Background;
@@ -154,13 +137,13 @@ namespace ColorCode.Formatting
             WriteElementStart(writer, "div", foreground, background );
         }
 
-        private static void WriteElementStart(TextWriter writer,
+        private static void WriteElementStart(System.IO.TextWriter writer,
                                               string elementName)
         {
             WriteElementStart(writer, elementName, string.Empty, string.Empty);
         }
 
-        private static void WriteElementStart(TextWriter writer,
+        private static void WriteElementStart(System.IO.TextWriter writer,
                                               string elementName,
                                               string foreground,
                                               string background,
@@ -175,10 +158,10 @@ namespace ColorCode.Formatting
                 writer.Write(" style=\"");
 
                 if (foreground != string.Empty)
-                    writer.Write("color:{0};", foreground.ToHtmlColor());
+                    writer.Write("color:{0};", foreground);
 
                 if (background != string.Empty)
-                    writer.Write("background-color:{0};", background.ToHtmlColor());
+                    writer.Write("background-color:{0};", background);
 
                 if (italic)
                     writer.Write("font-style: italic;");
