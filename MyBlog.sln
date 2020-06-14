@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevTests", "DevTests\DevTes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ColorCode.Core", "ColorCode.Core\ColorCode.Core.csproj", "{087048E2-257F-4A3C-84D7-B80E80B1C104}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ColorCodeNetStandard", "ColorCodeNetStandard\ColorCodeNetStandard.csproj", "{C5E92605-DC08-4531-9548-36E8B71C1481}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +71,10 @@ Global
 		{087048E2-257F-4A3C-84D7-B80E80B1C104}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{087048E2-257F-4A3C-84D7-B80E80B1C104}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{087048E2-257F-4A3C-84D7-B80E80B1C104}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C5E92605-DC08-4531-9548-36E8B71C1481}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C5E92605-DC08-4531-9548-36E8B71C1481}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C5E92605-DC08-4531-9548-36E8B71C1481}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C5E92605-DC08-4531-9548-36E8B71C1481}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
