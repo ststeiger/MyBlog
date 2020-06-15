@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS T_BlogPost
 	,AutoAudit_RowVersion int 
 	,CONSTRAINT PK_T_BlogPost PRIMARY KEY( BP_UID )
 ); 
-GO
+
 
 -- ALTER TABLE T_BlogPost ADD  CONSTRAINT T_BlogPost_AutoAudit_CreatedDate_DF  DEFAULT (CURRENT_TIMESTAMP) FOR AutoAudit_CreatedDate; 
 ALTER TABLE T_BlogPost ALTER COLUMN AutoAudit_CreatedDate SET DEFAULT CURRENT_TIMESTAMP; 
