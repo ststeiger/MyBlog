@@ -1,10 +1,11 @@
 ﻿
-using Microsoft.VisualBasic;
-
 namespace DevTests
 {
 
 
+    // https://github.com/atachimiko/AtachiWiki
+    // https://github.com/windows-toolkit/ColorCode-Universal
+    // https://github.com/stephanjohnson/commonplex
     class Program
     {
 
@@ -67,7 +68,8 @@ namespace DevTests
         }
 
 
-        public static void DataToXML()
+
+        public static string GetCS()
         {
             Npgsql.NpgsqlConnectionStringBuilder csb = new Npgsql.NpgsqlConnectionStringBuilder();
             csb.Database = "blogz";
@@ -77,7 +79,11 @@ namespace DevTests
             csb.Username = "postgres";
             // csb.Password = "";
 
+            return csb.ConnectionString;
+        }
 
+        public static void DataToXML()
+        {
             string table_schema = "geoip";
             string table_name = "geoip_blocks_temp";
 
@@ -96,7 +102,7 @@ namespace DevTests
 
                     using (System.Data.Common.DbConnection con = Npgsql.NpgsqlFactory.Instance.CreateConnection())
                     {
-                        con.ConnectionString = csb.ConnectionString;
+                        con.ConnectionString = GetCS();
 
                         using (System.Data.Common.DbCommand cmd = con.CreateCommand())
                         {
@@ -146,7 +152,7 @@ namespace DevTests
                     using (System.Xml.XmlWriter writer = System.Xml.XmlWriter.Create(exportFilename, xs))
                     {
                         dt.WriteXml(writer, System.Data.XmlWriteMode.IgnoreSchema);
-                    }
+                    } // End Using writer 
 
                     System.Console.WriteLine(dt.Rows.Count);
                 } // End Using ds 
@@ -156,11 +162,112 @@ namespace DevTests
         } // End Sub DataToXML 
 
 
+
+        public static void LargeDataToXML()
+        {
+            string table_schema = "geoip";
+            string table_name = "geoip_blocks_temp";
+
+            // table_schema = "public";
+            // table_name = "t_sys_language_monthnames";
+
+
+            System.Xml.XmlWriterSettings xs = new System.Xml.XmlWriterSettings();
+            xs.Indent = true;
+            xs.IndentChars = "    ";
+            xs.NewLineChars = System.Environment.NewLine;
+            xs.OmitXmlDeclaration = false; // // <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+            // xs.Encoding = System.Text.Encoding.UTF8; // doesn't work with pgsql 
+            xs.Encoding = new System.Text.UTF8Encoding(false);
+
+            string exportFilename = System.IO.Path.Combine(@"d:\", table_name + ".xml");
+
+            using (System.Xml.XmlWriter writer = System.Xml.XmlWriter.Create(exportFilename, xs))
+            {
+                writer.WriteStartDocument();
+                writer.WriteStartElement(table_name);
+
+                writer.WriteAttributeString("xmlns", "xsi", null, System.Xml.Schema.XmlSchema.InstanceNamespace);
+                // writer.WriteAttributeString("xsi", "schemaLocation", null, System.Xml.Schema.XmlSchema.InstanceNamespace);
+
+
+
+                using (System.Data.Common.DbConnection con = Npgsql.NpgsqlFactory.Instance.CreateConnection())
+                {
+                    con.ConnectionString = GetCS();
+
+                    using (System.Data.Common.DbCommand cmd = con.CreateCommand())
+                    {
+                        cmd.CommandText = "SELECT * FROM " + table_schema + "." + table_name;
+
+
+                        if (con.State != System.Data.ConnectionState.Open)
+                            con.Open();
+
+                        using (System.Data.Common.DbDataReader dr = cmd.ExecuteReader())
+                        {
+
+                            if (dr.HasRows)
+                            {
+                                int fc = dr.FieldCount;
+
+                                string[] columnNames = new string[fc];
+                                System.Type[] columnTypes = new System.Type[fc];
+
+                                for (int i = 0; i < dr.FieldCount; ++i)
+                                {
+                                    columnNames[i] = dr.GetName(i);
+                                    columnTypes[i] = dr.GetFieldType(i);
+                                } // Next i 
+
+
+                                while (dr.Read())
+                                {
+                                    // object[] thisRow = new object[dr.FieldCount];
+
+                                    writer.WriteStartElement("record");
+
+                                    for (int i = 0; i < fc; ++i)
+                                    {
+                                        writer.WriteStartElement(columnNames[i]);
+                                        object obj = dr.GetValue(i);
+
+                                        if (obj != System.DBNull.Value)
+                                        {
+                                            writer.WriteValue(obj);
+                                        }
+                                        else
+                                            writer.WriteAttributeString("xsi", "nil", System.Xml.Schema.XmlSchema.InstanceNamespace, "true");
+
+                                        writer.WriteEndElement();
+                                    } // Next i
+
+                                    writer.WriteEndElement();
+
+                                } // Whend 
+
+                            } // End if (dr.HasRows) 
+
+                        } // End Using dr 
+
+                        if (con.State != System.Data.ConnectionState.Open)
+                            con.Close();
+                    } // End Using cmd 
+
+                } // End Using con 
+
+                writer.WriteEndElement();
+            } // ENd Using writer 
+
+        } // End Sub LargeDataToXML 
+
+
         static void Main(string[] args)
         {
-            DataToXML();
+            LargeDataToXML();
+            // DataToXML();
 
-            string fileName = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory,"..","..","..", "Program.cs");
+            string fileName = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "Program.cs");
             fileName = System.IO.Path.GetFullPath(fileName);
             System.Console.WriteLine(fileName);
 
