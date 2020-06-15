@@ -1,8 +1,16 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CodeKicker.BBCode\CodeKicker.BBCode.csproj" />
+    <ProjectReference Include="..\ColorCode.Core\ColorCode.Core.csproj" />
+    <ProjectReference Include="..\Dapper\Dapper.csproj" />
+    <ProjectReference Include="..\DB\DB.csproj" />
+    <ProjectReference Include="..\WikiPlex\WikiPlex.csproj" />
+  </ItemGroup>
 
 
 
