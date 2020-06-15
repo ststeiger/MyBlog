@@ -19,11 +19,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WikiPlex", "WikiPlex\WikiPl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeKicker.BBCode", "CodeKicker.BBCode\CodeKicker.BBCode.csproj", "{87A91A03-BA9C-4616-B3CC-7D66A92B0BE7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevTests", "DevTests\DevTests.csproj", "{FE0C96C9-4EE5-49C1-8BFA-83080E60F122}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DevTests", "DevTests\DevTests.csproj", "{FE0C96C9-4EE5-49C1-8BFA-83080E60F122}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ColorCode.Core", "ColorCode.Core\ColorCode.Core.csproj", "{087048E2-257F-4A3C-84D7-B80E80B1C104}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ColorCode.Core", "ColorCode.Core\ColorCode.Core.csproj", "{087048E2-257F-4A3C-84D7-B80E80B1C104}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ColorCodeNetStandard", "ColorCodeNetStandard\ColorCodeNetStandard.csproj", "{C5E92605-DC08-4531-9548-36E8B71C1481}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DB", "DB\DB.csproj", "{4DFFC45E-5FE3-4AE2-8D72-F0913D4605DD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -75,6 +77,10 @@ Global
 		{C5E92605-DC08-4531-9548-36E8B71C1481}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C5E92605-DC08-4531-9548-36E8B71C1481}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C5E92605-DC08-4531-9548-36E8B71C1481}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4DFFC45E-5FE3-4AE2-8D72-F0913D4605DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4DFFC45E-5FE3-4AE2-8D72-F0913D4605DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4DFFC45E-5FE3-4AE2-8D72-F0913D4605DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4DFFC45E-5FE3-4AE2-8D72-F0913D4605DD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

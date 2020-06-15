@@ -1,4 +1,6 @@
-﻿
+﻿using Dapper;
+
+
 namespace DevTests
 {
 
@@ -261,9 +263,34 @@ namespace DevTests
         } // End Sub LargeDataToXML 
 
 
+
+        public static void TestFactory()
+        {
+            System.Data.SqlClient.SqlConnectionStringBuilder csb = new System.Data.SqlClient.SqlConnectionStringBuilder();
+            csb.DataSource = "localhost";
+            csb.InitialCatalog = "Blogz";
+            csb.IntegratedSecurity = true;
+
+            csb.PersistSecurityInfo = false;
+            csb.PacketSize = 4096;
+            csb.WorkstationID = System.Environment.MachineName;
+
+
+            // DB.SqlFactory factory = new DB.SqlFactory(System.Data.SqlClient.SqlClientFactory.Instance, csb.ConnectionString);
+            DB.SqlFactory factory = new DB.SqlFactory(Npgsql.NpgsqlFactory.Instance, GetCS());
+
+
+            int count = factory.Connection.ExecuteScalar<int>("SELECT COUNT(*) FROM information_schema.tables");
+            System.Console.WriteLine(count);
+        }
+
+
+
         static void Main(string[] args)
         {
-            LargeDataToXML();
+            TestFactory();
+
+            // LargeDataToXML();
             // DataToXML();
 
             string fileName = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "Program.cs");
