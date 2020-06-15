@@ -1,4 +1,6 @@
 ﻿
+using Microsoft.VisualBasic;
+
 namespace DevTests
 {
 
@@ -32,7 +34,7 @@ namespace DevTests
         }
 
 
-        public static void foo()
+        public static void ReplaceStylesheet()
         {
             string fileName = @"C:\Users\username\Documents\Visual Studio 2019\Projects\MyBlog\WikiPlex\Legacy\Colorizer\DefaultStyleSheet.cs";
 
@@ -65,8 +67,99 @@ namespace DevTests
         }
 
 
+        public static void DataToXML()
+        {
+            Npgsql.NpgsqlConnectionStringBuilder csb = new Npgsql.NpgsqlConnectionStringBuilder();
+            csb.Database = "blogz";
+            csb.Host = "localhost";
+            csb.Port = 5432;
+            csb.IntegratedSecurity = true;
+            csb.Username = "postgres";
+            // csb.Password = "";
+
+
+            string table_schema = "geoip";
+            string table_name = "geoip_blocks_temp";
+
+            table_schema = "public";
+            table_name = "t_sys_language_monthnames";
+
+
+            using (System.Data.DataTable dt = new System.Data.DataTable())
+            {
+                dt.TableName = "record";
+
+                using (System.Data.DataSet ds = new System.Data.DataSet(table_name))
+                {
+                    ds.Tables.Add(dt);
+                    // dt.Namespace = "foo";
+
+                    using (System.Data.Common.DbConnection con = Npgsql.NpgsqlFactory.Instance.CreateConnection())
+                    {
+                        con.ConnectionString = csb.ConnectionString;
+
+                        using (System.Data.Common.DbCommand cmd = con.CreateCommand())
+                        {
+                            cmd.CommandText = "SELECT * FROM " + table_schema + "." + table_name;
+
+                            using (System.Data.Common.DbDataAdapter da = Npgsql.NpgsqlFactory.Instance.CreateDataAdapter())
+                            {
+                                da.SelectCommand = cmd;
+
+                                if (con.State != System.Data.ConnectionState.Open)
+                                    con.Open();
+
+                                da.Fill(dt);
+
+                                if (con.State != System.Data.ConnectionState.Open)
+                                    con.Close();
+                            } // End Using da 
+
+                        } // End Using cmd 
+
+                    } // End Using con 
+
+                    string exportFilename = System.IO.Path.Combine(@"d:\", table_name + ".xml");
+
+
+                    //using (System.IO.Stream fs = System.IO.File.OpenWrite(exportFilename))
+                    //{
+                    //    using (System.IO.TextWriter sw = new System.IO.StreamWriter(fs, System.Text.Encoding.UTF8))
+                    //    {
+                    //        // System.IO.StringWriter sw = new System.IO.StringWriter();
+                    //        // dt.WriteXml(sw, System.Data.XmlWriteMode.IgnoreSchema);
+                    //        dt.WriteXml(sw, System.Data.XmlWriteMode.IgnoreSchema);
+                    //    } // End Using sw 
+
+                    //} // End Using fs 
+
+
+                    System.Xml.XmlWriterSettings xs = new System.Xml.XmlWriterSettings();
+                    xs.Indent = true;
+                    xs.IndentChars = "    ";
+                    xs.NewLineChars = System.Environment.NewLine;
+                    xs.OmitXmlDeclaration = false;
+                    // xs.Encoding = System.Text.Encoding.UTF8; // doesn't work with pgsql 
+                    xs.Encoding = new System.Text.UTF8Encoding(false);
+
+                    // <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+                    using (System.Xml.XmlWriter writer = System.Xml.XmlWriter.Create(exportFilename, xs))
+                    {
+                        dt.WriteXml(writer, System.Data.XmlWriteMode.IgnoreSchema);
+                    }
+
+                    System.Console.WriteLine(dt.Rows.Count);
+                } // End Using ds 
+
+            } // End Using dt 
+
+        } // End Sub DataToXML 
+
+
         static void Main(string[] args)
         {
+            DataToXML();
+
             string fileName = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory,"..","..","..", "Program.cs");
             fileName = System.IO.Path.GetFullPath(fileName);
             System.Console.WriteLine(fileName);
