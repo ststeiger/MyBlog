@@ -15,18 +15,19 @@ INSERT INTO T_BlogPost
 	,AutoAudit_RowVersion
 ) 
 SELECT 
-     (xpath('//bp_uid/text()', myTempTable.myXmlColumn))[1]::text AS bp_uid
-    ,(xpath('//bp_title/text()', myTempTable.myXmlColumn))[1]::text AS bp_title 
-    ,(xpath('//bp_content/text()', myTempTable.myXmlColumn))[1]::text AS bp_content
-    ,(xpath('//bp_creoletext/text()', myTempTable.myXmlColumn))[1]::text AS bp_creoletext
-    ,(xpath('//bp_bbcode/text()', myTempTable.myXmlColumn))[1]::text AS bp_bbcode
-    ,(xpath('//bp_htmlcontent/text()', myTempTable.myXmlColumn))[1]::text AS bp_htmlcontent
-    ,(xpath('//bp_entrydate/text()', myTempTable.myXmlColumn))[1]::text AS bp_entrydate
-    ,(xpath('//autoaudit_createddate/text()', myTempTable.myXmlColumn))[1]::text AS autoaudit_createddate
-    ,(xpath('//autoaudit_createdby/text()', myTempTable.myXmlColumn))[1]::text ASautoaudit_createdby
-    ,(xpath('//autoaudit_modifieddate/text()', myTempTable.myXmlColumn))[1]::text AS autoaudit_modifieddate
-    ,(xpath('//autoaudit_modifiedby/text()', myTempTable.myXmlColumn))[1]::text AS autoaudit_modifiedby
-    ,(xpath('//autoaudit_rowversion/text()', myTempTable.myXmlColumn))[1]::text AS autoaudit_rowversion
+     (xpath('//bp_uid/text()', myTempTable.myXmlColumn))[1]::text::uuid AS bp_uid
+    ,(xpath('//bp_title/text()', myTempTable.myXmlColumn))[1]::text::character varying AS bp_title
+    ,(xpath('//bp_content/text()', myTempTable.myXmlColumn))[1]::text::text AS bp_content
+    ,(xpath('//bp_creoletext/text()', myTempTable.myXmlColumn))[1]::text::text AS bp_creoletext
+    ,(xpath('//bp_bbcode/text()', myTempTable.myXmlColumn))[1]::text::text AS bp_bbcode
+    ,(xpath('//bp_htmlcontent/text()', myTempTable.myXmlColumn))[1]::text::text AS bp_htmlcontent
+    ,(xpath('//bp_entrydate/text()', myTempTable.myXmlColumn))[1]::text::timestamp without time zone AS bp_entrydate
+    ,(xpath('//autoaudit_createddate/text()', myTempTable.myXmlColumn))[1]::text::timestamp without time zone AS autoaudit_createddate
+    ,(xpath('//autoaudit_createdby/text()', myTempTable.myXmlColumn))[1]::text::character varying AS autoaudit_createdby
+    ,(xpath('//autoaudit_modifieddate/text()', myTempTable.myXmlColumn))[1]::text::timestamp without time zone AS autoaudit_modifieddate
+    ,(xpath('//autoaudit_modifiedby/text()', myTempTable.myXmlColumn))[1]::text::character varying AS autoaudit_modifiedby
+    ,(xpath('//autoaudit_rowversion/text()', myTempTable.myXmlColumn))[1]::text::integer AS autoaudit_rowversion
+
     -- ,myTempTable.myXmlColumn as myXmlElement 
     -- Source: https://en.wikipedia.org/wiki/List_of_DNS_record_types
 FROM unnest(xpath('//row', 
