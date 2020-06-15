@@ -204,7 +204,7 @@ namespace DevTests
                         if (con.State != System.Data.ConnectionState.Open)
                             con.Open();
 
-                        using (System.Data.Common.DbDataReader dr = cmd.ExecuteReader())
+                        using (System.Data.Common.DbDataReader dr = cmd.ExecuteReader(System.Data.CommandBehavior.SequentialAccess))
                         {
 
                             if (dr.HasRows)
@@ -212,14 +212,13 @@ namespace DevTests
                                 int fc = dr.FieldCount;
 
                                 string[] columnNames = new string[fc];
-                                System.Type[] columnTypes = new System.Type[fc];
+                                // System.Type[] columnTypes = new System.Type[fc];
 
                                 for (int i = 0; i < dr.FieldCount; ++i)
                                 {
                                     columnNames[i] = dr.GetName(i);
-                                    columnTypes[i] = dr.GetFieldType(i);
+                                    // columnTypes[i] = dr.GetFieldType(i);
                                 } // Next i 
-
 
                                 while (dr.Read())
                                 {
