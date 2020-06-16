@@ -357,11 +357,69 @@ namespace DevTests
             System.Console.WriteLine(content);
         }
 
+        public static string XmlBeautifier(string xml)
+        {
+            string result = "";
+
+            try
+            {
+                System.Xml.XmlDocument document = new System.Xml.XmlDocument();
+                document.XmlResolver = null;
+
+                // Load the XmlDocument with the XML.
+                document.LoadXml(xml);
+
+
+                using (System.IO.MemoryStream mStream = new System.IO.MemoryStream())
+                {
+
+                    using (System.Xml.XmlTextWriter writer = new System.Xml.XmlTextWriter(mStream, System.Text.Encoding.Unicode))
+                    {
+                        writer.Formatting = System.Xml.Formatting.Indented;
+
+                        // Write the XML into a formatting XmlTextWriter
+                        document.WriteContentTo(writer);
+                        writer.Flush();
+                        mStream.Flush();
+
+
+                        // Have to rewind the MemoryStream in order to read
+                        // its contents.
+                        mStream.Position = 0;
+
+                        // Read MemoryStream contents into a StreamReader.
+                        using (System.IO.StreamReader sReader = new System.IO.StreamReader(mStream))
+                        {
+                            // Extract the text from the StreamReader.
+                            result = sReader.ReadToEnd();
+                        } // End Using sReader 
+
+                    } // End Using writer 
+
+                } // End Using mStream 
+
+            }
+            catch (System.Xml.XmlException)
+            {
+                // Handle the exception
+            }
+
+            return result;
+        } // End Function XmlBeautifier 
+
+
+        public static void XmlFileBeautifier()
+        {
+            string xml = xml = System.IO.File.ReadAllText(@"D:\Stefan.Steiger\Desktop\3ba33caf-4d3a-4681-8231-dd8f8999467f.svg", System.Text.Encoding.UTF8);
+
+            string result = XmlBeautifier(xml);
+            System.IO.File.WriteAllText(@"D:\Stefan.Steiger\Desktop\333.svg", result, System.Text.Encoding.UTF8);
+        } // End Sub XmlFileBeautifier 
+
+
 
         static void Main(string[] args)
         {
-            foo();
-
             TestFactory();
 
             // LargeDataToXML();
