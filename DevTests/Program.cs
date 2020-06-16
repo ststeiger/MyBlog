@@ -408,14 +408,48 @@ namespace DevTests
         } // End Function XmlBeautifier 
 
 
+        public static void SaveXml(string fileName, string outputFileName)
+        {
+            System.Xml.XmlDocument doc = new System.Xml.XmlDocument();
+            doc.XmlResolver = null;
+            doc.Load(fileName);
+
+
+            System.Xml.XmlWriterSettings settings = new System.Xml.XmlWriterSettings();
+            settings.Encoding = System.Text.Encoding.UTF8;
+            settings.Indent = true;
+            settings.IndentChars = "  ";
+            // settings.NewLineChars = System.Environment.NewLine;
+            settings.NewLineChars = "\r\n";
+            settings.OmitXmlDeclaration = true;
+
+
+            using (System.Xml.XmlWriter xtw = System.Xml.XmlWriter.Create(outputFileName, settings))
+            {
+                doc.Save(xtw);
+            } // End Using xtw 
+
+
+            // using (System.Xml.XmlTextWriter xtwXMLwriter = new System.Xml.XmlTextWriter(outputFileName, System.Text.Encoding.UTF8))
+            // {
+            //     xtwXMLwriter.Formatting = System.Xml.Formatting.Indented;
+            //     doc.Save(xtwXMLwriter);
+            // }
+
+        } // End Sub SaveXml 
+
+
         public static void XmlFileBeautifier()
         {
-            string xml = xml = System.IO.File.ReadAllText(@"D:\Stefan.Steiger\Desktop\3ba33caf-4d3a-4681-8231-dd8f8999467f.svg", System.Text.Encoding.UTF8);
+            string inputFile = @"D:\Stefan.Steiger\Desktop\3ba33caf-4d3a-4681-8231-dd8f8999467f.svg";
+            string outputFile = @"D:\Stefan.Steiger\Desktop\333.svg";
 
-            string result = XmlBeautifier(xml);
-            System.IO.File.WriteAllText(@"D:\Stefan.Steiger\Desktop\333.svg", result, System.Text.Encoding.UTF8);
+            // string xml = System.IO.File.ReadAllText(inputFile, System.Text.Encoding.UTF8);
+            // string result = XmlBeautifier(xml);
+            // System.IO.File.WriteAllText(outputFile, result, System.Text.Encoding.UTF8);
+
+            SaveXml(inputFile, outputFile);
         } // End Sub XmlFileBeautifier 
-
 
 
         static void Main(string[] args)
