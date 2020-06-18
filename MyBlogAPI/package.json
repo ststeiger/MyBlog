@@ -1,0 +1,9 @@
+{
+  "version": "1.0.0",
+  "name": "myblog",
+  "private": true,
+  "dependencies": {
+    "parsoid": "0.11.0"
+  },
+  "devDependencies": {}
+}
