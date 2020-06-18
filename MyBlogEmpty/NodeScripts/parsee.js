@@ -1,5 +1,5 @@
 ﻿
-var parsoid = require('parsoid');
+let parsoid = require('parsoid');
 
 module.exports = function (callback, wikiText)
 {
@@ -17,14 +17,14 @@ module.exports = function (callback, wikiText)
         if(cache == null)
             cache = [];
 
-        var output ="";
-        for (var property in obj)
+        let output ="";
+        for (let property in obj)
         {
             // console.log("prop:", property);
 
-            var value = obj[property];
-            var valueType = typeof(value);
-            var objType = typeof(obj);
+            let value = obj[property];
+            let valueType = typeof(value);
+            let objType = typeof(obj);
 
             // console.log("valuetype:", valueType);
             if(obj != null && objType === "object" && obj.hasOwnProperty && obj.hasOwnProperty(property))
@@ -59,7 +59,7 @@ module.exports = function (callback, wikiText)
     {
         try 
         {
-            var data = await parsoid.parse(markup);
+            let data = await parsoid.parse(markup);
             //console.log(data.out);
             callback(null, data.out);
 
