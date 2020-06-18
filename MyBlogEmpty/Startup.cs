@@ -8,6 +8,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
+
+using Microsoft.AspNetCore.NodeServices;
+
 namespace MyBlogEmpty
 {
     public class Startup
@@ -16,6 +19,8 @@ namespace MyBlogEmpty
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            // Microsoft.AspNetCore.SpaServices.Extensions
+            NodeServicesServiceCollectionExtensions.AddNodeServices(services);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -35,6 +40,27 @@ namespace MyBlogEmpty
                     await context.Response.WriteAsync("Hello World!");
                 });
             });
+
+            INodeServices nodeServices = app.ApplicationServices.GetService<INodeServices>();
+            
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapGet("/", async context =>
+                {
+                    int num1 = 10;
+                    int num2 = 20;
+                    int result = await nodeServices.InvokeAsync<int>("AddModule.js", num1, num2);
+                    // ViewData["ResultFromNode"] = $"Result of {num1} + {num2} is {result}";
+                    // return View();
+                    string res = $"Result of {num1} + {num2} is {result}";
+                    await context.Response.WriteAsync(res);
+                });
+            });
+            
+            
+            
+            
+            
         }
     }
 }

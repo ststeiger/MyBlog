@@ -12,6 +12,10 @@
     <ProjectReference Include="..\WikiPlex\WikiPlex.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.NodeServices" Version="3.1.5" />
+  </ItemGroup>
+
 
 
 </Project>
