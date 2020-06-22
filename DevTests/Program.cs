@@ -1,4 +1,5 @@
-﻿using Dapper;
+﻿
+using Dapper;
 
 
 namespace DevTests
@@ -12,8 +13,24 @@ namespace DevTests
     {
 
 
-        public static string WordScrambler(System.Text.RegularExpressions.Match match)
+        public static string LowerCaseReplacement(System.Text.RegularExpressions.Match match)
         {
+            // JS: 
+            // https://2ality.com/2017/05/regexp-named-capture-groups.html
+            // var r = a.replace(/Background\s*=\s*"(.*)"\s*,\s*/, function(v) { return v.toUpperCase(); });
+
+            // JS simple: 
+            // var a = 'Background = "Red", ';
+            // var r = a.replace(/Background\s*=\s*"(.*)"\s*,\s*/, "$1".toUpperCase());
+            // console.log(r);
+
+            // JS equal: 
+            // var a = 'Background = "Red", ';
+            // var pattern = new RegExp("(Background = \")(.*)(\",)", 'i');
+            // var r = a.replace(pattern, function(match, a1, a2, a3, offset, originalString) { return a1 + a2.toLowerCase() + a3; });
+            // console.log(r);
+
+
             // string a = match.Captures[0].Value;
 
             string a = match.Groups[1].Value
@@ -43,7 +60,7 @@ namespace DevTests
 
             string content = System.IO.File.ReadAllText(fileName, System.Text.Encoding.UTF8);
 
-            string newContent = System.Text.RegularExpressions.Regex.Replace(content, "(Background = \")(.*)(\",)", new System.Text.RegularExpressions.MatchEvaluator(WordScrambler));
+            string newContent = System.Text.RegularExpressions.Regex.Replace(content, "(Background = \")(.*)(\",)", new System.Text.RegularExpressions.MatchEvaluator(LowerCaseReplacement));
             System.Console.WriteLine(newContent);
         }
 
