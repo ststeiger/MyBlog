@@ -201,6 +201,8 @@ namespace DevTests
 
             string exportFilename = System.IO.Path.Combine(@"d:\", table_name + ".xml");
 
+            // System.Text.StringBuilder builder = new System.Text.StringBuilder();
+            // using (System.Xml.XmlWriter writer = System.Xml.XmlWriter.Create(builder, xs))
             using (System.Xml.XmlWriter writer = System.Xml.XmlWriter.Create(exportFilename, xs))
             {
                 writer.WriteStartDocument();
