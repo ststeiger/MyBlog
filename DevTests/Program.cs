@@ -280,7 +280,6 @@ namespace DevTests
         } // End Sub LargeDataToXML 
 
 
-
         public static void TestFactory()
         {
             System.Data.SqlClient.SqlConnectionStringBuilder csb = new System.Data.SqlClient.SqlConnectionStringBuilder();
@@ -301,78 +300,6 @@ namespace DevTests
             System.Console.WriteLine(count);
         }
 
-
-        // https://www.gaijin.at/en/infos/ascii-ansi-character-table#:~:text=Overview,the%20unchanged%20ASCII%20character%20set.
-
-        public static System.Text.Encoding GetSystemEncoding()
-        {
-            // The OEM code page for use by legacy console applications
-            // int oem = System.Globalization.CultureInfo.CurrentCulture.TextInfo.OEMCodePage;
-
-            // The ANSI code page for use by legacy GUI applications
-            // int ansi = System.Globalization.CultureInfo.InstalledUICulture.TextInfo.ANSICodePage; // Machine 
-            int ansi = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ANSICodePage; // User 
-
-            try
-            {
-                System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
-                System.Text.Encoding enc = System.Text.Encoding.GetEncoding(ansi);
-                return enc;
-            }
-            catch (System.Exception)
-            { }
-
-
-            try
-            {
-
-                foreach (System.Text.EncodingInfo ei in System.Text.Encoding.GetEncodings())
-                {
-                    System.Text.Encoding e = ei.GetEncoding();
-
-                    // 20'127 US-ASCII 
-                    if (e.WindowsCodePage == ansi && e.CodePage != 20127)
-                    {
-                        return e;
-                    }
-
-                }
-            }
-            catch (System.Exception)
-            { }
-
-            // return System.Text.Encoding.GetEncoding("iso-8859-1");
-            return System.Text.Encoding.UTF8;
-        }
-
-
-        public static void BrokenEncoding()
-        {
-            // https://stackoverflow.com/questions/700187/unicode-utf-ascii-ansi-format-differences
-
-            System.Text.Encoding enc = System.Text.Encoding.GetEncoding("iso-8859-1");
-            
-            string fileName = @"D:\username\Documents\Visual Studio 2017\GitLab\COR-Basic-V4\Portal\Portal_Share\0\VWS.Legend.Load.sql";
-
-            string content = System.IO.File.ReadAllText(fileName, System.Text.Encoding.UTF8);
-            
-            // Text encoded as iso
-            byte[] bca = enc.GetBytes(content);
-            // text wrongly decoded as utf8 
-            content = new System.Text.UTF8Encoding(false).GetString(bca);
-
-
-            // expected reversal 
-            // bca = new System.Text.UTF8Encoding(false).GetBytes(content);
-            // content = enc.GetString(bca);
-
-
-            // This happens on browser:
-            bca = enc.GetBytes(content);
-            content = new System.Text.UTF8Encoding(false).GetString(bca);
-
-            System.Console.WriteLine(content);
-        }
 
         public static string XmlBeautifier(string xml)
         {
