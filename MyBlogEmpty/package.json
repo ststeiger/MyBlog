@@ -3,7 +3,8 @@
   "name": "myblog",
   "private": true,
   "dependencies": {
-    "parsoid": "0.11.0"
+    "prfun": "2.1.5",
+    "parsoid-jsapi": "0.0.1"
   },
   "devDependencies": {}
 }

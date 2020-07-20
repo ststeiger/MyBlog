@@ -25,7 +25,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ColorCode.Core", "ColorCode
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ColorCodeNetStandard", "ColorCodeNetStandard\ColorCodeNetStandard.csproj", "{C5E92605-DC08-4531-9548-36E8B71C1481}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DB", "DB\DB.csproj", "{4DFFC45E-5FE3-4AE2-8D72-F0913D4605DD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DB", "DB\DB.csproj", "{4DFFC45E-5FE3-4AE2-8D72-F0913D4605DD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,67 +1,24 @@
 ﻿
-let parsoid = require('parsoid');
+var Parsoid = require('parsoid-jsapi');
 
 module.exports = function (callback, wikiText)
 {
-    // callback(null, '{ "abc":"def", "ghi":123}'); // error - object returned is not a json-object
-    // callback(null, { "abc": "def", "ghi": 1234 });
 
-    // callback(null, mediaWiki);
-
-
-    function dumpObject(obj, level, cache)
-    {
-        if(level == null)
-            level = 0;
-
-        if(cache == null)
-            cache = [];
-
-        let output ="";
-        for (let property in obj)
-        {
-            // console.log("prop:", property);
-
-            let value = obj[property];
-            let valueType = typeof(value);
-            let objType = typeof(obj);
-
-            // console.log("valuetype:", valueType);
-            if(obj != null && objType === "object" && obj.hasOwnProperty && obj.hasOwnProperty(property))
-            {
-
-                if(value != null && valueType === "object")
-                {
-
-                    if (cache.indexOf(value) !== -1)
-                        output += "  ".repeat(level) + property + ': ' + "[Circular],\n";
-                    else
-                    {
-                        cache.push(value);
-                        if(level > 1)
-                            output += "  ".repeat(level) + property + ': "[Object]"\n'
-                        else
-                            output += "  ".repeat(level) + property + ': {\n' + dumpObject(value, level+1, cache)
-                                + "  ".repeat(level) + "},\n";
-                    }
-
-                }
-                else if(valueType !== "function")
-                    output += "  ".repeat(level) + property + ': ' + obj[property] + ",\n";
-            }
-        } // End Function dumpObject
-        
-        return output;
-    }
 
 
     async function parseWiki(markup)
     {
         try 
         {
-            let data = await parsoid.parse(markup);
-            //console.log(data.out);
+            // var pdoc = await Parsoid.parse(markup, { pdoc: true });
+            // callback(null, pdoc.document.outerHTML);
+
+            var data = await Parsoid.parse(markup);
             callback(null, data.out);
+
+            // let data = await parsoid.parse(markup);
+            //console.log(data.out);
+            // callback(null, data.out);
 
             // data.out = null;
             // data.env.page.src = null;

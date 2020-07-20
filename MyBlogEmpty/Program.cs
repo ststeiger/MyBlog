@@ -16,6 +16,11 @@ namespace MyBlogEmpty
             CreateHostBuilder(args).Build().Run();
         }
 
+
+        // https://github.com/wikimedia/parsoid-jsapi/blob/master/index.js
+        // https://github.com/wikimedia/parsoid-jsapi/blob/master/jsapi.js
+        // https://www.mediawiki.org/wiki/Parsoid
+
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>

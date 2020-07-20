@@ -3,7 +3,8 @@
   "name": "myblog",
   "private": true,
   "dependencies": {
-    "parsoid": "0.11.0"
+    "parsoid": "0.11.0",
+    "jsdom": "16.3.0"
   },
   "devDependencies": {}
 }

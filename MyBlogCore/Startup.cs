@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -45,6 +46,7 @@ namespace MyBlogCore
 
             app.UseRouting();
 
+            /*
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
@@ -53,6 +55,41 @@ namespace MyBlogCore
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
             });
+            */
+
+            // https://www.c-sharpcorner.com/article/nodeservices-where-javascript-and-net-meet-back-on-the-other-side/
+            Microsoft.AspNetCore.NodeServices.INodeServices nodeServices = app.ApplicationServices.GetService<Microsoft.AspNetCore.NodeServices.INodeServices>();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapGet("/", async context =>
+                {
+                    int num1 = 10;
+                    int num2 = 20;
+                    // num2 = 0;
+
+
+                    object result = "";
+                    try
+                    {
+                        // result = await nodeServices.InvokeAsync<int>("NodeScripts/test_module.js", num1, num2);
+                        // result = await nodeServices.InvokeExportAsync<int>("NodeScripts/test_module.js", "add", num1, num2);
+                        // result = await nodeServices.InvokeExportAsync<double>("NodeScripts/test_module.js", "divide", num1, num2);
+                        result = await nodeServices.InvokeAsync<string>("NodeScripts/parsee.js", "Hello world");
+                    }
+                    catch (System.Exception ex)
+                    {
+                        result = ex.Message;
+                    }
+
+                    string res = $"Result of {num1} op {num2} is {result}";
+                    await context.Response.WriteAsync(res);
+                });
+            });
+
+
+
+
         }
     }
 }
