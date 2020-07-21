@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -13,11 +14,14 @@ namespace MyBlogEmpty
 
     public class Startup
     {
-
+        
+        public IConfiguration Configuration { get; }
         private IHostEnvironment CurrentEnvironment { get; set; }
 
+       
         public Startup(Microsoft.Extensions.Configuration.IConfiguration configuration, Microsoft.Extensions.Hosting.IHostEnvironment env)
         {
+            Configuration = configuration;
             this.CurrentEnvironment = env;
         } // End Constructor 
 
@@ -102,8 +106,8 @@ namespace MyBlogEmpty
             });
 
         } // End Sub Configure 
-
-
+        
+        
     } // End Class Startup 
 
 

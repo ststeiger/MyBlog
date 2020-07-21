@@ -43,7 +43,7 @@ function convertWikiToHtml(input, options, optCb)
 			loadWMF: true,
 		}, options.parsoidOptions || {}),
 		envOptions: Object.assign({
-			domain: argv.domain || 'en.wikipedia.org',
+			domain: argv.domain || 'localhost:5000', // 'en.wikipedia.org', //  
 			pageName: argv.pageName,
 			wrapSections: true,
 		}, options.envOptions || {}),
@@ -103,7 +103,7 @@ async function debugParseWiki(markup)
 }
 
 // node ./parsee.js
-// debugParseWiki("hello world");
+debugParseWiki("hello world");
 
 
 module.exports = function (callback, wikiText)
