@@ -1,23 +1,22 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
+
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.NodeServices.HostingModels;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
+
 namespace MyBlogCore
 {
+
+
     public class Startup
     {
+
         public IConfiguration Configuration { get; }
         private IHostEnvironment CurrentEnvironment { get; set; }
 
@@ -37,6 +36,8 @@ namespace MyBlogCore
             object path = dict["PATH"];
             dict["PATH"] = System.Convert.ToString(path) + ":/root/.nvm/versions/node/v14.3.0/bin";
 
+            // Microsoft.AspNetCore.SpaServices 
+            // Microsoft.AspNetCore.SpaServices.Extensions
 
             NodeServicesServiceCollectionExtensions.AddNodeServices(services,
                 delegate(Microsoft.AspNetCore.NodeServices.NodeServicesOptions options)
@@ -50,6 +51,7 @@ namespace MyBlogCore
             // NodeServicesServiceCollectionExtensions.AddNodeServices(services, options => options.EnvironmentVariables);
             services.AddControllersWithViews();
         }
+
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -96,9 +98,12 @@ namespace MyBlogCore
                     // https://michelenasti.com/2018/10/02/let-s-write-a-simple-version-of-the-require-function.html
                     try
                     {
+                        // string jsonPath = System.IO.Path.Combine(CurrentEnvironment.ContentRootPath, "json", "wiki.json");
+                        string jsonPath = System.IO.Path.Combine(CurrentEnvironment.ContentRootPath, "wwwroot", "json", "wiki.json");
+
 #if true
                         string answer =
-                            System.IO.File.ReadAllText("/root/Desktop/wiki.json", System.Text.Encoding.UTF8);
+                            System.IO.File.ReadAllText(jsonPath, System.Text.Encoding.UTF8);
                         context.Response.StatusCode = 200;
                         context.Response.ContentType = "application/json";
                         await context.Response.WriteAsync(answer);
@@ -126,7 +131,7 @@ namespace MyBlogCore
                         }
 #endif
                     }
-                    catch (Exception e)
+                    catch (System.Exception e)
                     {
                         context.Response.StatusCode = 500;
                         System.Console.WriteLine(e);
@@ -157,7 +162,12 @@ namespace MyBlogCore
                     string res = $"Result of {num1} op {num2} is {result}";
                     await context.Response.WriteAsync(res);
                 });
-            });
-        }
-    }
-}
+            }); // End UseEndpoints 
+
+        } // End Sub Configure 
+
+
+    } // End Class Startup 
+
+
+} // End Namespace MyBlogCore 
