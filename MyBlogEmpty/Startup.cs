@@ -18,7 +18,8 @@ namespace MyBlogEmpty
         public IConfiguration Configuration { get; }
         private IHostEnvironment CurrentEnvironment { get; set; }
 
-       
+
+
         public Startup(Microsoft.Extensions.Configuration.IConfiguration configuration, Microsoft.Extensions.Hosting.IHostEnvironment env)
         {
             Configuration = configuration;
@@ -41,6 +42,33 @@ namespace MyBlogEmpty
             //     // options.ProjectPath = System.AppContext.BaseDirectory;
             //     options.ProjectPath = this.CurrentEnvironment.ContentRootPath;
             // });
+
+            /*
+            services.AddAuthentication(Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(opt =>
+            {
+                System.ReadOnlySpan<byte> publicKey = null; // tokenSettings.PublicKey.ToByteArray();
+
+                // removing "using" makes it work
+                using (System.Security.Cryptography.RSA rsa = System.Security.Cryptography.RSA.Create())
+                {
+                    rsa.ImportSubjectPublicKeyInfo(publicKey, out _);
+                    Microsoft.IdentityModel.Tokens.RsaSecurityKey key = new Microsoft.IdentityModel.Tokens.RsaSecurityKey(rsa);
+
+                    opt.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                    {
+                        IssuerSigningKey = key,
+                        ValidAudience = "tokenSettings.TargetAud",
+                        ValidIssuers = new[] { "tokenSettings.Issuer" },
+                        RequireSignedTokens = true,
+                        RequireExpirationTime = true,
+                        ValidateLifetime = true,
+                        ValidateAudience = true,
+                        ValidateIssuer = true,
+                        ClockSkew = System.TimeSpan.Zero,
+                    };
+                }
+            });
+            */
 
 
             NodeServicesServiceCollectionExtensions.AddNodeServices(services,
