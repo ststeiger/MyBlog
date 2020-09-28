@@ -6,7 +6,7 @@ var HEX_CRAD = 32, HEX_BG = '#171717', HEX_HL = '#2a2a2a', HEX_HLW = 2, HEX_GAP 
     '#ff99cb', '#fe349a',
     '#cc99fe', '#6599ff',
     '#00ccff', '#ffffff'
-], T_SWITCH = 64, unit_x = 3 * HEX_CRAD + HEX_GAP * Math.sqrt(3), unit_y = HEX_CRAD * Math.sqrt(3) * .5 + .5 * HEX_GAP, off_x = 1.5 * HEX_CRAD + HEX_GAP * Math.sqrt(3) * .5, wp = NEON_PALETE.map(function (c) {
+], T_SWITCH = 64, unit_x = 3 * HEX_CRAD + HEX_GAP * Math.sqrt(3), unit_y = HEX_CRAD * Math.sqrt(3) * 0.5 + 0.5 * HEX_GAP, off_x = 1.5 * HEX_CRAD + HEX_GAP * Math.sqrt(3) * 0.5, wp = NEON_PALETE.map(function (c) {
     var num = parseInt(c.replace('#', ''), 16);
     return {
         'r': num >> 16 & 0xFF,
@@ -22,7 +22,7 @@ var GridItem = (function () {
         this.init();
     }
     GridItem.prototype.init = function () {
-        var x, y, a, ba = Math.PI / 3, ri = HEX_CRAD - .5 * HEX_HLW;
+        var x, y, a, ba = Math.PI / 3, ri = HEX_CRAD - 0.5 * HEX_HLW;
         for (var i = 0; i < 6; i++) {
             a = i * ba;
             x = this.x + HEX_CRAD * Math.cos(a);

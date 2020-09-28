@@ -38,8 +38,8 @@ let HEX_CRAD = 32,
     T_SWITCH = 64,
 
     unit_x = 3 * HEX_CRAD + HEX_GAP * Math.sqrt(3),
-    unit_y = HEX_CRAD * Math.sqrt(3) * .5 + .5 * HEX_GAP,
-    off_x = 1.5 * HEX_CRAD + HEX_GAP * Math.sqrt(3) * .5,
+    unit_y = HEX_CRAD * Math.sqrt(3) * 0.5 + 0.5 * HEX_GAP,
+    off_x = 1.5 * HEX_CRAD + HEX_GAP * Math.sqrt(3) * 0.5,
 
     // extract a work palette
     wp = NEON_PALETE.map(function (c)
@@ -86,7 +86,7 @@ class GridItem
     public init()
     {
         let x, y, a, ba = Math.PI / 3,
-            ri = HEX_CRAD - .5 * HEX_HLW;
+            ri = HEX_CRAD - 0.5 * HEX_HLW;
 
         for (let i = 0; i < 6; i++)
         {
@@ -211,6 +211,9 @@ function init()
 {
     let s = getComputedStyle(c[0]),
         rows, cols;
+
+    // That ~~is a double NOT bitwise operator.
+    // It is used as a faster substitute for Math.floor().
 
     w = ~~s.width.split('px')[0];
     h = ~~s.height.split('px')[0];
