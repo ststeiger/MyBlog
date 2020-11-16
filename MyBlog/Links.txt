@@ -86,3 +86,29 @@ https://mk0thebloggingboyrgo.kinstacdn.com/wp-content/uploads/2017/02/PerfectBlo
 
 
 https://www.magnet4blogging.net/disqus-vs-wordpress-comment
+
+
+https://www.hobo-web.co.uk/your-website-design-should-load-in-4-seconds/
+
+
+https://www.jeremymorgan.com/blog/linux/blazor-in-linux/
+
+
+https://www.jeremymorgan.com/blog/id/linux/blazor-in-linux/24.10.2020
+https://www.jeremymorgan.com/blog/id/linux/blazor-in-linux/
+https://www.jeremymorgan.com/blog/id/asp.net,linux,C#/blazor-in-linux
+
+
+optimal format:
+https://moz.com/learn/seo/url
+http://www.example.com/category-keyword/subcategory-keyword/primary-keyword.html
+
+http://blog.example.com/linux/asp.net/blazor
+
+http://blog.example.com/2020-12-31-a7/linux/asp.net/blazor
+One reason to remove your date out of your blog post URL is that people don't share old content. 
+Knowing that a blog post is dated may deter them from sharing your content online. 
+A lot of WordPress themes don't even come with a date on their blog posts anymore.
+
+https://moz.com/learn/seo/url
+https://www.elyssamcgregor.com/remove-date-from-blog-post-url/#:~:text=People%20don't%20share%20old,on%20their%20blog%20posts%20anymore.
