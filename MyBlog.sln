@@ -27,7 +27,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ColorCodeNetStandard", "Col
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DB", "DB\DB.csproj", "{4DFFC45E-5FE3-4AE2-8D72-F0913D4605DD}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "_DB", "_DB\_DB.shproj", "{B91CA08A-4922-44B6-837E-BB88BD4E2B85}"
+EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		_DB\_DB.projitems*{b91ca08a-4922-44b6-837e-bb88bd4e2b85}*SharedItemsImports = 13
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
