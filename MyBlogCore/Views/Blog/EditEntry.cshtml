@@ -1,0 +1,29 @@
+﻿@model MyBlogCore.Controllers.BlogController.T_BlogPost
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>NewEntry</title>
+</head>
+<body>
+
+    <form name="bla" method="post" action="@Url.Action("UpdateEntry", "Blog")">
+        <input name="hdnBP_UID" type="hidden" value="@Model.BP_UID" />
+
+        <span>Blog entry dated @Model.BP_EntryDate</span>
+
+        <div style="clear: both;">&nbsp;</div>
+        <input type="text" id="txtTitle" name="txtTitle" value="@Model.BP_Title" placeholder="Title" style="width: 90%;" />
+        <div style="clear: both; height: 10px;">&nbsp;</div>
+        
+        <textarea id="taBody" name="taBody" rows="1" cols="1" style="width: 90%; height: 300px;" placeholder="content">@Model.BP_Content</textarea>
+        
+        <div style="clear: both; height: 10px;">&nbsp;</div>
+        <input type="submit" value="Submit" />
+    </form>
+</body>
+</html>

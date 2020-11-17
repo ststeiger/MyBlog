@@ -1,0 +1,16 @@
+﻿
+@model MyBlog.Controllers.BlogController.T_BlogPost
+
+
+@{
+    Layout = null;
+}
+
+
+    
+    <div>
+        <h3>@Model.BP_Title  <a href="@Url.Action("EditEntry", "Blog")/@Model.BP_UID" style="margin-left: 1cm; font-size: 13px;">[&nbsp;Edit&nbsp;]</a> </h3> 
+        @Html.Raw(Model.BP_HtmlContent)
+    </div>
+
+    <hr />
