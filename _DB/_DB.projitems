@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>b91ca08a-4922-44b6-837e-bb88bd4e2b85</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>_DB</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)MS\Views\V_Navigation.sql" />
+    <None Include="$(MSBuildThisFileDirectory)PG\Domains\MS_Types.sql" />
+    <None Include="$(MSBuildThisFileDirectory)PG\Domains\_TODO.sql" />
+    <None Include="$(MSBuildThisFileDirectory)MS\Tables\T_Navigation.sql" />
+    <None Include="$(MSBuildThisFileDirectory)MS\Tables\T_BlogPost.sql" />
+    <None Include="$(MSBuildThisFileDirectory)MS\Queries\Query_BlogPosts.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)MS\Tables\" />
+    <Folder Include="$(MSBuildThisFileDirectory)MS\Views\" />
+    <Folder Include="$(MSBuildThisFileDirectory)MS\Queries\" />
+    <Folder Include="$(MSBuildThisFileDirectory)MS\" />
+  </ItemGroup>
+</Project>
