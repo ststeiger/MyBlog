@@ -98,6 +98,8 @@ https://www.jeremymorgan.com/blog/id/linux/blazor-in-linux/24.10.2020
 https://www.jeremymorgan.com/blog/id/linux/blazor-in-linux/
 https://www.jeremymorgan.com/blog/id/asp.net,linux,C#/blazor-in-linux
 
+https://jonlennartaasenden.wordpress.com/2020/03/08/delphi-dying-think-again-tiobe/
+
 
 optimal format:
 https://moz.com/learn/seo/url

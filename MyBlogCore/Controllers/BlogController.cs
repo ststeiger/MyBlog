@@ -1,15 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+
 using System.Linq;
 using System.Threading.Tasks;
+using System.Diagnostics;
+using Microsoft.Extensions.Logging;
 
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
+// using System.Web.Mvc;
 
 
 // meinerettung.ch/felix
@@ -19,9 +18,17 @@ namespace MyBlogCore.Controllers
 
     public class BlogController : Controller
     {
+        
+        
+        
         public IActionResult IndexABC()
         {
-            return View();
+            // return View();
+            int num1, num2, result;
+            num1 = 1;
+            num2 = 2; 
+            result = 3;
+            return Content($"Result of {num1} + {num2} is {result}", "text/plain");
         }
 
         public class cSearchResult
@@ -112,7 +119,8 @@ AND
 
             SearchResult.searchResults = ls;
 
-            return Json(SearchResult, JsonRequestBehavior.AllowGet);
+            // return Json(SearchResult, JsonRequestBehavior.AllowGet);
+            return Json(SearchResult, new Newtonsoft.Json.JsonSerializerSettings());
         } // End Action Search
 
         // Content(strHTML, "text/html");
@@ -147,6 +155,7 @@ AND
 
         public ActionResult UploadFiles()
         {
+            /*
             lock (objlock)
             {
                 iCount++;
@@ -170,7 +179,9 @@ AND
                 Console.WriteLine(iCount);
                 return Content(Request.Params["index"]);
             } // End lock (objlock)
+            */
 
+            return null;
         } // End Action UploadFiles 
 
 
@@ -250,22 +261,27 @@ ORDER BY BP_EntryDate DESC
         //
         // POST: /Blog/Create
         [HttpPost]
-        public ActionResult AddEntry(FormCollection collection)
+        public ActionResult AddEntry()
         {
             try
             {
                 // TODO: Add insert logic here
                 T_BlogPost bp = new T_BlogPost();
 
-                bp.BP_Title = Request.Params["txtTitle"];
-                bp.BP_Content = Request.Params["taBody"];
+                // bp.BP_Title = Request.Params["txtTitle"];
+                // bp.BP_Content = Request.Params["taBody"];
 
-                Settings.DAL.Insert<T_BlogPost>(bp);
+                bp.BP_Title ="";
+                bp.BP_Title ="";
+
+                // Settings.DAL.Insert<T_BlogPost>(bp);
                 return RedirectToAction("Success");
             }
-            catch
+            catch(System.Exception ex)
             {
-                return View();
+                // return View();
+                return Json(new { success = false, responseText = ex.Message, stackTrace = ex.StackTrace });
+                
             }
         } // End Action AddEntry
 
@@ -273,7 +289,7 @@ ORDER BY BP_EntryDate DESC
         //
         // POST: /Blog/Create
         [HttpPost]
-        public ActionResult UpdateEntry(FormCollection collection)
+        public ActionResult UpdateEntry()
         {
             try
             {
@@ -286,12 +302,14 @@ ORDER BY BP_EntryDate DESC
                 bp.BP_Title = Request.Params["txtTitle"];
                 bp.BP_Content = Request.Params["taBody"];
 
-                Settings.DAL.Insert<T_BlogPost>(bp);
+                // Settings.DAL.Insert<T_BlogPost>(bp);
                 return RedirectToAction("Success");
             }
             catch
             {
-                return View();
+                // return View();
+                int num1, num2, result;
+                return Content($"Result of {num1} + {num2} is {result}", "text/plain");
             }
         } // End Action AddEntry
 
