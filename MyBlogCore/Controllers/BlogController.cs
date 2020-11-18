@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 
 // using System.Web.Mvc;
@@ -16,18 +17,72 @@ namespace MyBlogCore.Controllers
 {
 
 
+    public class MyDal
+    {
+
+
+        public System.Data.IDbCommand CreateCommand(string sql)
+        {
+            return null;
+        }
+
+
+        public System.Data.IDbCommand CreateCommand()
+        {
+            return null;
+        }
+
+        public virtual System.Data.IDbCommand CreateLimitedCommand(string strSQL, int iLimit)
+        {
+            strSQL = string.Format(strSQL, "", "LIMIT " + iLimit.ToString());
+            return CreateCommand(strSQL);
+        }
+
+        public System.Data.IDbDataParameter AddParameter(System.Data.IDbCommand command, string strParameterName, object objValue)
+        {
+            return null; // AddParameter(command, strParameterName, objValue, System.Data.ParameterDirection.Input);
+        } // End Function AddParameter
+
+        public virtual T GetClass<T>(System.Data.IDbCommand cmd)
+        {
+            T tThisClassInstance = System.Activator.CreateInstance<T>();
+            return tThisClassInstance; // GetClass<T>(cmd, tThisClassInstance);
+        }
+
+
+        public virtual T ExecuteScalar<T>(System.Data.IDbCommand cmd)
+        {
+            T tThisClassInstance = System.Activator.CreateInstance<T>();
+            return tThisClassInstance; 
+        }
+
+        public System.Collections.Generic.List<T> GetList<T>(System.Data.IDbCommand cmd)
+        {
+            return null;
+        }
+
+
+        public  void Insert<T>(object objInsertValue)
+        {
+        } // End Sub Insert
+
+
+    }
+
+
+
     public class BlogController : Controller
     {
-        
-        
-        
+
+        protected MyDal m_dal;
+
+
         public IActionResult IndexABC()
         {
             // return View();
-            int num1, num2, result;
-            num1 = 1;
-            num2 = 2; 
-            result = 3;
+            int num1 = 1;
+            int num2 = 2;
+            int result = 3;
             return Content($"Result of {num1} + {num2} is {result}", "text/plain");
         }
 
@@ -94,7 +149,7 @@ namespace MyBlogCore.Controllers
             cSearchResult SearchResult = new cSearchResult(q);
 
             System.Collections.Generic.List<T_BlogPost> ls;
-            using (System.Data.IDbCommand cmd = Settings.DAL.CreateCommand(@"
+            using (System.Data.IDbCommand cmd = this.m_dal.CreateCommand(@"
 SELECT 
 	 BP_UID
     ,BP_Title
@@ -113,8 +168,8 @@ AND
 )
 "))
             {
-                Settings.DAL.AddParameter(cmd, "@searchtext", "%" + LikeEscape(q) + "%");
-                ls = Settings.DAL.GetList<T_BlogPost>(cmd);
+                this.m_dal.AddParameter(cmd, "@searchtext", "%" + LikeEscape(q) + "%");
+                ls = this.m_dal.GetList<T_BlogPost>(cmd);
             } // End Using cmd 
 
             SearchResult.searchResults = ls;
@@ -144,7 +199,7 @@ AND
                 strHTML = strHTML.Replace("\n", "<br />");
 
                 bp.BP_HtmlContent = strHTML;
-                Settings.DAL.Insert<T_BlogPost>(bp);
+                this.m_dal.Insert<T_BlogPost>(bp);
             } // Next bpThisPost 
 
         } // End Sub UpdateBlogStructure 
@@ -196,7 +251,7 @@ AND
             q = System.Uri.UnescapeDataString(q);
             // string strHTML = RenderUtils.RenderMarkdown (q);
             // string strHTML = RenderUtils.RenderBbCode(q);
-            string strHTML = RenderUtils.RenderMediaWikiMarkup(q);
+            string strHTML = MyBlog.RenderUtils.RenderMediaWikiMarkup(q);
 
             return Content(strHTML, "text/html", System.Text.Encoding.UTF8);
         } // End Action Upload
@@ -207,9 +262,9 @@ AND
         public ActionResult Index()
         {
             BlogIndex bi = new BlogIndex();
-            // bi.lsBlogEntries = Settings.DAL.GetList<T_BlogPost>(@"");
+            // bi.lsBlogEntries = this.m_dal.GetList<T_BlogPost>(@"");
 
-            using (System.Data.IDbCommand cmd = Settings.DAL.CreateLimitedCommand(@"
+            using (System.Data.IDbCommand cmd = this.m_dal.CreateLimitedCommand(@"
 SELECT {0} 
 	 T_BlogPost.*
 	,row_number() OVER (ORDER BY BP_EntryDate DESC) AS rownum 
@@ -217,7 +272,7 @@ FROM T_BlogPost
 ORDER BY BP_EntryDate DESC
 ", 100))
             {
-                bi.lsBlogEntries = Settings.DAL.GetList<T_BlogPost>(cmd);
+                bi.lsBlogEntries = this.m_dal.GetList<T_BlogPost>(cmd);
             }
 
 
@@ -261,20 +316,17 @@ ORDER BY BP_EntryDate DESC
         //
         // POST: /Blog/Create
         [HttpPost]
-        public ActionResult AddEntry()
+        public ActionResult AddEntry(string txtTitle, string taBody)
         {
             try
             {
                 // TODO: Add insert logic here
                 T_BlogPost bp = new T_BlogPost();
 
-                // bp.BP_Title = Request.Params["txtTitle"];
-                // bp.BP_Content = Request.Params["taBody"];
+                bp.BP_Title = txtTitle; // Request.Params["txtTitle"];
+                bp.BP_Title = taBody; // Request.Params["taBody"];
 
-                bp.BP_Title ="";
-                bp.BP_Title ="";
-
-                // Settings.DAL.Insert<T_BlogPost>(bp);
+                // this.m_dal.Insert<T_BlogPost>(bp);
                 return RedirectToAction("Success");
             }
             catch(System.Exception ex)
@@ -289,7 +341,7 @@ ORDER BY BP_EntryDate DESC
         //
         // POST: /Blog/Create
         [HttpPost]
-        public ActionResult UpdateEntry()
+        public ActionResult UpdateEntry(string hdnBP_UID, string txtTitle, string taBody)
         {
             try
             {
@@ -297,18 +349,20 @@ ORDER BY BP_EntryDate DESC
                 T_BlogPost bp = new T_BlogPost();
 
                 //bp.BP_UID = (Guid) System.Convert.ChangeType(Request.Params["hdnBP_UID"], typeof(Guid));
-                bp.BP_UID = new Guid(Request.Params["hdnBP_UID"]);
+                bp.BP_UID = new System.Guid(hdnBP_UID);
 
-                bp.BP_Title = Request.Params["txtTitle"];
-                bp.BP_Content = Request.Params["taBody"];
+                bp.BP_Title = txtTitle; // Request.Params["txtTitle"];
+                bp.BP_Content = taBody; // Request.Params["taBody"];
 
-                // Settings.DAL.Insert<T_BlogPost>(bp);
+                // this.m_dal.Insert<T_BlogPost>(bp);
                 return RedirectToAction("Success");
             }
             catch
             {
                 // return View();
-                int num1, num2, result;
+                int num1 = 1;
+                int num2 = 2;
+                int result = 3;
                 return Content($"Result of {num1} + {num2} is {result}", "text/plain");
             }
         } // End Action AddEntry
@@ -386,16 +440,16 @@ ORDER BY BP_EntryDate DESC
             Console.WriteLine(lol);
 
 
-            using (System.Data.IDbCommand cmd = Settings.DAL.CreateLimitedCommand("SELECT {0} BP_UID FROM T_BlogPost ORDER BY BP_EntryDate DESC;", 1))
+            using (System.Data.IDbCommand cmd = this.m_dal.CreateLimitedCommand("SELECT {0} BP_UID FROM T_BlogPost ORDER BY BP_EntryDate DESC;", 1))
             {
-                id = Settings.DAL.ExecuteScalar<string>(cmd);
+                id = this.m_dal.ExecuteScalar<string>(cmd);
             } // End Using cmd 
 
 
-            using (System.Data.IDbCommand cmd = Settings.DAL.CreateCommand("SELECT * FROM T_BlogPost WHERE BP_UID = @__bp_uid"))
+            using (System.Data.IDbCommand cmd = this.m_dal.CreateCommand("SELECT * FROM T_BlogPost WHERE BP_UID = @__bp_uid"))
             {
-                Settings.DAL.AddParameter(cmd, "__bp_uid", new System.Guid(id));
-                bp = Settings.DAL.GetClass<T_BlogPost>(cmd);
+                this.m_dal.AddParameter(cmd, "__bp_uid", new System.Guid(id));
+                bp = this.m_dal.GetClass<T_BlogPost>(cmd);
             } // End Using cmd
 
             bp.BP_Content = ReplaceURLs(bp.BP_Content);
@@ -449,15 +503,15 @@ ORDER BY BP_EntryDate DESC
         {
             T_BlogPost bp = null;
 
-            using (System.Data.IDbCommand cmd = Settings.DAL.CreateLimitedCommand("SELECT {0} BP_UID FROM T_BlogPost ORDER BY BP_EntryDate DESC;", 1))
+            using (System.Data.IDbCommand cmd = this.m_dal.CreateLimitedCommand("SELECT {0} BP_UID FROM T_BlogPost ORDER BY BP_EntryDate DESC;", 1))
             {
-                id = Settings.DAL.ExecuteScalar<string>(cmd);
+                id = this.m_dal.ExecuteScalar<string>(cmd);
             } // End Using cmd 
 
-            using (System.Data.IDbCommand cmd = Settings.DAL.CreateCommand("SELECT * FROM T_BlogPost WHERE BP_UID = @__bp_uid"))
+            using (System.Data.IDbCommand cmd = this.m_dal.CreateCommand("SELECT * FROM T_BlogPost WHERE BP_UID = @__bp_uid"))
             {
-                Settings.DAL.AddParameter(cmd, "__bp_uid", new System.Guid(id));
-                bp = Settings.DAL.GetClass<T_BlogPost>(cmd);
+                this.m_dal.AddParameter(cmd, "__bp_uid", new System.Guid(id));
+                bp = this.m_dal.GetClass<T_BlogPost>(cmd);
             } // End Using cmd
 
             return View(bp);
