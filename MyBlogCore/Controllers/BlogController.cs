@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿
+using Dapper;
+
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 
@@ -19,8 +22,8 @@ namespace MyBlogCore.Controllers
     
     public class BlogController : Controller
     {
-
-        protected MyDal m_dal;
+        protected SqlFactory m_fac = new SqlClientFactory();
+        // protected MyDal m_dal;
 
 
         public IActionResult IndexABC()
@@ -136,17 +139,24 @@ AND
         public void UpdateBlogStructure(IList<T_BlogPost> lsBlogEntries)
         {
             T_BlogPost bp;
-            foreach (T_BlogPost bpThisPost in lsBlogEntries)
+
+            using (System.Data.Common.DbConnection con = this.m_fac.Connection)
             {
-                bp = bpThisPost;
-                string strHTML = ReplaceURLs(bp.BP_Content);
 
-                strHTML = strHTML.Replace("\r\n", "\n");
-                strHTML = strHTML.Replace("\n", "<br />");
+                foreach (T_BlogPost bpThisPost in lsBlogEntries)
+                {
+                    bp = bpThisPost;
+                    string strHTML = ReplaceURLs(bp.BP_Content);
 
-                bp.BP_HtmlContent = strHTML;
-                this.m_dal.Insert<T_BlogPost>(bp);
-            } // Next bpThisPost 
+                    strHTML = strHTML.Replace("\r\n", "\n");
+                    strHTML = strHTML.Replace("\n", "<br />");
+
+                    bp.BP_HtmlContent = strHTML;
+
+                    con.Insert<T_BlogPost>(bp);
+                } // next bpThisPost 
+
+            } // End Using con 
 
         } // End Sub UpdateBlogStructure 
 
@@ -209,18 +219,18 @@ AND
         {
             BlogIndex bi = new BlogIndex();
             // bi.lsBlogEntries = this.m_dal.GetList<T_BlogPost>(@"");
-
-            using (System.Data.IDbCommand cmd = this.m_dal.CreateLimitedCommand(@"
+            string sql = @"
 SELECT {0} 
 	 T_BlogPost.*
-	,row_number() OVER (ORDER BY BP_EntryDate DESC) AS rownum 
+	,ROW_NUMBER() OVER (ORDER BY BP_EntryDate DESC) AS rownum 
 FROM T_BlogPost 
 ORDER BY BP_EntryDate DESC
-", 100))
-            {
-                bi.lsBlogEntries = this.m_dal.GetList<T_BlogPost>(cmd);
-            }
+" + this.m_fac.PagingTemplate(100); 
 
+            using (System.Data.Common.DbConnection con = this.m_fac.Connection)
+            {
+                bi.lsBlogEntries = con.Query<BlogController.T_BlogPost>(sql).ToList();
+            }
 
             // UpdateBlogStructure(bi.lsBlogEntries);
 
@@ -381,22 +391,22 @@ ORDER BY BP_EntryDate DESC
             string lol = "http://localhost/image.aspx?&postimage_text=%0A%5Burl%3Dhttp%3A%2F%2Fpostimg.org%2Fimage%2Fu0zc6aznf%2F%5D%5Bimg%5Dhttp%3A%2F%2Fs1.postimg.org%2Fu0zc6aznf%2Fhtc_hero_wallpaper_03.jpg%5B%2Fimg%5D%5B%2Furl%5D%0A";
             //"http://localhost/image.aspx?&postimage_text=[url=http://postimg.org/image/u0zc6aznf/][img]http://s1.postimg.org/u0zc6aznf/htc_hero_wallpaper_03.jpg[/img][/url]
 
-
             lol = System.Web.HttpUtility.UrlDecode(lol);
             Console.WriteLine(lol);
 
+            string sql = "SELECT BP_UID FROM T_BlogPost ORDER BY BP_EntryDate DESC;"+ this.m_fac.PagingTemplate(1);
 
-            using (System.Data.IDbCommand cmd = this.m_dal.CreateLimitedCommand("SELECT {0} BP_UID FROM T_BlogPost ORDER BY BP_EntryDate DESC;", 1))
+            using (System.Data.Common.DbConnection con = this.m_fac.Connection)
             {
-                id = this.m_dal.ExecuteScalar<string>(cmd);
-            } // End Using cmd 
+                id = con.QuerySingle<string>(sql);
+            }
 
+            sql = "SELECT * FROM T_BlogPost WHERE BP_UID = @__bp_uid";
 
-            using (System.Data.IDbCommand cmd = this.m_dal.CreateCommand("SELECT * FROM T_BlogPost WHERE BP_UID = @__bp_uid"))
+            using (System.Data.Common.DbConnection con = this.m_fac.Connection)
             {
-                this.m_dal.AddParameter(cmd, "__bp_uid", new System.Guid(id));
-                bp = this.m_dal.GetClass<T_BlogPost>(cmd);
-            } // End Using cmd
+                bp = con.QuerySingle<T_BlogPost>(sql,new { __bp_uid = new System.Guid(id) });
+            }
 
             bp.BP_Content = ReplaceURLs(bp.BP_Content);
 
@@ -448,17 +458,19 @@ ORDER BY BP_EntryDate DESC
         public ActionResult EditEntry(string id)
         {
             T_BlogPost bp = null;
-
-            using (System.Data.IDbCommand cmd = this.m_dal.CreateLimitedCommand("SELECT {0} BP_UID FROM T_BlogPost ORDER BY BP_EntryDate DESC;", 1))
+            // string sql = "SELECT {0} BP_UID 
+            string sql = "SELECT {0} BP_UID FROM T_BlogPost ORDER BY BP_EntryDate DESC;" + this.m_fac.PagingTemplate(1);
+            using (System.Data.Common.DbConnection con = this.m_fac.Connection)
             {
-                id = this.m_dal.ExecuteScalar<string>(cmd);
-            } // End Using cmd 
+                id  = con.QuerySingle<string>(sql);
+            }
 
-            using (System.Data.IDbCommand cmd = this.m_dal.CreateCommand("SELECT * FROM T_BlogPost WHERE BP_UID = @__bp_uid"))
+            sql = "SELECT * FROM T_BlogPost WHERE BP_UID = @__bp_uid";
+
+            using (System.Data.Common.DbConnection con = this.m_fac.Connection)
             {
-                this.m_dal.AddParameter(cmd, "__bp_uid", new System.Guid(id));
-                bp = this.m_dal.GetClass<T_BlogPost>(cmd);
-            } // End Using cmd
+                bp = con.QuerySingle<T_BlogPost>(sql, new { __bp_uid = new System.Guid(id) });
+            }
 
             return View(bp);
         } // End Action EditEntry 

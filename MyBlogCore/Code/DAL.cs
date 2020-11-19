@@ -8,35 +8,55 @@ namespace MyBlogCore
 {
     
     
-    public abstract class BaseFactory
+    public abstract class SqlFactory// BaseFactory
     {
         
         protected System.Data.Common.DbProviderFactory Factory;
-        
-        
-        public virtual string PagingTemplate(ulong offset, ulong rows)
-        {
-            return @"OFFSET "+ offset.ToString(System.Globalization.CultureInfo.InvariantCulture) + @" ROWS 
-FETCH NEXT " + rows.ToString(System.Globalization.CultureInfo.InvariantCulture) + " ROWS ONLY ";    
-        }
-        
-        
-        public string CS
-        {
-            get { return ""; }
-        }
-        
-        
-        protected BaseFactory(System.Data.Common.DbProviderFactory fac)
+
+        public abstract string ConnectionString { get; }
+
+
+        protected SqlFactory(System.Data.Common.DbProviderFactory fac)
         {
             this.Factory = fac;
         }
-        
+
+
+        public virtual System.Data.Common.DbConnection Connection
+        {
+            get
+            {
+                System.Data.Common.DbConnection conn = this.Factory.CreateConnection();
+                conn.ConnectionString = this.ConnectionString;
+
+                return conn;
+            }
+        }
+
+
+        public virtual string PagingTemplate(ulong offset, ulong rows)
+        {
+            return string.Concat(
+                 "\r\nOFFSET " 
+                ,offset.ToString(System.Globalization.CultureInfo.InvariantCulture) 
+                ," ROWS \r\nFETCH NEXT " 
+                ,rows.ToString(System.Globalization.CultureInfo.InvariantCulture) 
+                ," ROWS ONLY \r\n" 
+            ); 
+        }
+
+
+        public virtual string PagingTemplate(ulong rows)
+        {
+            return PagingTemplate(0, rows);
+        }
+
+
     }
 
 
-    public class SqlFactory 
-        : BaseFactory
+    public class SqlClientFactory
+        : SqlFactory
     {
 
         private static int s_seed;
@@ -48,9 +68,6 @@ FETCH NEXT " + rows.ToString(System.Globalization.CultureInfo.InvariantCulture) 
         
         protected delegate string GetConnectionString_t();
         protected GetConnectionString_t m_GetInternalConnectionString;
-
-
-
 
 
         private static System.Random GetRandom()
@@ -96,7 +113,7 @@ FETCH NEXT " + rows.ToString(System.Globalization.CultureInfo.InvariantCulture) 
         }
 
 
-        static SqlFactory()
+        static SqlClientFactory()
         {
             s_seed = System.Environment.TickCount;
             s_random = new System.Threading.ThreadLocal<System.Random>(GetRandom);
@@ -104,40 +121,29 @@ FETCH NEXT " + rows.ToString(System.Globalization.CultureInfo.InvariantCulture) 
 
 
 
-        public SqlFactory(System.Data.Common.DbProviderFactory factory, params string[] connectionStrings)
+        public SqlClientFactory(System.Data.Common.DbProviderFactory factory, params string[] connectionStrings)
+            :base(factory)
         {
             this.Factory = factory;
             SetConnectionStrings(connectionStrings);
         }
 
 
-        public SqlFactory(params string[] connectionStrings)
+        public SqlClientFactory(params string[] connectionStrings)
             : this(System.Data.SqlClient.SqlClientFactory.Instance, connectionStrings)
         { }
 
 
-        public SqlFactory()
+        public SqlClientFactory()
          : this((string[])null)
         { }
 
 
-        public string ConnectionString
+        public override string ConnectionString
         {
             get
             {
                 return this.m_GetInternalConnectionString();
-            }
-        }
-
-
-        public System.Data.Common.DbConnection Connection
-        {
-            get
-            {
-                System.Data.Common.DbConnection conn = this.Factory.CreateConnection();
-                conn.ConnectionString = this.ConnectionString;
-
-                return conn;
             }
         }
 
@@ -150,22 +156,28 @@ FETCH NEXT " + rows.ToString(System.Globalization.CultureInfo.InvariantCulture) 
     public class NewDal
     {
 
-        public static async void foo()
+        public static async System.Threading.Tasks.Task Test()
         {
-            
-            
-            System.Data.Common.DbConnection con = new System.Data.SqlClient.SqlConnection("Server=localhost,2017;User=sa;Password=Pass123!;Database=basics;");
-            
-            // DbProviderFactory ProviderFactory => DbProviderFactory; 
-            
-            
-            
-            BlogController.T_BlogPost x = await con.QuerySingleAsync<BlogController.T_BlogPost>("select * from T_BlogPost");
-            BlogController.T_BlogPost b = con.QuerySingle<BlogController.T_BlogPost>("select * from T_BlogPost");
-            IEnumerable<BlogController.T_BlogPost> a = con.Query<BlogController.T_BlogPost>("select * from T_BlogPost");
-        }
+            SqlFactory fac = new SqlClientFactory();
+            // DbConnection.ProviderFactory => DbProviderFactory; 
 
-    }
+            using (System.Data.Common.DbConnection con = fac.Connection)
+            {
+                string sql = "SELECT * FROM T_BlogPost";
+                string sql_paged = sql += fac.PagingTemplate(3, 2);
+                string sql_limited = sql += fac.PagingTemplate(1);
+
+                IEnumerable<BlogController.T_BlogPost> a = con.Query<BlogController.T_BlogPost>(sql);
+                IEnumerable<BlogController.T_BlogPost> aa = await con.QueryAsync<BlogController.T_BlogPost>(sql_paged);
+
+                BlogController.T_BlogPost b = con.QuerySingle<BlogController.T_BlogPost>(sql_limited);
+                BlogController.T_BlogPost ba = await con.QuerySingleAsync<BlogController.T_BlogPost>(sql_limited);
+            } // End Using con 
+
+        } // End Sub Test 
+
+
+    } // End Class NewDal 
 
 
     public class MyDal
