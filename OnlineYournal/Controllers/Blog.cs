@@ -17,6 +17,8 @@ using MyBlogCore.Controllers;
 /Blog/Search?q=
 */
 
+// https://stackoverflow.com/questions/10946931/ignoring-properties-in-dapper
+
 namespace OnlineYournal.Controllers
 {
 
