@@ -2,31 +2,29 @@
 using Dapper;
 
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+
+
 using System;
 using System.Collections.Generic;
-
 using System.Linq;
 using System.Threading.Tasks;
+
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Npgsql;
+using MyBlogCore;
+using MyBlogCore.Controllers;
 
-
-// using System.Web.Mvc;
-
-
-// meinerettung.ch/felix
-namespace MyBlogCore.Controllers
+namespace OnlineYournal.Controllers
 {
-    
-    
-    public class BlogController : Controller
+
+
+    public class Blog : Controller
     {
         // protected SqlFactory m_fac = SqlFactory.CreateInstance<NpgsqlFactory>();
         protected SqlFactory m_fac = SqlFactory.CreateInstance<System.Data.SqlClient.SqlClientFactory>();
-        
-        
+
+
         // protected MyDal m_dal;
 
         public IActionResult IndexABC()
@@ -108,16 +106,16 @@ AND
             sql = this.m_fac.ReplaceOdbcFunctions(sql);
 
             System.Collections.Generic.List<T_BlogPost> ls;
-            
+
             using (var con = this.m_fac.Connection)
             {
-                ls = con.Query<T_BlogPost>(sql, new{ searchtext="%" + LikeEscape(q) + "%"}).ToList();
+                ls = con.Query<T_BlogPost>(sql, new { searchtext = "%" + LikeEscape(q) + "%" }).ToList();
             }
-            
+
             SearchResult.searchResults = ls;
 
             // return Json(SearchResult, JsonRequestBehavior.AllowGet);
-            return Json(SearchResult, new Newtonsoft.Json.JsonSerializerSettings());
+            return Json(SearchResult); //, new Newtonsoft.Json.JsonSerializerSettings());
         } // End Action Search
 
         // Content(strHTML, "text/html");
@@ -212,7 +210,7 @@ SELECT {0}
 	,ROW_NUMBER() OVER (ORDER BY BP_EntryDate DESC) AS rownum 
 FROM T_BlogPost 
 ORDER BY BP_EntryDate DESC
-" + this.m_fac.PagingTemplate(100); 
+" + this.m_fac.PagingTemplate(100);
 
             using (System.Data.Common.DbConnection con = this.m_fac.Connection)
             {
@@ -249,11 +247,11 @@ ORDER BY BP_EntryDate DESC
                 // this.m_dal.Insert<T_BlogPost>(bp);
                 return RedirectToAction("Success");
             }
-            catch(System.Exception ex)
+            catch (System.Exception ex)
             {
                 // return View();
                 return Json(new { success = false, responseText = ex.Message, stackTrace = ex.StackTrace });
-                
+
             }
         } // End Action AddEntry
 
@@ -358,7 +356,7 @@ ORDER BY BP_EntryDate DESC
             lol = System.Web.HttpUtility.UrlDecode(lol);
             Console.WriteLine(lol);
 
-            string sql = "SELECT BP_UID FROM T_BlogPost ORDER BY BP_EntryDate DESC;"+ this.m_fac.PagingTemplate(1);
+            string sql = "SELECT BP_UID FROM T_BlogPost ORDER BY BP_EntryDate DESC;" + this.m_fac.PagingTemplate(1);
 
             using (System.Data.Common.DbConnection con = this.m_fac.Connection)
             {
@@ -369,7 +367,7 @@ ORDER BY BP_EntryDate DESC
 
             using (System.Data.Common.DbConnection con = this.m_fac.Connection)
             {
-                bp = con.QuerySingle<T_BlogPost>(sql,new { __bp_uid = new System.Guid(id) });
+                bp = con.QuerySingle<T_BlogPost>(sql, new { __bp_uid = new System.Guid(id) });
             }
 
             bp.BP_Content = ReplaceURLs(bp.BP_Content);
@@ -426,7 +424,7 @@ ORDER BY BP_EntryDate DESC
             string sql = "SELECT {0} BP_UID FROM T_BlogPost ORDER BY BP_EntryDate DESC;" + this.m_fac.PagingTemplate(1);
             using (System.Data.Common.DbConnection con = this.m_fac.Connection)
             {
-                id  = con.QuerySingle<string>(sql);
+                id = con.QuerySingle<string>(sql);
             }
 
             sql = "SELECT * FROM T_BlogPost WHERE BP_UID = @__bp_uid";

@@ -29,6 +29,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DB", "DB\DB.csproj", "{4DFF
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "_DB", "_DB\_DB.shproj", "{B91CA08A-4922-44B6-837E-BB88BD4E2B85}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnlineYournal", "OnlineYournal\OnlineYournal.csproj", "{30584B74-75FE-4AF2-8AAA-B6B1C0431E09}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		_DB\_DB.projitems*{b91ca08a-4922-44b6-837e-bb88bd4e2b85}*SharedItemsImports = 13
@@ -86,6 +88,10 @@ Global
 		{4DFFC45E-5FE3-4AE2-8D72-F0913D4605DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4DFFC45E-5FE3-4AE2-8D72-F0913D4605DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4DFFC45E-5FE3-4AE2-8D72-F0913D4605DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{30584B74-75FE-4AF2-8AAA-B6B1C0431E09}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{30584B74-75FE-4AF2-8AAA-B6B1C0431E09}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{30584B74-75FE-4AF2-8AAA-B6B1C0431E09}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{30584B74-75FE-4AF2-8AAA-B6B1C0431E09}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

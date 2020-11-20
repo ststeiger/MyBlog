@@ -1,0 +1,70 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload</title>
+    
+    <link href="http://fonts.googleapis.com/css?family=Boogaloo" rel="stylesheet" type="text/css">
+    <link href="@Url.Content("~/Content/style.css")" type="text/css" rel="stylesheet">
+    
+    
+    <script type="text/javascript" src="@Url.Content("~/Content/jquery-2.0.0.min.js")"></script>
+    
+    <!--
+    <script type="text/javascript" src="@Url.Content("~/Content/jquery.min.js")"></script>
+    -->    
+        <script type="text/javascript" src="@Url.Content("~/Content/multiupload.js")"></script>
+    <script type="text/javascript">
+        var config = {
+            // Valid file formats
+            support: "image/jpg,image/jpeg,image/png,image/gif,image/svg+xml,image/x-icon,image/tiff,image/x-xbitmap,image/bmp,text/plain"
+            ,form: "demoFiler" // Form ID
+            ,dragArea: "dragAndDropFiles" // Upload Area ID
+            ,uploadUrl: "@Url.Action("UploadFiles", "Blog")" // Server side file url
+            ,imagePath: "@Url.Content("~/Content/")" // Upload Area ID
+        }
+        
+        //Initiate file uploader.
+        $(document).ready(function () {
+            //alert(JSON.stringify(config));
+            initMultiUploader(config);
+        });
+    </script>
+
+    <style type="text/css" media="all">
+        .grayTitle {
+            color: #ccc;
+            width: 100%;
+            z-index: 0;
+            text-align: center;
+            vertical-align: middle;
+            margin-bottom: 0.25cm;
+        }
+
+    </style>
+
+</head>
+<body>
+    
+    <div id="lalala">
+        <h1 class="grayTitle">Drop Images Here</h1>
+        <div id="dragAndDropFiles" class="uploadArea" >
+            <!--
+            <h1>Drop Images Here</h1>
+            -->   
+        </div>
+    </div>
+    
+    <form name="demoFiler" id="demoFiler" enctype="multipart/form-data">
+        <input type="file" name="multiUpload" id="multiUpload" multiple="multiple" />
+        <input type="submit" name="submitHandler" id="submitHandler" value="Upload" />
+    </form>
+    
+    <div class="progressBar">
+        <div class="status"></div>
+    </div>
+</body>
+</html>
