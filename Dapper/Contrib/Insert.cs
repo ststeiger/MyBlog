@@ -3,9 +3,10 @@ namespace Dapper
 {
 
 
+    // https://dapper-tutorial.net/insert
+    // https://github.com/StackExchange/Dapper
     public static class InsertExtensions
     {
-
 
 
         //public static string[] ToNameArray(this System.Reflection.MemberInfo[] arrMi)
@@ -42,7 +43,7 @@ namespace Dapper
 
 
 
-
+        /*
         public static void Insert<T>(this System.Data.IDbConnection con, object objInsertValue)
         {
             System.Type tTypeToInsert = typeof(T);
@@ -170,7 +171,7 @@ ORDER BY ORDINAL_POSITION
             con.Execute(strSQL, dbArgs);
         } // End Sub InsertClassProfiles
 
-
+        */
     }
 
 

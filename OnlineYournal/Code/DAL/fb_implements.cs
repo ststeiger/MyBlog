@@ -7,6 +7,7 @@ namespace MyBlogCore
     {
 
         // Firebird 2.5, 3.5 supports SQL-Std. paging.
+        // https://www.jooq.org/translate/
         internal static string PagingTemplate(ulong offset, ulong rows)
         {
             offset++;

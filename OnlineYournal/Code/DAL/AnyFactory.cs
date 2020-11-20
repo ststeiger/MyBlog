@@ -37,8 +37,30 @@ namespace MyBlogCore
         }
 
 
+        private static System.Data.Common.DbProviderFactory GetFactory(System.Type t)
+        {
+            if (object.ReferenceEquals(t, typeof(Npgsql.NpgsqlFactory)))
+            {
+                return Npgsql.NpgsqlFactory.Instance;
+            }
+            else if (object.ReferenceEquals(t, typeof(System.Data.SqlClient.SqlClientFactory)))
+            {
+                return System.Data.SqlClient.SqlClientFactory.Instance;
+            }
+            else
+            {
+                throw new System.NotImplementedException(t.FullName);
+            }
+        }
+
+
         public AnyFactory()
-            : base(default(T))
+            : this(null)
+        { }
+
+
+        public AnyFactory(string connectionString)
+            : base(GetFactory(typeof(T)))
         {
             System.Type t = typeof(T);
             if (object.ReferenceEquals(t, typeof(Npgsql.NpgsqlFactory)))
@@ -46,7 +68,7 @@ namespace MyBlogCore
                 this.m_cs = pg_implements.LocalConnectionString;
                 m_callback = pg_implements.OdbcFunctionReplacementCallback;
             }
-            else if (object.ReferenceEquals(t, typeof(Npgsql.NpgsqlFactory)))
+            else if (object.ReferenceEquals(t, typeof(System.Data.SqlClient.SqlClientFactory)))
             {
                 this.m_cs = ms_implements.LocalConnectionString;
                 m_callback = ms_implements.OdbcFunctionReplacementCallback;
@@ -56,6 +78,8 @@ namespace MyBlogCore
                 throw new System.NotImplementedException(t.FullName);
             }
 
+            if (connectionString != null)
+                this.m_cs = connectionString;
         } // End Constructor 
 
 

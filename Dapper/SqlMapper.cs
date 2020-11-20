@@ -602,6 +602,17 @@ namespace Dapper
             return new WrappedReader(dbcmd, reader);
         }
 
+
+
+        public static System.Data.Common.DbDataReader ExecuteDbReader(this IDbConnection cnn, string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null)
+        {
+            IWrappedDataReader iw = (IWrappedDataReader)
+                ExecuteReader(cnn, sql, param, transaction, commandTimeout, commandType);
+            ;
+
+            return (System.Data.Common.DbDataReader)iw.Reader;
+        }
+
         /// <summary>
         /// Execute parameterized SQL and return an <see cref="IDataReader"/>.
         /// </summary>

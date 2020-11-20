@@ -358,7 +358,7 @@ ORDER BY BP_EntryDate DESC
             lol = System.Web.HttpUtility.UrlDecode(lol);
             Console.WriteLine(lol);
 
-            string sql = "SELECT BP_UID FROM T_BlogPost ORDER BY BP_EntryDate DESC;"+ this.m_fac.PagingTemplate(1);
+            string sql = "SELECT BP_UID FROM T_BlogPost ORDER BY BP_EntryDate DESC"+ this.m_fac.PagingTemplate(1);
 
             using (System.Data.Common.DbConnection con = this.m_fac.Connection)
             {
@@ -423,7 +423,7 @@ ORDER BY BP_EntryDate DESC
         {
             T_BlogPost bp = null;
             // string sql = "SELECT {0} BP_UID 
-            string sql = "SELECT {0} BP_UID FROM T_BlogPost ORDER BY BP_EntryDate DESC;" + this.m_fac.PagingTemplate(1);
+            string sql = "SELECT {0} BP_UID FROM T_BlogPost ORDER BY BP_EntryDate DESC" + this.m_fac.PagingTemplate(1);
             using (System.Data.Common.DbConnection con = this.m_fac.Connection)
             {
                 id  = con.QuerySingle<string>(sql);

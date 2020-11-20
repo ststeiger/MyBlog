@@ -1,22 +1,177 @@
 ﻿
-using Dapper;
-
+using System.Linq;
+// using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-using System.Diagnostics;
-using Microsoft.Extensions.Logging;
+using Dapper;
 using MyBlogCore;
 using MyBlogCore.Controllers;
 
+/*
+/Blog/Index
+/Blog/ShowEntry
+/Blog/NewEntry => AddEntry
+/Blog/EditEntry => UpdateEntry
+/Blog/Search?q=
+*/
+
 namespace OnlineYournal.Controllers
 {
+
+
+    public class JsonCamelCaseResult
+        : IActionResult // ActionResult
+    {
+
+        public enum JsonRequestBehavior_t
+        {
+            AllowGet,
+            DenyGet,
+        }
+
+        public JsonCamelCaseResult(object data, JsonRequestBehavior_t jsonRequestBehavior)
+        {
+            Data = data;
+            JsonRequestBehavior = jsonRequestBehavior;
+        }
+
+        public System.Text.Encoding ContentEncoding { get; set; }
+
+        public string ContentType { get; set; }
+
+        public object Data { get; set; }
+
+        public JsonRequestBehavior_t JsonRequestBehavior { get; set; }
+
+
+        public async System.Threading.Tasks.Task ExecuteResultAsync(ActionContext context)
+        {
+            if (context == null)
+            {
+                throw new System.ArgumentNullException("context");
+            }
+
+            if (JsonRequestBehavior == JsonRequestBehavior_t.DenyGet && string.Equals(context.HttpContext.Request.Method, "GET", System.StringComparison.OrdinalIgnoreCase))
+            {
+                throw new System.InvalidOperationException("This request has been blocked because sensitive information could be disclosed to third party web sites when this is used in a GET request. To allow GET requests, set JsonRequestBehavior to AllowGet.");
+            }
+
+            var response = context.HttpContext.Response;
+
+            // https://stackoverflow.com/questions/9254891/what-does-content-type-application-json-charset-utf-8-really-mean
+            response.ContentType = "application/json; charset=utf-8";
+            //response.ContentType = !String.IsNullOrEmpty(ContentType) ? ContentType : "application/json";
+            //if (ContentEncoding != null)
+            //{
+            //    response.ContentEncoding = ContentEncoding;
+            //}
+
+            if (Data == null)
+                return;
+
+            /*
+            Newtonsoft.Json.JsonSerializerSettings jsonSerializerSettings =
+                new Newtonsoft.Json.JsonSerializerSettings
+                {
+                    ContractResolver = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver()
+                };
+
+            using (System.IO.StreamWriter writer = new System.IO.StreamWriter(response.Body, System.Text.Encoding.UTF8))
+            {
+                using (Newtonsoft.Json.JsonTextWriter jsonWriter = new Newtonsoft.Json.JsonTextWriter(writer))
+                {
+                    Newtonsoft.Json.JsonSerializer ser = Newtonsoft.Json.JsonSerializer.Create(jsonSerializerSettings);
+
+                    ser.Serialize(jsonWriter, Data);
+                    jsonWriter.Flush();
+                }
+
+                writer.Flush();
+            }
+            */
+
+
+            System.Text.Json.JsonSerializerOptions options = new System.Text.Json.JsonSerializerOptions()
+            {
+                IncludeFields = true,
+                WriteIndented = true
+                // PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase
+            };
+
+            await System.Text.Json.JsonSerializer.SerializeAsync(response.Body, Data, options);
+        }
+    }
+
+
+
+
+    public class JsonStreamingResult
+        : IActionResult
+    {
+
+        public enum JsonRequestBehavior_t
+        {
+            AllowGet,
+            DenyGet,
+        }
+
+
+        public System.Text.Encoding ContentEncoding { get; set; }
+
+        public string ContentType { get; set; }
+
+        
+        protected string m_sql;
+        protected System.Collections.Generic.Dictionary<string, object> m_parameters; 
+        protected AnySqlWebAdmin.RenderType_t m_renderType;
+
+        public JsonStreamingResult(
+              AnySqlWebAdmin.RenderType_t renderType
+            , JsonRequestBehavior_t jsonRequestBehavior
+            , string sql
+            , System.Collections.Generic.Dictionary<string, object> pars
+            )
+        {
+            this.m_sql = sql;
+            this.m_parameters = pars;
+            this.m_renderType = renderType;
+            JsonRequestBehavior = jsonRequestBehavior;
+        }
+
+
+        public JsonRequestBehavior_t JsonRequestBehavior { get; set; }
+
+        public async System.Threading.Tasks.Task ExecuteResultAsync(ActionContext context)
+        {
+            if (context == null)
+            {
+                throw new System.ArgumentNullException("context");
+            }
+
+            if (JsonRequestBehavior == JsonRequestBehavior_t.DenyGet && string.Equals(context.HttpContext.Request.Method, "GET", System.StringComparison.OrdinalIgnoreCase))
+            {
+                throw new System.InvalidOperationException("This request has been blocked because sensitive information could be disclosed to third party web sites when this is used in a GET request. To allow GET requests, set JsonRequestBehavior to AllowGet.");
+            }
+
+            var response = context.HttpContext.Response;
+
+            // https://stackoverflow.com/questions/9254891/what-does-content-type-application-json-charset-utf-8-really-mean
+            response.ContentType = "application/json; charset=utf-8";
+            
+            if (this.m_sql == null)
+                return;
+
+            await AnySqlWebAdmin.SqlServiceJsonHelper.AnyDataReaderToJson(
+              this.m_sql
+            , this.m_parameters
+            , context.HttpContext 
+            , this.m_renderType
+            );
+
+        }
+    }
 
 
     public class Blog : Controller
@@ -34,6 +189,21 @@ namespace OnlineYournal.Controllers
             int num2 = 2;
             int result = 3;
             return Content($"Result of {num1} + {num2} is {result}", "text/plain");
+        }
+
+
+        public IActionResult Dataa()
+        {
+            string sql = "SELECT * FROM T_BlogPost";
+            System.Collections.Generic.Dictionary<string, object> pars = 
+                new System.Collections.Generic.Dictionary<string, object>();
+            
+            return new JsonStreamingResult(
+                  AnySqlWebAdmin.RenderType_t.DataTable | AnySqlWebAdmin.RenderType_t.Indented
+                , JsonStreamingResult.JsonRequestBehavior_t.AllowGet
+                , sql
+                , pars 
+            );
         }
 
 
@@ -81,7 +251,7 @@ namespace OnlineYournal.Controllers
         } // End Function LikeEscape
 
 
-        public JsonResult Search(string q)
+        public IActionResult Search(string q)
         {
             cSearchResult SearchResult = new cSearchResult(q);
 
@@ -114,14 +284,25 @@ AND
 
             SearchResult.searchResults = ls;
 
+            // https://docs.microsoft.com/en-us/dotnet/standard/serialization/system-text-json-how-to?pivots=dotnet-5-0#include-fields
+            System.Text.Json.JsonSerializerOptions options = new System.Text.Json.JsonSerializerOptions()
+            {
+                IncludeFields = true,
+                WriteIndented = true
+            };
+
+
+            // https://localhost:44397/Blog/Search?q=test
             // return Json(SearchResult, JsonRequestBehavior.AllowGet);
-            return Json(SearchResult); //, new Newtonsoft.Json.JsonSerializerSettings());
+            // return Json(SearchResult); //, new Newtonsoft.Json.JsonSerializerSettings());
+            // return Json(SearchResult, options);
+            return new JsonCamelCaseResult(SearchResult, JsonCamelCaseResult.JsonRequestBehavior_t.AllowGet);
         } // End Action Search
 
         // Content(strHTML, "text/html");
 
 
-        public void UpdateBlogStructure(IList<T_BlogPost> lsBlogEntries)
+        public void UpdateBlogStructure(System.Collections.Generic.IEnumerable<T_BlogPost> lsBlogEntries)
         {
             T_BlogPost bp;
 
@@ -205,7 +386,7 @@ AND
             BlogIndex bi = new BlogIndex();
             // bi.lsBlogEntries = this.m_dal.GetList<T_BlogPost>(@"");
             string sql = @"
-SELECT {0} 
+SELECT 
 	 T_BlogPost.*
 	,ROW_NUMBER() OVER (ORDER BY BP_EntryDate DESC) AS rownum 
 FROM T_BlogPost 
@@ -242,9 +423,13 @@ ORDER BY BP_EntryDate DESC
                 T_BlogPost bp = new T_BlogPost();
 
                 bp.BP_Title = txtTitle; // Request.Params["txtTitle"];
-                bp.BP_Title = taBody; // Request.Params["taBody"];
+                bp.BP_Content = taBody; // Request.Params["taBody"];
 
-                // this.m_dal.Insert<T_BlogPost>(bp);
+                using (System.Data.Common.DbConnection con = this.m_fac.Connection)
+                {
+                    con.Insert<T_BlogPost>(bp);
+                } // End Using con 
+
                 return RedirectToAction("Success");
             }
             catch (System.Exception ex)
@@ -272,7 +457,11 @@ ORDER BY BP_EntryDate DESC
                 bp.BP_Title = txtTitle; // Request.Params["txtTitle"];
                 bp.BP_Content = taBody; // Request.Params["taBody"];
 
-                // this.m_dal.Insert<T_BlogPost>(bp);
+                using (System.Data.Common.DbConnection con = this.m_fac.Connection)
+                {
+                    con.Insert<T_BlogPost>(bp);
+                } // End Using con 
+
                 return RedirectToAction("Success");
             }
             catch
@@ -297,6 +486,9 @@ ORDER BY BP_EntryDate DESC
         // string str = ReplaceURLs("http://www.google.com/ncr?abc=def#ghi");
         public static string ReplaceURLs(string strPlainText)
         {
+            if (string.IsNullOrEmpty(strPlainText))
+                return strPlainText;
+
             string strPattern = @"((http|ftp|https|[a-zA-Z]):(//|\\)([a-zA-Z0-9\\\~\!\@\#\$\%\^\&\*\(\)_\-\=\+\\\/\?\.\:\;\'\,]*)?)|(www\.([a-zA-Z0-9\~\!\@\#\$\%\^\&\*\(\)_\-\=\+\\\/\?\.\:\;\'\,]*)?)";
 
             strPlainText = System.Text.RegularExpressions.Regex.Replace(strPlainText, strPattern,
@@ -345,29 +537,34 @@ ORDER BY BP_EntryDate DESC
 
         //
         // GET: /Blog/Delete/5
-        public ActionResult ShowEntry(string id)
+        public ActionResult ShowEntry(System.Guid? id)
         {
             T_BlogPost bp = null;
 
+            // string lol = "http://localhost/image.aspx?&postimage_text=%0A%5Burl%3Dhttp%3A%2F%2Fpostimg.org%2Fimage%2Fu0zc6aznf%2F%5D%5Bimg%5Dhttp%3A%2F%2Fs1.postimg.org%2Fu0zc6aznf%2Fhtc_hero_wallpaper_03.jpg%5B%2Fimg%5D%5B%2Furl%5D%0A";
+            //  //"http://localhost/image.aspx?&postimage_text=[url=http://postimg.org/image/u0zc6aznf/][img]http://s1.postimg.org/u0zc6aznf/htc_hero_wallpaper_03.jpg[/img][/url]
 
-            string lol = "http://localhost/image.aspx?&postimage_text=%0A%5Burl%3Dhttp%3A%2F%2Fpostimg.org%2Fimage%2Fu0zc6aznf%2F%5D%5Bimg%5Dhttp%3A%2F%2Fs1.postimg.org%2Fu0zc6aznf%2Fhtc_hero_wallpaper_03.jpg%5B%2Fimg%5D%5B%2Furl%5D%0A";
-            //"http://localhost/image.aspx?&postimage_text=[url=http://postimg.org/image/u0zc6aznf/][img]http://s1.postimg.org/u0zc6aznf/htc_hero_wallpaper_03.jpg[/img][/url]
+            // lol = System.Web.HttpUtility.UrlDecode(lol);
+            // System.Console.WriteLine(lol);
 
-            lol = System.Web.HttpUtility.UrlDecode(lol);
-            Console.WriteLine(lol);
 
-            string sql = "SELECT BP_UID FROM T_BlogPost ORDER BY BP_EntryDate DESC;" + this.m_fac.PagingTemplate(1);
 
-            using (System.Data.Common.DbConnection con = this.m_fac.Connection)
+            if (!id.HasValue)
             {
-                id = con.QuerySingle<string>(sql);
+                string fetchLatestId = "SELECT BP_UID FROM T_BlogPost ORDER BY BP_EntryDate DESC" + this.m_fac.PagingTemplate(1);
+
+                using (System.Data.Common.DbConnection con = this.m_fac.Connection)
+                {
+                    id = con.QuerySingle<System.Guid>(fetchLatestId);
+                }
             }
+            
 
-            sql = "SELECT * FROM T_BlogPost WHERE BP_UID = @__bp_uid";
+            string sql = "SELECT * FROM T_BlogPost WHERE BP_UID = @__bp_uid";
 
             using (System.Data.Common.DbConnection con = this.m_fac.Connection)
             {
-                bp = con.QuerySingle<T_BlogPost>(sql, new { __bp_uid = new System.Guid(id) });
+                bp = con.QuerySingle<T_BlogPost>(sql, new { __bp_uid = id });
             }
 
             bp.BP_Content = ReplaceURLs(bp.BP_Content);
@@ -381,7 +578,7 @@ ORDER BY BP_EntryDate DESC
                 .Select(x => new { value = x, text = x }),
                 "value", "text", "15");
 
-            List<SelectListItem> ls = new List<SelectListItem>();
+            System.Collections.Generic.List<SelectListItem> ls = new System.Collections.Generic.List<SelectListItem>();
 
             ls.Add(new SelectListItem() { Text = "Yes", Value = "true", Selected = true });
             ls.Add(new SelectListItem() { Text = "No", Value = "false", Selected = false });
@@ -417,21 +614,21 @@ ORDER BY BP_EntryDate DESC
 
         //
         // GET: /Blog/Delete/5
-        public ActionResult EditEntry(string id)
+        public ActionResult EditEntry(System.Guid? id)
         {
             T_BlogPost bp = null;
             // string sql = "SELECT {0} BP_UID 
-            string sql = "SELECT {0} BP_UID FROM T_BlogPost ORDER BY BP_EntryDate DESC;" + this.m_fac.PagingTemplate(1);
+            string sql = "SELECT BP_UID FROM T_BlogPost ORDER BY BP_EntryDate DESC" + this.m_fac.PagingTemplate(1);
             using (System.Data.Common.DbConnection con = this.m_fac.Connection)
             {
-                id = con.QuerySingle<string>(sql);
+                id = con.QuerySingle<System.Guid>(sql);
             }
 
             sql = "SELECT * FROM T_BlogPost WHERE BP_UID = @__bp_uid";
 
             using (System.Data.Common.DbConnection con = this.m_fac.Connection)
             {
-                bp = con.QuerySingle<T_BlogPost>(sql, new { __bp_uid = new System.Guid(id) });
+                bp = con.QuerySingle<T_BlogPost>(sql, new { __bp_uid = id });
             }
 
             return View(bp);
