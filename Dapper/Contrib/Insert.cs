@@ -9,7 +9,7 @@ namespace Dapper
 
 
         //public static string[] ToNameArray(this System.Reflection.MemberInfo[] arrMi)
-        public static string[] ToNameArray(System.Reflection.MemberInfo[] arrMi)
+        private static string[] ToNameArray(System.Reflection.MemberInfo[] arrMi)
         {
             string[] arr = new string[arrMi.Length];
 
@@ -22,7 +22,7 @@ namespace Dapper
         } // End Extension Function System.Reflection.MemberInfo[].ToNameArray
 
 
-        public static bool Contains(System.Collections.Generic.List<string> ls, string strValueToSearch, System.StringComparer cmp)
+        private static bool Contains(System.Collections.Generic.List<string> ls, string strValueToSearch, System.StringComparer cmp)
         {
             foreach (string strThisValue in ls)
             {
@@ -34,7 +34,7 @@ namespace Dapper
         } // End Extension Function List<string>.Contains
 
 
-        public static string EscapeTableName(string strTableName)
+        private static string EscapeTableName(string strTableName)
         {
             return "\"" + strTableName.Replace("\"", "\"\"") + "\"";
         }

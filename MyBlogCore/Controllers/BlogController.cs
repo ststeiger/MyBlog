@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Npgsql;
 
 
 // using System.Web.Mvc;
@@ -22,9 +23,11 @@ namespace MyBlogCore.Controllers
     
     public class BlogController : Controller
     {
-        protected SqlFactory m_fac = new SqlClientFactory();
+        protected SqlFactory m_fac = SqlFactory.CreateInstance<NpgsqlFactory>();
+        protected SqlFactory m_fac2 = SqlFactory.CreateInstance<System.Data.SqlClient.SqlClientFactory>();
+        
+        
         // protected MyDal m_dal;
-
 
         public IActionResult IndexABC()
         {
@@ -97,8 +100,7 @@ namespace MyBlogCore.Controllers
         {
             cSearchResult SearchResult = new cSearchResult(q);
 
-            System.Collections.Generic.List<T_BlogPost> ls;
-            using (System.Data.IDbCommand cmd = this.m_dal.CreateCommand(@"
+            string sql = @"
 SELECT 
 	 BP_UID
     ,BP_Title
@@ -114,13 +116,17 @@ AND
     {fn ILIKE(BP_Title, @searchtext )} 
     OR 
     {fn ILIKE(BP_Content, @searchtext )} 
-)
-"))
-            {
-                this.m_dal.AddParameter(cmd, "@searchtext", "%" + LikeEscape(q) + "%");
-                ls = this.m_dal.GetList<T_BlogPost>(cmd);
-            } // End Using cmd 
+) 
+";
+            sql = this.m_fac.ReplaceOdbcFunctions(sql);
 
+            System.Collections.Generic.List<T_BlogPost> ls;
+            
+            using (var con = this.m_fac.Connection)
+            {
+                ls = con.Query<T_BlogPost>(sql, new{ searchtext="%" + LikeEscape(q) + "%"}).ToList();
+            }
+            
             SearchResult.searchResults = ls;
 
             // return Json(SearchResult, JsonRequestBehavior.AllowGet);
