@@ -1,12 +1,9 @@
-﻿
-using Dapper;
+﻿using Dapper;
 using MyBlogCore;
 
 
 namespace AnySqlWebAdmin
 {
-
-
     [System.Flags]
     public enum RenderType_t : int
     {
@@ -81,7 +78,6 @@ namespace AnySqlWebAdmin
             //await jsonWriter.WriteStartObjectAsync();
             await jsonWriter.WriteStartObjectAsync();
 
-
             for (int i = 0; i <= dr.FieldCount - 1; i++)
             {
                 await jsonWriter.WritePropertyNameAsync(dr.GetName(i));
@@ -147,128 +143,125 @@ namespace AnySqlWebAdmin
 
 
         public static async System.Threading.Tasks.Task AnyDataReaderToJson(
-              string sql
+            System.Data.Common.DbConnection con
+            , string sql
             , System.Collections.Generic.Dictionary<string, object> pars
             , Microsoft.AspNetCore.Http.HttpContext context
             , RenderType_t format)
         {
-            // SqlService service = (SqlService) context.RequestServices.GetService(typeof(SqlService));
-
-            SqlFactory service = SqlFactory.CreateInstance<System.Data.SqlClient.SqlClientFactory>();
             // DynamicParameters dbArgs = new DynamicParameters();
 
-            using (System.Data.Common.DbConnection con = service.Connection)
+
+            // using (System.Data.Common.DbDataReader dr = await cmd.ExecuteReaderAsync(System.Data.CommandBehavior.SequentialAccess| System.Data.CommandBehavior.CloseConnection))
+            // using (System.Data.Common.DbDataReader dr = con.ExecuteDbReader(sql, pars))
+            using (System.Data.Common.DbDataReader dr = await con.ExecuteDbReaderAsync(sql, pars))
             {
-
-                // using (System.Data.Common.DbDataReader dr = await cmd.ExecuteReaderAsync(System.Data.CommandBehavior.SequentialAccess| System.Data.CommandBehavior.CloseConnection))
-                using (var dr = con.ExecuteDbReader(sql, pars))
+                using (System.IO.StreamWriter output = new System.IO.StreamWriter(context.Response.Body))
                 {
-                    using (System.IO.StreamWriter output = new System.IO.StreamWriter(context.Response.Body))
+                    using (Newtonsoft.Json.JsonTextWriter jsonWriter =
+                        new Newtonsoft.Json.JsonTextWriter(output)) // context.Response.Output)
                     {
-                        using (Newtonsoft.Json.JsonTextWriter jsonWriter =
-                            new Newtonsoft.Json.JsonTextWriter(output)) // context.Response.Output)
+                        if (format.HasFlag(RenderType_t.Indented))
+                            jsonWriter.Formatting = Newtonsoft.Json.Formatting.Indented;
+
+                        context.Response.StatusCode = (int) System.Net.HttpStatusCode.OK;
+                        context.Response.ContentType = "application/json";
+
+                        await jsonWriter.WriteStartObjectAsync();
+
+                        await jsonWriter.WritePropertyNameAsync("tables");
+                        await jsonWriter.WriteStartArrayAsync();
+
+                        do
                         {
-                            if (format.HasFlag(RenderType_t.Indented))
-                                jsonWriter.Formatting = Newtonsoft.Json.Formatting.Indented;
+                            if (!format.HasFlag(RenderType_t.Data_Only) &&
+                                !format.HasFlag(RenderType_t.DataTable))
+                            {
+                                await jsonWriter.WriteStartObjectAsync();
+                                await jsonWriter.WritePropertyNameAsync("columns");
+
+                                if (format.HasFlag(RenderType_t.Columns_Associative))
+                                {
+                                    await WriteAssociativeColumnsArray(jsonWriter, dr, format);
+                                }
+                                else if (format.HasFlag(RenderType_t.Columns_ObjectArray))
+                                {
+                                    await WriteComplexArray(jsonWriter, dr, format);
+                                }
+                                else // (format.HasFlag(RenderType_t.Array))
+                                {
+                                    await WriteArray(jsonWriter, dr);
+                                }
+                            } // End if (!format.HasFlag(RenderType_t.Data_Only)) 
 
 
-                            context.Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
-                            context.Response.ContentType = "application/json";
+                            if (!format.HasFlag(RenderType_t.Data_Only) &&
+                                !format.HasFlag(RenderType_t.DataTable))
+                            {
+                                await jsonWriter.WritePropertyNameAsync("rows");
+                            } // End if (!format.HasFlag(RenderType_t.Data_Only))
 
-
-                            await jsonWriter.WriteStartObjectAsync();
-
-                            await jsonWriter.WritePropertyNameAsync("tables");
                             await jsonWriter.WriteStartArrayAsync();
 
-                            do
+                            string[] columns = null;
+                            if (format.HasFlag(RenderType_t.DataTable))
                             {
-                                if (!format.HasFlag(RenderType_t.Data_Only) &&
-                                    !format.HasFlag(RenderType_t.DataTable))
+                                columns = new string[dr.FieldCount];
+                                for (int i = 0; i < dr.FieldCount; i++)
                                 {
-                                    await jsonWriter.WriteStartObjectAsync();
-                                    await jsonWriter.WritePropertyNameAsync("columns");
+                                    columns[i] = dr.GetName(i);
+                                } // Next i 
+                            } // End if (format.HasFlag(RenderType_t.DataTable)) 
 
-                                    if (format.HasFlag(RenderType_t.Columns_Associative))
-                                    {
-                                        await WriteAssociativeColumnsArray(jsonWriter, dr, format);
-                                    }
-                                    else if (format.HasFlag(RenderType_t.Columns_ObjectArray))
-                                    {
-                                        await WriteComplexArray(jsonWriter, dr, format);
-                                    }
-                                    else // (format.HasFlag(RenderType_t.Array))
-                                    {
-                                        await WriteArray(jsonWriter, dr);
-                                    }
-                                } // End if (!format.HasFlag(RenderType_t.Data_Only)) 
-
-
-                                if (!format.HasFlag(RenderType_t.Data_Only) &&
-                                    !format.HasFlag(RenderType_t.DataTable))
-                                {
-                                    await jsonWriter.WritePropertyNameAsync("rows");
-                                } // End if (!format.HasFlag(RenderType_t.Data_Only))
-
-                                await jsonWriter.WriteStartArrayAsync();
-
-                                string[] columns = null;
+                            while (await dr.ReadAsync())
+                            {
                                 if (format.HasFlag(RenderType_t.DataTable))
+                                    await jsonWriter.WriteStartObjectAsync();
+                                else
+                                    await jsonWriter.WriteStartArrayAsync();
+
+                                for (int i = 0; i <= dr.FieldCount - 1; i++)
                                 {
-                                    columns = new string[dr.FieldCount];
-                                    for (int i = 0; i < dr.FieldCount; i++)
+                                    object obj = await dr.GetFieldValueAsync<object>(i);
+                                    if (obj == System.DBNull.Value)
+                                        obj = null;
+
+                                    if (columns != null && format.HasFlag(RenderType_t.DataTable))
                                     {
-                                        columns[i] = dr.GetName(i);
-                                    } // Next i 
-                                } // End if (format.HasFlag(RenderType_t.DataTable)) 
+                                        await jsonWriter.WritePropertyNameAsync(columns[i]);
+                                    }
 
-                                while (await dr.ReadAsync())
-                                {
-                                    if (format.HasFlag(RenderType_t.DataTable))
-                                        await jsonWriter.WriteStartObjectAsync();
-                                    else
-                                        await jsonWriter.WriteStartArrayAsync();
+                                    await jsonWriter.WriteValueAsync(obj);
+                                } // Next i 
 
-                                    for (int i = 0; i <= dr.FieldCount - 1; i++)
-                                    {
-                                        object obj = await dr.GetFieldValueAsync<object>(i);
-                                        if (obj == System.DBNull.Value)
-                                            obj = null;
-
-                                        if (columns != null && format.HasFlag(RenderType_t.DataTable))
-                                        {
-                                            await jsonWriter.WritePropertyNameAsync(columns[i]);
-                                        }
-
-                                        await jsonWriter.WriteValueAsync(obj);
-                                    } // Next i 
-
-                                    if (format.HasFlag(RenderType_t.DataTable))
-                                        await jsonWriter.WriteEndObjectAsync();
-                                    else
-                                        await jsonWriter.WriteEndArrayAsync();
-                                } // Whend 
-
-                                await jsonWriter.WriteEndArrayAsync();
-
-                                if (!format.HasFlag(RenderType_t.Data_Only) &&
-                                    !format.HasFlag(RenderType_t.DataTable))
-                                {
+                                if (format.HasFlag(RenderType_t.DataTable))
                                     await jsonWriter.WriteEndObjectAsync();
-                                } // End if (!format.HasFlag(RenderType_t.Data_Only)) 
-                            } while (await dr.NextResultAsync());
+                                else
+                                    await jsonWriter.WriteEndArrayAsync();
+                            } // Whend 
 
                             await jsonWriter.WriteEndArrayAsync();
-                            await jsonWriter.WriteEndObjectAsync();
 
-                            await jsonWriter.FlushAsync();
-                            await output.FlushAsync();
-                        } // jsonWriter 
-                    } // output 
-                } // dr 
-                if (con.State != System.Data.ConnectionState.Closed)
-                    con.Close();
-            } // con 
+                            if (!format.HasFlag(RenderType_t.Data_Only) &&
+                                !format.HasFlag(RenderType_t.DataTable))
+                            {
+                                await jsonWriter.WriteEndObjectAsync();
+                            } // End if (!format.HasFlag(RenderType_t.Data_Only)) 
+                        } while (await dr.NextResultAsync());
+
+                        await jsonWriter.WriteEndArrayAsync();
+                        await jsonWriter.WriteEndObjectAsync();
+
+                        await jsonWriter.FlushAsync();
+                        await output.FlushAsync();
+                    } // jsonWriter 
+                } // output 
+            } // dr 
+            
         } // End Sub WriteArray 
+        
+        
     } // End Class 
+    
+    
 } // End Namespace 

@@ -1103,6 +1103,38 @@ namespace Dapper
         public static Task<IDataReader> ExecuteReaderAsync(this IDbConnection cnn, string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null) =>
             ExecuteReaderImplAsync(cnn, new CommandDefinition(sql, param, transaction, commandTimeout, commandType, CommandFlags.Buffered), CommandBehavior.Default);
 
+        
+        
+        /// <summary>
+        /// Execute parameterized SQL and return an <see cref="IDataReader"/>.
+        /// </summary>
+        /// <param name="cnn">The connection to execute on.</param>
+        /// <param name="sql">The SQL to execute.</param>
+        /// <param name="param">The parameters to use for this command.</param>
+        /// <param name="transaction">The transaction to use for this command.</param>
+        /// <param name="commandTimeout">Number of seconds before command execution timeout.</param>
+        /// <param name="commandType">Is it a stored proc or a batch?</param>
+        /// <returns>An <see cref="IDataReader"/> that can be used to iterate over the results of the SQL query.</returns>
+        /// <remarks>
+        /// This is typically used when the results of a query are not processed by Dapper, for example, used to fill a <see cref="DataTable"/>
+        /// or <see cref="T:DataSet"/>.
+        /// </remarks>
+        /// <example>
+        /// <code>
+        /// <![CDATA[
+        /// DataTable table = new DataTable("MyTable");
+        /// using (var reader = ExecuteReader(cnn, sql, param))
+        /// {
+        ///     table.Load(reader);
+        /// }
+        /// ]]>
+        /// </code>
+        /// </example>
+        public static Task<DbDataReader> ExecuteDbReaderAsync(this IDbConnection cnn, string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null) =>
+            ExecuteDbReaderImplAsync(cnn, new CommandDefinition(sql, param, transaction, commandTimeout, commandType, CommandFlags.Buffered), CommandBehavior.Default);
+
+        
+        
         /// <summary>
         /// Execute parameterized SQL and return an <see cref="IDataReader"/>.
         /// </summary>
@@ -1150,6 +1182,29 @@ namespace Dapper
                 cmd?.Dispose();
             }
         }
+
+        
+        private static async Task<DbDataReader> ExecuteDbReaderImplAsync(IDbConnection cnn, CommandDefinition command, CommandBehavior commandBehavior)
+        {
+            Action<IDbCommand, object> paramReader = GetParameterReader(cnn, ref command);
+
+            DbCommand cmd = null;
+            bool wasClosed = cnn.State == ConnectionState.Closed;
+            try
+            {
+                cmd = command.TrySetupAsyncCommand(cnn, paramReader);
+                if (wasClosed) await cnn.TryOpenAsync(command.CancellationToken).ConfigureAwait(false);
+                var reader = await ExecuteReaderWithFlagsFallbackAsync(cmd, wasClosed, commandBehavior, command.CancellationToken).ConfigureAwait(false);
+                wasClosed = false;
+                return reader;
+            }
+            finally
+            {
+                if (wasClosed) cnn.Close();
+                cmd?.Dispose();
+            }
+        }
+
 
         /// <summary>
         /// Execute parameterized SQL that selects a single value.

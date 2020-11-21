@@ -22,8 +22,8 @@ namespace MyBlogCore
 
                 if (!csb.IntegratedSecurity)
                 {
-                    csb.Username = "apws";
-                    csb.Password = "Test123";
+                    csb.Username = "postgres";
+                    csb.Password = "test123";
                 }
 
                 csb.Pooling = true;

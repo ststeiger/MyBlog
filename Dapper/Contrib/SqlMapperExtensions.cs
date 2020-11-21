@@ -1,4 +1,7 @@
-﻿using System;
+﻿
+#if true
+
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -429,7 +432,7 @@ namespace Dapper //.Contrib.Extensions
                     type = type.GetGenericArguments()[0];
                 }
             }
-
+            
             var keyProperties = KeyPropertiesCache(type).ToList();  //added ToList() due to issue #418, must work on a list copy
             var explicitKeyProperties = ExplicitKeyPropertiesCache(type);
             if (keyProperties.Count == 0 && explicitKeyProperties.Count == 0)
@@ -1159,3 +1162,5 @@ public partial class FbAdapter : ISqlAdapter
         sb.AppendFormat("{0} = @{1}", columnName, columnName);
     }
 }
+
+#endif 

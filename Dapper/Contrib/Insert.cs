@@ -1,4 +1,6 @@
 ﻿
+#if false
+
 namespace Dapper
 {
 
@@ -43,7 +45,7 @@ namespace Dapper
 
 
 
-        /*
+        
         public static void Insert<T>(this System.Data.IDbConnection con, object objInsertValue)
         {
             System.Type tTypeToInsert = typeof(T);
@@ -75,6 +77,9 @@ namespace Dapper
             System.Reflection.PropertyInfo[] properties = tTypeToInsert.GetProperties();
 
 
+            string escTableName = EscapeTableName(strTableName);
+            
+
             //string[] astrFieldNames = fields.Select(c => c.Name).ToArray();
             //string[] astrFieldNames = fields.ToNameArray();
             string[] astrFieldNames = ToNameArray(fields);
@@ -105,7 +110,7 @@ ORDER BY ORDINAL_POSITION
 ";
 
             System.Collections.Generic.List<string> astrDbFields = System.Linq.Enumerable.ToList(
-                con.Query<string>(strSQL, new { __tableName = strTableName })
+                con.Query<string>(strSQL, new { __tableName = strTableName.ToLowerInvariant() })
             );
 
 
@@ -116,28 +121,26 @@ ORDER BY ORDINAL_POSITION
                     lsFieldNames.Remove(lsFieldNames[i]);
             }
 
-            strSQL = "INSERT INTO " + EscapeTableName(strTableName) + "( " + System.Environment.NewLine;
+            strSQL = "INSERT INTO " + escTableName + "( " + System.Environment.NewLine;
             for (int i = 0; i < lsFieldNames.Count; ++i)
             {
                 strSQL += i == 0 ? "     " : "    ,";
                 strSQL += "    " + lsFieldNames[i].Key + System.Environment.NewLine;
             } // Next i
             strSQL += ") " + System.Environment.NewLine;
-
+            
             strSQL += "VALUES ( " + System.Environment.NewLine;
-
+            
             for (int i = 0; i < lsFieldNames.Count; ++i)
             {
                 strSQL += i == 0 ? "     " : "    ,";
                 strSQL += "@__in_" + lsFieldNames[i].Key + System.Environment.NewLine;
             } // Next i
             strSQL += ") " + System.Environment.NewLine;
-
+            
             DynamicParameters dbArgs = new DynamicParameters();
-
-
-
-
+            
+            
             for (int i = 0; i < lsFieldNames.Count; ++i)
             {
                 object objValue = null;
@@ -155,9 +158,9 @@ ORDER BY ORDINAL_POSITION
 
 
             string strPK = astrDbFields[0];
-
-            string sq = "DELETE FROM " + EscapeTableName(strTableName) + " WHERE " + EscapeTableName(strPK) + " = @__in_pk";
-
+            
+            string sq = "DELETE FROM " + escTableName + " WHERE " + EscapeTableName(strPK) + " = @__in_pk";
+            
             object objPK = null;
             if (object.ReferenceEquals(lsFieldNames[0].Value, typeof(System.Reflection.FieldInfo)))
                 objPK = tTypeToInsert.GetField(lsFieldNames[0].Key).GetValue(objInsertValue);
@@ -165,14 +168,17 @@ ORDER BY ORDINAL_POSITION
                 objPK = tTypeToInsert.GetProperty(lsFieldNames[0].Key).GetValue(objInsertValue, null);
             else
                 throw new System.Exception("No such type or property '" + lsFieldNames[0].Key + "'");
-
+            
             con.Execute(sq, new { __in_pk = objPK });
-
+            
             con.Execute(strSQL, dbArgs);
-        } // End Sub InsertClassProfiles
+        } // End Sub InsertClassProfiles 
+        
+        
+    } // End Class InsertExtensions 
+    
+    
+}  // End Namespace Dapper 
 
-        */
-    }
 
-
-}
+#endif 

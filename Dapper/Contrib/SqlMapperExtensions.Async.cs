@@ -1,4 +1,8 @@
-﻿using System;
+﻿
+#if false
+
+
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -575,3 +579,5 @@ public partial class FbAdapter
         return Convert.ToInt32(id);
     }
 }
+
+#endif 

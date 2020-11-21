@@ -1,4 +1,5 @@
 ﻿
+using System;
 using System.Linq;
 // using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Mvc;
@@ -128,14 +129,17 @@ namespace OnlineYournal.Controllers
         protected string m_sql;
         protected System.Collections.Generic.Dictionary<string, object> m_parameters; 
         protected AnySqlWebAdmin.RenderType_t m_renderType;
-
+        protected SqlFactory m_factory;
+        
         public JsonStreamingResult(
-              AnySqlWebAdmin.RenderType_t renderType
+              SqlFactory factory
+            , AnySqlWebAdmin.RenderType_t renderType
             , JsonRequestBehavior_t jsonRequestBehavior
             , string sql
             , System.Collections.Generic.Dictionary<string, object> pars
             )
         {
+            this.m_factory = factory;
             this.m_sql = sql;
             this.m_parameters = pars;
             this.m_renderType = renderType;
@@ -164,13 +168,17 @@ namespace OnlineYournal.Controllers
             
             if (this.m_sql == null)
                 return;
-
-            await AnySqlWebAdmin.SqlServiceJsonHelper.AnyDataReaderToJson(
-              this.m_sql
-            , this.m_parameters
-            , context.HttpContext 
-            , this.m_renderType
-            );
+            
+            using (System.Data.Common.DbConnection con = this.m_factory.Connection)
+            {
+                await AnySqlWebAdmin.SqlServiceJsonHelper.AnyDataReaderToJson(
+                      con
+                    , this.m_sql
+                    , this.m_parameters
+                    , context.HttpContext 
+                    , this.m_renderType
+                );
+            }
 
         }
     }
@@ -178,12 +186,18 @@ namespace OnlineYournal.Controllers
 
     public class Blog : Controller
     {
-        // protected SqlFactory m_fac = SqlFactory.CreateInstance<NpgsqlFactory>();
-        protected SqlFactory m_fac = SqlFactory.CreateInstance<System.Data.SqlClient.SqlClientFactory>();
 
-
-        // protected MyDal m_dal;
-
+        private static SqlFactory CreateAppropriateFactory()
+        {
+            if(System.Environment.OSVersion.Platform == PlatformID.Unix)
+                return SqlFactory.CreateInstance<Npgsql.NpgsqlFactory>();
+            
+            return SqlFactory.CreateInstance<System.Data.SqlClient.SqlClientFactory>();
+        }
+        
+        protected SqlFactory m_fac = CreateAppropriateFactory();
+        
+        
         public IActionResult IndexABC()
         {
             // return View();
@@ -201,7 +215,8 @@ namespace OnlineYournal.Controllers
                 new System.Collections.Generic.Dictionary<string, object>();
             
             return new JsonStreamingResult(
-                  AnySqlWebAdmin.RenderType_t.DataTable | AnySqlWebAdmin.RenderType_t.Indented
+                  this.m_fac
+                , AnySqlWebAdmin.RenderType_t.DataTable | AnySqlWebAdmin.RenderType_t.Indented
                 , JsonStreamingResult.JsonRequestBehavior_t.AllowGet
                 , sql
                 , pars 
