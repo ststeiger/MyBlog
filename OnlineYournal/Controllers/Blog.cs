@@ -164,10 +164,19 @@ namespace OnlineYournal.Controllers
             var response = context.HttpContext.Response;
 
             // https://stackoverflow.com/questions/9254891/what-does-content-type-application-json-charset-utf-8-really-mean
-            response.ContentType = "application/json; charset=utf-8";
-            
+
             if (this.m_sql == null)
+            {
+                response.StatusCode = 500;
+                response.ContentType = "application/json; charset=utf-8";
+                using (System.IO.StreamWriter output = new System.IO.StreamWriter(context.Response.Body, System.Text.Encoding.UTF8))
+                {
+                    await output.WriteAsync("{ error: true, msg: \"SQL-command is NULL or empty\"}");
+                }
+
                 return;
+            }
+            
             
             using (System.Data.Common.DbConnection con = this.m_factory.Connection)
             {
@@ -556,6 +565,10 @@ ORDER BY BP_EntryDate DESC
         // GET: /Blog/Delete/5
         public ActionResult ShowEntry(System.Guid? id)
         {
+            string host = (string)this.RouteData.Values["Host"];
+            System.Console.WriteLine(host);
+
+
             T_BlogPost bp = null;
 
             // string lol = "http://localhost/image.aspx?&postimage_text=%0A%5Burl%3Dhttp%3A%2F%2Fpostimg.org%2Fimage%2Fu0zc6aznf%2F%5D%5Bimg%5Dhttp%3A%2F%2Fs1.postimg.org%2Fu0zc6aznf%2Fhtc_hero_wallpaper_03.jpg%5B%2Fimg%5D%5B%2Furl%5D%0A";

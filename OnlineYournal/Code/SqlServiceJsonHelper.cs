@@ -156,7 +156,7 @@ namespace AnySqlWebAdmin
             // using (System.Data.Common.DbDataReader dr = con.ExecuteDbReader(sql, pars))
             using (System.Data.Common.DbDataReader dr = await con.ExecuteDbReaderAsync(sql, pars))
             {
-                using (System.IO.StreamWriter output = new System.IO.StreamWriter(context.Response.Body))
+                using (System.IO.StreamWriter output = new System.IO.StreamWriter(context.Response.Body,System.Text.Encoding.UTF8))
                 {
                     using (Newtonsoft.Json.JsonTextWriter jsonWriter =
                         new Newtonsoft.Json.JsonTextWriter(output)) // context.Response.Output)
@@ -165,7 +165,8 @@ namespace AnySqlWebAdmin
                             jsonWriter.Formatting = Newtonsoft.Json.Formatting.Indented;
 
                         context.Response.StatusCode = (int) System.Net.HttpStatusCode.OK;
-                        context.Response.ContentType = "application/json";
+                        // context.Response.ContentType = "application/json";
+                        context.Response.ContentType = "application/json; charset=utf-8";
 
                         await jsonWriter.WriteStartObjectAsync();
 

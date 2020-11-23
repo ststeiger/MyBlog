@@ -7,6 +7,11 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
+
+// https://stackoverflow.com/questions/53803266/subdomain-routing-in-asp-net-core-3-0-razorpages
+// https://github.com/xeonye/Open.Infrastructure/blob/master/Open.Infrastructure.Solution/src/Open.Infrastructure.Web/DomainMatcher/DomainRoute.cs
+
+
 namespace OnlineYournal.Controllers
 {
     public class HomeController : Controller
