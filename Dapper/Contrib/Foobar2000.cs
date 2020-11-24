@@ -91,6 +91,30 @@ namespace Dapper.Contrib
     static class Foobar2000
     {
 
+        private static  readonly char[] s_vowels = new char[] { 'a','e', 'i', 'o', 'u', 'ä' ,'ö', 'ü' };
+        private static bool IsVowel(char c)
+        {
+            c = char.ToLowerInvariant(c);
+            if (System.Array.IndexOf(s_vowels, c) > -1)
+                return true;
+            
+            return false;
+        }
+
+        private static void foo()
+        {
+            // In some cases, singular nouns ending in -s or -z, require that you double the -s or -z prior to adding the -es for pluralization.
+            
+            //  If the noun ends with ‑f or ‑fe, the f is often changed to ‑ve before adding the -s to form the plural version.
+            string[] ff = new string[] {"f","fe" };
+            // If the singular noun ends in ‑s, -ss, -sh, -ch, -x, or -z, add ‑es to the end to make it plural.
+            string[] foo = new string[]{ "s","ss","sh","ch","x","z"};
+            
+            //  If a singular noun ends in ‑y and the letter before the -y is a consonant, change the ending to ‑ies to make the noun plural.
+            //  If the singular noun ends in -y and the letter before the -y is a vowel, simply add an -s to make it plural.
+            // https://github.com/ststeiger/Pluralize.NET.Core
+        }
+
         private static bool IsWriteable(System.Reflection.PropertyInfo pi)
         {
             var attributes = pi.GetCustomAttributes(typeof(WriteAttribute), false).AsList();
