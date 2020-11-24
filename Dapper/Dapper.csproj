@@ -21,4 +21,8 @@
     <PackageReference Include="System.Reflection.TypeExtensions" Version="4.5.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Contrib\Pluralizer\" />
+  </ItemGroup>
+
 </Project>

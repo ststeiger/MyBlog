@@ -109,10 +109,16 @@ namespace Dapper.Contrib
             string[] ff = new string[] {"f","fe" };
             // If the singular noun ends in ‑s, -ss, -sh, -ch, -x, or -z, add ‑es to the end to make it plural.
             string[] foo = new string[]{ "s","ss","sh","ch","x","z"};
-            
+
             //  If a singular noun ends in ‑y and the letter before the -y is a consonant, change the ending to ‑ies to make the noun plural.
             //  If the singular noun ends in -y and the letter before the -y is a vowel, simply add an -s to make it plural.
             // https://github.com/ststeiger/Pluralize.NET.Core
+
+
+            Pluralize.NET.Core.Pluralizer plu = new Pluralize.NET.Core.Pluralizer();
+            plu.Pluralize("word");
+            plu.Singularize("words");
+
         }
 
         private static bool IsWriteable(System.Reflection.PropertyInfo pi)
@@ -143,7 +149,6 @@ namespace Dapper.Contrib
         }
 
 
-
         public static bool IsReservedKeyword(System.Data.IDbConnection con, string objectName)
         {
             if (string.IsNullOrEmpty(objectName))
@@ -155,7 +160,7 @@ namespace Dapper.Contrib
             }
             else if (con is Npgsql.NpgsqlConnection)
             {
-                return pg_specific.ReservedKeywords.Contains(object);
+                return pg_specific.ReservedKeywords.Contains(objectName);
             }
 
             return false;

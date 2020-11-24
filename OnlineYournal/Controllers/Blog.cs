@@ -169,7 +169,7 @@ namespace OnlineYournal.Controllers
             {
                 response.StatusCode = 500;
                 response.ContentType = "application/json; charset=utf-8";
-                using (System.IO.StreamWriter output = new System.IO.StreamWriter(context.Response.Body, System.Text.Encoding.UTF8))
+                using (System.IO.StreamWriter output = new System.IO.StreamWriter(response.Body, System.Text.Encoding.UTF8))
                 {
                     await output.WriteAsync("{ error: true, msg: \"SQL-command is NULL or empty\"}");
                 }
