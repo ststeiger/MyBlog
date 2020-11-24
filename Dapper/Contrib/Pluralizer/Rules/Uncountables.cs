@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Pluralize.NET.Core.Rules
+namespace Dapper.Contrib.Pluralize.Rules
 {
     internal static class Uncountables
     {

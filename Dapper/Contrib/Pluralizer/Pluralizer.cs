@@ -1,10 +1,10 @@
-﻿using Pluralize.NET.Core.Rules;
+﻿using Dapper.Contrib.Pluralize.Rules;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace Pluralize.NET.Core
+namespace Dapper.Contrib.Pluralize
 {
     public class Pluralizer
     {

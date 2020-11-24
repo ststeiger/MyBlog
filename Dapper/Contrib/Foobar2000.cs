@@ -3,123 +3,275 @@ namespace Dapper.Contrib
 {
 
 
-    [System.AttributeUsage(System.AttributeTargets.Property)]
-    public class WriteAttribute 
-        : System.Attribute
+    public class TableInfo
     {
-        /// <summary>
-        /// Specifies whether a field is writable in the database.
-        /// </summary>
-        /// <param name="write">Whether a field is writable in the database.</param>
-        public WriteAttribute(bool write)
-        {
-            Write = write;
-        }
+        public bool NeedsIdentityInsert;
 
-        /// <summary>
-        /// Whether a field is writable in the database.
-        /// </summary>
-        public bool Write { get; }
+        public string TableSchema;
+        public string TableName;
+
+        public string SelectStatement;
+        public string InsertStatement;
+        public string UpdateStatement;
+        public string UpsertStatement;
+        // insert into dummy(id, name, size) values(1, 'new_name', 3)
+        // on conflict on constraint dummy_pkey
+        // do update set name = 'new_name', size = 4;
+
+        // ON CONFLICT (id) DO NOTHING
+
+        // INSERT INTO b(pk_b, b, comment)
+        // SELECT pk_a, a, comment FROM a
+        // ON CONFLICT(pk_b) DO UPDATE  -- conflict is on the unique column
+        // SET b = excluded.b;            -- key word "excluded", refer to target column
+
+
+        // https://stackoverflow.com/questions/19007884/import-xml-files-to-postgresql/33211885#33211885
+        /* 
+        
+CREATE TABLE IF NOT EXISTS public.foobar
+(
+    myid int NOT NULL,
+    mytesttext character varying(200),
+ 
+    CONSTRAINT pk_foobar PRIMARY KEY (myid)
+);
+
+
+
+;WITH CTE AS 
+(
+	SELECT 
+	     (xpath('//ID/text()', myTempTable.myXmlColumn))[1]::text::int AS id
+	    ,(xpath('//Name/text()', myTempTable.myXmlColumn))[1]::text::character varying(200) AS mytext 
+	FROM unnest(xpath('//record', 
+	 CAST('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+	<data-set>
+	    <record>
+		<ID>1</ID>
+		<Name>A</Name>
+		<RFC>RFC 1035[1]</RFC>
+		<Text>Address record</Text>
+		<Desc>Returns a 32-bit IPv4 address, most commonly used to map hostnames to an IP address of the host, but it is also used for DNSBLs, storing subnet masks in RFC 1101, etc.</Desc>
+	    </record>
+	    <record>
+		<ID>2</ID>
+		<Name>NS</Name>
+		<RFC>RFC 1035[1]</RFC>
+		<Text>Name server record</Text>
+		<Desc>Delegates a DNS zone to use the given authoritative name servers</Desc>
+	    </record>
+	</data-set>
+	' AS xml)   
+	)) AS myTempTable(myXmlColumn)
+)
+-- SELECT * FROM CTE 
+INSERT INTO public.foobar(myid, mytesttext)
+SELECT id, mytext FROM CTE 
+ON CONFLICT(myid) DO UPDATE 
+	SET mytesttext = excluded.mytesttext; -- key word "excluded", refer to target column
+
+
+-- SELECT * FROM foobar
+
+-- DROP TABLE public.foobar;
+
+        */
+
+
+        public string[] Columns;
+        public string[] KeyColumns;
+
+        public string InsertColumns;
+        public string SelectColumns;
+
+
+        public System.Action<object>[] Setters;
+        public System.Action<object>[] Getters;
+
     }
 
 
-
-    /// <summary>
-    /// Specifies that this field is a primary key in the database
-    /// </summary>
-    [System.AttributeUsage(System.AttributeTargets.Property)]
-    public class KeyAttribute 
-        : System.Attribute
+    public class TableInfoCache<TableType>
     {
+        public static object s_lock = new object();
+        public static TableInfo Instance;
 
 
-        public KeyAttribute(string name, params string[] fields)
+        private static Dapper.Contrib.Pluralize.Pluralizer plu = new Dapper.Contrib.Pluralize.Pluralizer();
+
+
+        private static string Singularize(string input)
         {
-            this.Name = name;
-            this.Fields = fields;
+            return plu.Singularize(input);
         }
 
 
-        public KeyAttribute(string name)
-            : this(name, null)
-        { }
+        private static string Pluralize(string input)
+        {
+            return plu.Pluralize(input);
+        }
 
-        public string Name;
-        public string[] Fields;
+
+        public static void Create(System.Data.Common.DbProviderFactory factory)
+        {
+            System.Type t = typeof(TableType);
+
+            lock (s_lock)
+            {
+                if (TableInfoCache<TableType>.Instance != null)
+                {
+                    return;
+                }
+
+                TableInfoCache<TableType>.Instance = new TableInfo();
+            }
+        }
+
+        public static void Create<T>() where T : System.Data.Common.DbProviderFactory
+        {
+            System.Data.Common.DbProviderFactory fact = System.Activator.CreateInstance<T>();
+            Create(fact);
+        }
+
 
     }
 
 
+    public abstract class BaseTable
+    { 
+        public virtual string foo { get; set; }
+    }
 
-    /// <summary>
-    /// Defines the name of a table to use in Dapper.Contrib commands.
-    /// </summary>
-    [System.AttributeUsage(System.AttributeTargets.Class)]
-    public class TableAttribute 
-        : System.Attribute
+
+    [Table("blog", "posts")]
+    public class Post 
+        : BaseTable
     {
+        [IdentityInsert()]
+        public int Id { get; set; }
 
-        /// <summary>
-        /// The name of the table in the database
-        /// </summary>
-        public string Schema { get; set; }
-        public string Name { get; set; }
-
-
-        /// <summary>
-        /// Creates a table mapping to a specific name for Dapper.Contrib commands
-        /// </summary>
-        /// <param name="tableSchema">The name of the schema of this table in the database.</param>
-        /// <param name="tableName">The name of this table in the database.</param>
-        public TableAttribute(string tableSchema, string tableName)
-        {
-            Schema = tableSchema;
-            Name = tableName;
-        }
+        
+        // DB: bla_name
+        public int BlaName { get; set; }
 
 
-        /// <summary>
-        /// Creates a table mapping to a specific name for Dapper.Contrib commands
-        /// </summary>
-        /// <param name="tableName">The name of this table in the database.</param>
-        public TableAttribute(string tableName)
-            :this("dbo", tableName)
-        { }
+        public string _id { get; } // Computed column 
 
     }
+
+
 
     static class Foobar2000
     {
+        
 
-        private static  readonly char[] s_vowels = new char[] { 'a','e', 'i', 'o', 'u', 'ä' ,'ö', 'ü' };
-        private static bool IsVowel(char c)
+        public static int Ins<T>(this System.Data.IDbConnection cnn
+            , T entity
+            , System.Data.IDbTransaction transaction = null
+            , int? commandTimeout = null
+            , System.Data.CommandType? commandType = null)
         {
-            c = char.ToLowerInvariant(c);
-            if (System.Array.IndexOf(s_vowels, c) > -1)
-                return true;
-            
-            return false;
+            int ret = -1;
+
+            // string sql = "INSERT INTO T VALUES (@A, @B)";
+            string sql = TableInfoCache<T>.Instance.InsertStatement;
+            ret = cnn.Execute(sql, entity);
+            return ret;
         }
 
-        private static void foo()
+
+        public static int Ins<T>(this System.Data.IDbConnection cnn
+            , System.Collections.Generic.IEnumerable<T> entities
+            , int? commandTimeout = null
+            , System.Data.CommandType? commandType = null)
         {
-            // In some cases, singular nouns ending in -s or -z, require that you double the -s or -z prior to adding the -es for pluralization.
-            
-            //  If the noun ends with ‑f or ‑fe, the f is often changed to ‑ve before adding the -s to form the plural version.
-            string[] ff = new string[] {"f","fe" };
-            // If the singular noun ends in ‑s, -ss, -sh, -ch, -x, or -z, add ‑es to the end to make it plural.
-            string[] foo = new string[]{ "s","ss","sh","ch","x","z"};
+            int ret = -1;
+            bool wasOpen = false;
 
-            //  If a singular noun ends in ‑y and the letter before the -y is a consonant, change the ending to ‑ies to make the noun plural.
-            //  If the singular noun ends in -y and the letter before the -y is a vowel, simply add an -s to make it plural.
-            // https://github.com/ststeiger/Pluralize.NET.Core
+            if (cnn.State != System.Data.ConnectionState.Open)
+                cnn.Open();
+            else
+                wasOpen = true;
 
+            System.Data.IDbTransaction transaction = cnn.BeginTransaction();
 
-            Pluralize.NET.Core.Pluralizer plu = new Pluralize.NET.Core.Pluralizer();
-            plu.Pluralize("word");
-            plu.Singularize("words");
+            // string sql = "INSERT INTO T VALUES (@A, @B)";
+            string sql = TableInfoCache<T>.Instance.InsertStatement;
+            try
+            {
+                ret = cnn.Execute(sql, entities, transaction);
+                transaction.Commit();
+            }
+            catch (System.Exception ex)
+            {
+                System.Console.WriteLine("Commit Exception Type: {0}", ex.GetType().FullName);
+                System.Console.WriteLine("  Message: {0}", ex.Message);
 
+                // Attempt to roll back the transaction. 
+                try
+                {
+                    transaction.Rollback();
+                }
+                catch (System.Exception ex2)
+                {
+                    // This catch block will handle any errors that may have occurred 
+                    // on the server that would cause the rollback to fail, such as a closed connection.
+                    System.Console.WriteLine("Rollback Exception Type: {0}", ex2.GetType().FullName);
+                    System.Console.WriteLine("  Message: {0}", ex2.Message);
+                }
+
+                throw;
+            }
+            finally
+            {
+                if (!wasOpen && cnn.State != System.Data.ConnectionState.Closed)
+                    cnn.Close();
+            }
+
+            return ret;
         }
+
+
+        public static T GetCustomAttribute<T>(System.Reflection.MemberInfo mi)
+        {
+            object[] objs = mi.GetCustomAttributes(typeof(T), false);
+
+            if (objs == null || objs.Length < 1)
+                return default(T);
+
+            T attr = (T)objs[0];
+            return attr;
+        }
+
+        public static System.Reflection.MemberInfo GetFieldOrProperty(System.Type t, string memberName, System.Reflection.BindingFlags flags)
+        {
+            System.Reflection.MemberInfo retValue = t.GetProperty(memberName, flags);
+            if (retValue == null)
+                retValue = t.GetField(memberName, flags);
+
+            return retValue;
+        }
+
+        public static TAttribute GetMemberAttribute<T, TAttribute>(string memberName)
+        {
+            TAttribute attr = GetCustomAttribute<TAttribute>(
+                GetFieldOrProperty(typeof(T), memberName, System.Reflection.BindingFlags.Public
+                | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.IgnoreCase)
+                );
+
+            return attr;
+        }
+
+
+        public static void CheckAttribute<T>(string memberName)
+        {
+            KeyAttribute attr = GetMemberAttribute<T, KeyAttribute>(memberName);
+
+            System.Console.WriteLine(attr.Name);
+            System.Console.WriteLine(attr.Fields[0]);
+        }
+
 
         private static bool IsWriteable(System.Reflection.PropertyInfo pi)
         {

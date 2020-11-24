@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace Pluralize.NET.Core.Rules
+namespace Dapper.Contrib.Pluralize.Rules
 {
     internal static class IrregularRules
     {
@@ -58,7 +58,10 @@ namespace Pluralize.NET.Core.Rules
                 {"thief", "thieves"},
                 {"groove", "grooves"},
                 {"pickaxe", "pickaxes"},
-                {"whiskey", "whiskies"}
+                {"whiskey", "whiskies"},
+
+                {"fez", "fezzes"},
+                {"gas", "gasses"},
             };
 
         public static Dictionary<string, string> GetIrregularPlurals()
