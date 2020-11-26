@@ -2,9 +2,10 @@
 using Dapper;
 
 
-// namespace Dapper
-namespace OnlineYournal.Code
+namespace OnlineYournal
 {
+
+
     [System.Flags]
     public enum XmlRenderType_t : int
     {
@@ -21,9 +22,6 @@ namespace OnlineYournal.Code
         AssemblyQualifiedName = 512
     }
 
-    
-        
-        
 
     public class StringWriterWithEncoding
         : System.IO.StringWriter
@@ -50,11 +48,29 @@ namespace OnlineYournal.Code
     public static class SqlServiceXmlHelper
     {
 
-        
-        private static System.Xml.XmlWriter CreateXmlWriter(System.Text.StringBuilder builder)
+
+        private static System.Xml.XmlWriter CreateXmlWriter(System.Text.StringBuilder builder, XmlRenderType_t renderType)
+        {
+            return CreateXmlWriter(builder, null, renderType);
+        }
+
+
+        private static System.Xml.XmlWriter CreateXmlWriter(System.IO.StreamWriter writer, XmlRenderType_t renderType)
+        {
+            return CreateXmlWriter(null, writer, renderType);
+        }
+
+
+        private static System.Xml.XmlWriter CreateXmlWriter(System.Text.StringBuilder builder, System.IO.StreamWriter writer, XmlRenderType_t renderType)
         {
             System.Xml.XmlWriterSettings xs = new System.Xml.XmlWriterSettings();
-            xs.Indent = true;
+            
+            if(renderType.HasFlag(XmlRenderType_t.Indented))
+                xs.Indent = true;
+            else
+                xs.Indent = false;
+
+            xs.Async = true;
             xs.IndentChars = "    ";
             xs.NewLineChars = System.Environment.NewLine;
             xs.OmitXmlDeclaration = false; // // <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -62,11 +78,14 @@ namespace OnlineYournal.Code
             // xs.Encoding = new System.Text.UTF8Encoding(false);
             xs.Encoding = new System.Text.UnicodeEncoding(false, false);
 
+            // string exportFilename = System.IO.Path.Combine(@"d:\", table_name + ".xml");
+            // using (System.Xml.XmlWriter writer = System.Xml.XmlWriter.Create(exportFilename, xs))
+
+            if (writer != null)
+                return System.Xml.XmlWriter.Create(writer, xs);
 
             StringWriterWithEncoding sw = new StringWriterWithEncoding(builder, xs.Encoding);
 
-            // string exportFilename = System.IO.Path.Combine(@"d:\", table_name + ".xml");
-            // using (System.Xml.XmlWriter writer = System.Xml.XmlWriter.Create(exportFilename, xs))
             return System.Xml.XmlWriter.Create(sw, xs);
         } // End Function CreateXmlWriter 
 
@@ -79,31 +98,31 @@ namespace OnlineYournal.Code
 
             return "\"" + objectName.Replace("\"", "\"\"") + "\"";
         }
-        
-        /*
-https://data.services.jetbrains.com/products/download?code=RD&platform=linux&_ga=2.172199712.2087767762.1605895035-1291856558.1605895035
 
-var properties = type.GetProperties().Where(IsWriteable).ToArray();
+        // https://data.services.jetbrains.com/products/download?code=RD&platform=linux&_ga=2.172199712.2087767762.1605895035-1291856558.1605895035
 
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary
+            <System.RuntimeTypeHandle, System.Collections.Generic.IEnumerable<System.Reflection.PropertyInfo>> 
+            TypeProperties = new System.Collections.Concurrent.ConcurrentDictionary
+            <System.RuntimeTypeHandle, System.Collections.Generic.IEnumerable<System.Reflection.PropertyInfo>>();
 
-
-            var properties = type.GetProperties().Where(IsWriteable).ToArray();
-            
-                        if (TypeProperties.TryGetValue(type.TypeHandle, out IEnumerable<PropertyInfo> pis))
+        public static System.Collections.Generic.IEnumerable<System.Reflection.PropertyInfo> foo(System.Type type)
+        {
+            if (TypeProperties.TryGetValue(type.TypeHandle, out System.Collections.Generic.IEnumerable<
+                System.Reflection.PropertyInfo> pis))
             {
-                return pis.ToList();
+                return System.Linq.Enumerable.ToList(pis);
             }
-
-            var properties = type.GetProperties().Where(IsWriteable).ToArray();
+            
+            System.Reflection.PropertyInfo[] properties = System.Linq.Enumerable.ToArray(
+                System.Linq.Enumerable.Where(type.GetProperties(), pi => pi.CanWrite)
+            ); 
+            
             TypeProperties[type.TypeHandle] = properties;
-            return properties.ToList();
-            
-            
-            private static readonly ConcurrentDictionary<RuntimeTypeHandle, IEnumerable<PropertyInfo>> TypeProperties = new ConcurrentDictionary<RuntimeTypeHandle, IEnumerable<PropertyInfo>>();
+            return System.Linq.Enumerable.ToList(properties);
+        }
 
 
-
-         */
         public static async System.Threading.Tasks.Task AnyDataReaderToXml(this System.Data.IDbConnection cnn 
             , string sql 
             , object param = null
@@ -140,10 +159,11 @@ var properties = type.GetProperties().Where(IsWriteable).ToArray();
             using (System.IO.StreamWriter output =
                 new System.IO.StreamWriter(context.Response.Body, System.Text.Encoding.UTF8))
             {
-                
-                using (System.Xml.XmlWriter writer = CreateXmlWriter(xmlBuilder))
+
+                // using (System.Xml.XmlWriter writer = CreateXmlWriter(xmlBuilder, format))
+                using (System.Xml.XmlWriter writer = CreateXmlWriter(output, format))
                 {
-                    
+
                     using (System.Data.Common.DbDataReader dr = await cnn.ExecuteDbReaderAsync(sql, param, transaction, commandTimeout, commandType))
                     {
                         if (context != null)
@@ -153,34 +173,33 @@ var properties = type.GetProperties().Where(IsWriteable).ToArray();
                             context.Response.ContentType = "application/xml; charset=utf-8";
                         }
                         
-                        // LargeDataToElementXML(table_schema, table_name, writer, dr);  
-                        LargeDataToArrributeXML(tableSchema, tableName, writer, dr); 
+                        await LargeDataToElementXML(tableSchema, tableName, writer, dr);
+                        // await LargeDataToArrributeXML(tableSchema, tableName, writer, dr); 
                     }
-                    
+
+                    await writer.FlushAsync();
                 } // End Using writer 
             }
         }
         
     
         
-        private static void LargeDataToArrributeXML(
+        private static async System.Threading.Tasks.Task LargeDataToArrributeXML(
               string table_schema
             , string table_name
             , System.Xml.XmlWriter writer
             , System.Data.IDataReader dr)
         {
-            writer.WriteStartDocument(true);
-            writer.WriteStartElement("table");
-            // writer.WriteStartElement(table_name);
-            if(table_schema != null)
-                writer.WriteAttributeString(null, "table_schema", null, table_schema);
+            await writer.WriteStartDocumentAsync(true);
+            await writer.WriteStartElementAsync(null, "table", null);
+            // await writer.WriteStartElementAsync(null, table_name, null);
+
+            if (table_schema != null)
+                await writer.WriteAttributeStringAsync(null, "table_schema", null, table_schema);
             
             if(table_name != null)
-                writer.WriteAttributeString(null, "table_name", null, table_name);
+                await writer.WriteAttributeStringAsync(null, "table_name", null, table_name);
             
-            writer.WriteAttributeString("xmlns", "xsi", null, System.Xml.Schema.XmlSchema.InstanceNamespace);
-            // writer.WriteAttributeString("xsi", "schemaLocation", null, System.Xml.Schema.XmlSchema.InstanceNamespace);
-
             int fc = dr.FieldCount;
 
             string[] columnNames = new string[fc];
@@ -194,7 +213,7 @@ var properties = type.GetProperties().Where(IsWriteable).ToArray();
 
             while (dr.Read())
             {
-                writer.WriteStartElement("row");
+                await writer.WriteStartElementAsync(null, "row", null);
 
                 for (int i = 0; i < fc; ++i)
                 {
@@ -208,41 +227,42 @@ var properties = type.GetProperties().Where(IsWriteable).ToArray();
                         {
                             System.DateTime dt = (System.DateTime) obj;
                             value = dt.ToString("yyyy-MM-dd'T'HH':'mm':'ss'.'fff",
-                                System.Globalization.CultureInfo.InvariantCulture));
+                                System.Globalization.CultureInfo.InvariantCulture);
                         }
                         else
                             value = System.Convert.ToString(obj, System.Globalization.CultureInfo.InvariantCulture);
                         
-                        writer.WriteAttributeString(null, columnNames[i], null, value);
+                        await writer.WriteAttributeStringAsync(null, columnNames[i], null, value);
                     }
                     
                 } // Next i
 
-                writer.WriteEndElement();
+                await writer.WriteEndElementAsync();
             } // Whend
             
-            writer.WriteEndElement();
+            await writer.WriteEndElementAsync();
+            await writer.FlushAsync();
         } // End Sub LargeDataToArrributeXML 
 
         
-        private static void LargeDataToElementXML(
+        private static async System.Threading.Tasks.Task LargeDataToElementXML(
               string table_schema
             , string table_name
             , System.Xml.XmlWriter writer
             , System.Data.IDataReader dr)
         {
-            writer.WriteStartDocument(true);
-            writer.WriteStartElement("table");
-            // writer.WriteStartElement(table_name);
-            if(table_schema != null)
-                writer.WriteAttributeString(null, "table_schema", null, table_schema);
+            await writer.WriteStartDocumentAsync(true);
+            await writer.WriteStartElementAsync(null, "table", null);
+            // await writer.WriteStartElementAsync(null, table_name, null);
+
+            if (table_schema != null)
+                await writer.WriteAttributeStringAsync(null, "table_schema", null, table_schema);
             
             if(table_name != null)
-                writer.WriteAttributeString(null, "table_name", null, table_name);
+                await writer.WriteAttributeStringAsync(null, "table_name", null, table_name);
             
-            writer.WriteAttributeString("xmlns", "xsi", null, System.Xml.Schema.XmlSchema.InstanceNamespace);
-            // writer.WriteAttributeString("xsi", "schemaLocation", null, System.Xml.Schema.XmlSchema.InstanceNamespace);
-
+            await writer.WriteAttributeStringAsync("xmlns", "xsi", null, System.Xml.Schema.XmlSchema.InstanceNamespace);
+            
             int fc = dr.FieldCount;
 
             string[] columnNames = new string[fc];
@@ -256,11 +276,11 @@ var properties = type.GetProperties().Where(IsWriteable).ToArray();
 
             while (dr.Read())
             {
-                writer.WriteStartElement("row");
+                await writer.WriteStartElementAsync(null, "row", null);
 
                 for (int i = 0; i < fc; ++i)
                 {
-                    writer.WriteStartElement(columnNames[i]);
+                    await writer.WriteStartElementAsync(null, columnNames[i], null);
                     object obj = dr.GetValue(i);
 
                     if (obj != System.DBNull.Value)
@@ -275,15 +295,15 @@ var properties = type.GetProperties().Where(IsWriteable).ToArray();
                             writer.WriteValue(System.Convert.ToString(obj, System.Globalization.CultureInfo.InvariantCulture));
                     }
                     else
-                        writer.WriteAttributeString("xsi", "nil", System.Xml.Schema.XmlSchema.InstanceNamespace, "true");
+                        await writer.WriteAttributeStringAsync("xsi", "nil", System.Xml.Schema.XmlSchema.InstanceNamespace, "true");
 
-                    writer.WriteEndElement();
+                    await writer.WriteEndElementAsync();
                 } // Next i
 
-                writer.WriteEndElement();
+                await writer.WriteEndElementAsync();
             } // Whend 
 
-            writer.WriteEndElement();
+            await writer.WriteEndElementAsync();
         } // End Sub LargeDataToElementXML 
         
         

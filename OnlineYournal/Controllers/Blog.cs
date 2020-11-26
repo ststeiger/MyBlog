@@ -125,12 +125,12 @@ namespace OnlineYournal.Controllers
 
         public string ContentType { get; set; }
 
-        
+
         protected string m_sql;
-        protected System.Collections.Generic.Dictionary<string, object> m_parameters; 
+        protected System.Collections.Generic.Dictionary<string, object> m_parameters;
         protected AnySqlWebAdmin.RenderType_t m_renderType;
         protected SqlFactory m_factory;
-        
+
         public JsonStreamingResult(
               SqlFactory factory
             , AnySqlWebAdmin.RenderType_t renderType
@@ -176,16 +176,107 @@ namespace OnlineYournal.Controllers
 
                 return;
             }
-            
-            
+
+
             using (System.Data.Common.DbConnection con = this.m_factory.Connection)
             {
                 await AnySqlWebAdmin.SqlServiceJsonHelper.AnyDataReaderToJson(
                       con
                     , this.m_sql
                     , this.m_parameters
-                    , context.HttpContext 
+                    , context.HttpContext
                     , this.m_renderType
+                );
+            }
+
+        }
+    }
+
+
+
+
+    public class XmlStreamingResult
+        : IActionResult
+    {
+
+        public enum XmlRequestBehavior_t
+        {
+            AllowGet,
+            DenyGet,
+        }
+
+
+        public System.Text.Encoding ContentEncoding { get; set; }
+
+        public string ContentType { get; set; }
+        public XmlRequestBehavior_t XmlRequestBehavior { get; set; }
+
+
+        protected string m_sql;
+        protected System.Collections.Generic.Dictionary<string, object> m_parameters;
+        protected OnlineYournal.XmlRenderType_t m_renderType;
+        protected SqlFactory m_factory;
+
+
+
+        public XmlStreamingResult(
+              SqlFactory factory
+            , OnlineYournal.XmlRenderType_t renderType
+            , XmlRequestBehavior_t xmlRequestBehavior
+            , string sql
+            , System.Collections.Generic.Dictionary<string, object> pars
+            )
+        {
+            this.m_factory = factory;
+            this.m_sql = sql;
+            this.m_parameters = pars;
+            this.m_renderType = renderType;
+            XmlRequestBehavior = xmlRequestBehavior;
+        }
+
+
+        
+
+        public async System.Threading.Tasks.Task ExecuteResultAsync(ActionContext context)
+        {
+            if (context == null)
+            {
+                throw new System.ArgumentNullException("context");
+            }
+
+            if (XmlRequestBehavior == XmlRequestBehavior_t.DenyGet && string.Equals(context.HttpContext.Request.Method, "GET", System.StringComparison.OrdinalIgnoreCase))
+            {
+                throw new System.InvalidOperationException("This request has been blocked because sensitive information could be disclosed to third party web sites when this is used in a GET request. To allow GET requests, set JsonRequestBehavior to AllowGet.");
+            }
+
+            var response = context.HttpContext.Response;
+
+            // https://stackoverflow.com/questions/9254891/what-does-content-type-application-json-charset-utf-8-really-mean
+
+            if (this.m_sql == null)
+            {
+                response.StatusCode = 500;
+                response.ContentType = "application/xml; charset=utf-8";
+                using (System.IO.StreamWriter output = new System.IO.StreamWriter(response.Body, System.Text.Encoding.UTF8))
+                {
+                    await output.WriteAsync("{ error: true, msg: \"SQL-command is NULL or empty\"}");
+                }
+
+                return;
+            }
+
+
+            using (System.Data.Common.DbConnection con = this.m_factory.Connection)
+            {
+                await OnlineYournal.SqlServiceXmlHelper.AnyDataReaderToXml(
+                      con
+                    , this.m_sql
+                    , this.m_parameters
+                    , "dbo"
+                    , "T_BlogPost"
+                    , this.m_renderType
+                    , context.HttpContext
+                    
                 );
             }
 
@@ -217,18 +308,34 @@ namespace OnlineYournal.Controllers
         }
 
 
-        public IActionResult Dataa()
+        public IActionResult JsonData()
         {
             string sql = "SELECT * FROM T_BlogPost";
-            System.Collections.Generic.Dictionary<string, object> pars = 
+            System.Collections.Generic.Dictionary<string, object> pars =
                 new System.Collections.Generic.Dictionary<string, object>();
-            
+
             return new JsonStreamingResult(
                   this.m_fac
                 , AnySqlWebAdmin.RenderType_t.DataTable | AnySqlWebAdmin.RenderType_t.Indented
                 , JsonStreamingResult.JsonRequestBehavior_t.AllowGet
                 , sql
-                , pars 
+                , pars
+            );
+        }
+
+
+        public IActionResult XmlData()
+        {
+            string sql = "SELECT * FROM T_BlogPost";
+            System.Collections.Generic.Dictionary<string, object> pars =
+                new System.Collections.Generic.Dictionary<string, object>();
+            
+            return new XmlStreamingResult(
+                  this.m_fac
+                , XmlRenderType_t.Default | XmlRenderType_t.Indented
+                , XmlStreamingResult.XmlRequestBehavior_t.AllowGet
+                , sql
+                , pars
             );
         }
 
