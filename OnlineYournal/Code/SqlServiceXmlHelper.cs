@@ -77,8 +77,19 @@ namespace OnlineYournal
             return CreateXmlWriter(null, writer, renderType);
         }
 
+        private static System.Xml.XmlWriter CreateXmlWriter(System.IO.Stream stream, XmlRenderType_t renderType)
+        {
+            System.IO.TextWriter tw = new System.IO.StreamWriter(stream, System.Text.Encoding.UTF8);
 
-        private static System.Xml.XmlWriter CreateXmlWriter(System.Text.StringBuilder builder, System.IO.StreamWriter writer, XmlRenderType_t renderType)
+            return CreateXmlWriter(null, tw, renderType);
+        }
+
+        private static System.Xml.XmlWriter CreateXmlWriter(Microsoft.AspNetCore.Http.HttpContext context, XmlRenderType_t renderType)
+        {
+            return CreateXmlWriter(context.Response.Body, renderType);
+        }
+        
+        private static System.Xml.XmlWriter CreateXmlWriter(System.Text.StringBuilder builder, System.IO.TextWriter writer, XmlRenderType_t renderType)
         {
             System.Xml.XmlWriterSettings xs = new System.Xml.XmlWriterSettings();
             
@@ -94,6 +105,7 @@ namespace OnlineYournal
             // xs.Encoding = System.Text.Encoding.UTF8; // doesn't work with pgsql 
             // xs.Encoding = new System.Text.UTF8Encoding(false);
             xs.Encoding = new System.Text.UnicodeEncoding(false, false);
+            xs.CloseOutput = true;
 
             // string exportFilename = System.IO.Path.Combine(@"d:\", table_name + ".xml");
             // using (System.Xml.XmlWriter writer = System.Xml.XmlWriter.Create(exportFilename, xs))
