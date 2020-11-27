@@ -5,6 +5,23 @@ using Dapper;
 namespace OnlineYournal
 {
 
+    // wcf host in .net core
+    // https://github.com/DigDes/SoapCore
+    // https://devblogs.microsoft.com/dotnet/custom-asp-net-core-middleware-example/
+    
+    // WCF: No connection could be made because the target machine actively refused
+    // https://stackoverflow.com/a/25370157/155077
+    // bypassonlocal?
+    // Well, I got this error message when I forgot to install necessary components. see link Configuring WCF Service with netTcpBinding
+    // Go to "Programs and Features" (usually in control panel)
+    // Go to "Turn Windows features on or off"
+    // (assuming VS2012) Go to ".NET Framework 4.5 Advanced Services"->"WCF Services"
+    // Enable "TCP Activation"
+    // https://rohitguptablog.wordpress.com/2011/06/16/configuring-wcf-service-with-nettcpbinding/
+    
+    // https://docs.microsoft.com/en-us/aspnet/core/grpc/why-migrate-wcf-to-dotnet-grpc?view=aspnetcore-5.0
+    // https://stackoverflow.com/questions/8514766/how-to-run-wcf-service-on-a-specific-port
+    
 
     [System.Flags]
     public enum XmlRenderType_t : int
