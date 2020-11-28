@@ -152,7 +152,7 @@ namespace OnlineYournal
 
 
         public static async System.Threading.Tasks.Task AnyDataReaderToXml(this System.Data.IDbConnection cnn 
-            , string sql 
+            , string sql
             , object param = null
             , string tableSchema = null
             , string tableName = null
