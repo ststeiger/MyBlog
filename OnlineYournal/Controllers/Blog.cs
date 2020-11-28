@@ -330,7 +330,7 @@ namespace OnlineYournal.Controllers
 
 SELECT * FROM T_BlogPost; 
 
-SELECT * FROM geoip.geoip_locations_temp; 
+SELECT * FROM geoip.geoip_locations_temp WHERE (a=2); 
 
 SELECT TOP 10 * FROM geoip.geoip_blocks_temp; 
 
@@ -340,7 +340,7 @@ SELECT TOP 10 * FROM geoip.geoip_blocks_temp;
             
             return new XmlStreamingResult(
                   this.m_fac
-                , XmlRenderType_t.Default | XmlRenderType_t.Indented  | XmlRenderType_t.DataInAttributes  // | XmlRenderType_t.DataTable | XmlRenderType_t.WithColumnDefinition | XmlRenderType_t.WithDetail | XmlRenderType_t.LongName
+                , XmlRenderType_t.Default | XmlRenderType_t.Indented  | XmlRenderType_t.WithColumnDefinition | XmlRenderType_t.WithDetail | XmlRenderType_t.LongName // | XmlRenderType_t.DataInAttributes | XmlRenderType_t.DataTable 
                 , XmlStreamingResult.XmlRequestBehavior_t.AllowGet
                 , sql
                 , pars

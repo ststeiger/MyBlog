@@ -210,16 +210,30 @@ namespace OnlineYournal
                         context.Response.StatusCode = (int)System.Net.HttpStatusCode.InternalServerError;
                         context.Response.ContentType = "application/xml; charset=utf-8";
 
+                        bool dataAsAttributes = format.HasFlag(XmlRenderType_t.DataInAttributes);
+
+
                         await writer.WriteStartDocumentAsync(true);
 
                         await writer.WriteStartElementAsync(null, "error", null);
-                        await writer.WriteStartElementAsync(null, "Message", null);
-                        writer.WriteValue(ex.Message);
-                        await writer.WriteEndElementAsync(); // Message
+                        if (dataAsAttributes)
+                            await writer.WriteAttributeStringAsync(null, "Message", null, ex.Message);
+                        else
+                        {
+                            await writer.WriteStartElementAsync(null, "Message", null);
+                            writer.WriteValue(ex.Message);
+                            await writer.WriteEndElementAsync(); // Message
+                        }
 
-                        await writer.WriteStartElementAsync(null, "StackTrace", null);
-                        writer.WriteValue(ex.StackTrace);
-                        await writer.WriteEndElementAsync(); // StackTrace
+                        if (dataAsAttributes)
+                            await writer.WriteAttributeStringAsync(null, "StackTrace", null, ex.StackTrace);
+                        else
+                        {
+                            await writer.WriteStartElementAsync(null, "StackTrace", null);
+                            writer.WriteValue(ex.StackTrace);
+                            await writer.WriteEndElementAsync(); // StackTrace
+                        }
+                        
                         await writer.WriteEndElementAsync(); // error
                     }
 
@@ -397,8 +411,6 @@ namespace OnlineYournal
                 if (dataTableOnly)
                     break;
             } while (dr.NextResult());
-
-
 
             if (!dataTableOnly)
             {
