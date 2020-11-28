@@ -332,7 +332,7 @@ namespace OnlineYournal.Controllers
             
             return new XmlStreamingResult(
                   this.m_fac
-                , XmlRenderType_t.Default | XmlRenderType_t.Indented
+                , XmlRenderType_t.Default | XmlRenderType_t.Indented | XmlRenderType_t.DataInAttributes // | XmlRenderType_t.WithColumnDefinition | XmlRenderType_t.WithDetail | XmlRenderType_t.LongName
                 , XmlStreamingResult.XmlRequestBehavior_t.AllowGet
                 , sql
                 , pars

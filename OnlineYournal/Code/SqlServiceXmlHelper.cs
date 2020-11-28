@@ -29,15 +29,14 @@ namespace OnlineYournal
         Default = 0,
         Indented = 1,
         DataTable = 2,
-        Array = 4,
-        Data_Only = 8,
-        Columns_Associative = 16,
-        Columns_ObjectArray = 32,
-        WithDetail = 64,
-        ShortName = 128,
-        LongName = 256,
-        AssemblyQualifiedName = 512
+        DataInAttributes = 4,
+        WithColumnDefinition = 8,
+        WithDetail = 16,
+        LongName = 32,
+        AssemblyQualifiedName = 64
     }
+
+
 
 
     public class StringWriterWithEncoding
@@ -173,11 +172,8 @@ namespace OnlineYournal
                     sql = $"SELECT * FROM " + QuoteObject(tableName) + " ;";
                 else
                     sql = $"SELECT * FROM " + QuoteObject(tableSchema) + "." + QuoteObject(tableName) + " ;";
-            }
-                
+            } // End if (string.IsNullOrEmpty(sql))
 
-        
-            
             if (string.IsNullOrEmpty(sql))
                 throw new System.ArgumentException("Parameter " +nameof(sql) + " is NULL or empty.");
             
@@ -198,24 +194,96 @@ namespace OnlineYournal
                         if (context != null)
                         {
                             context.Response.StatusCode = (int) System.Net.HttpStatusCode.OK;
-                            // context.Response.ContentType = "application/xml";
                             context.Response.ContentType = "application/xml; charset=utf-8";
-                        }
-                        
-                        await LargeDataToElementXML(tableSchema, tableName, writer, dr);
-                        // await LargeDataToArrributeXML(tableSchema, tableName, writer, dr); 
-                    }
+                        } // End if (context != null) 
+
+                        await WriteAsXmlAsync(tableSchema, tableName, format, writer, dr);
+                    } // End Using dr 
 
                     await writer.FlushAsync();
                 } // End Using writer 
+
+            }// Wnd Using output 
+
+        } // End Task AnyDataReaderToXml 
+
+
+        private static string GetAssemblyQualifiedNoVersionName(string input)
+        {
+            int i = 0;
+            bool isNotFirst = false;
+            while (i < input.Length)
+            {
+                if (input[i] == ',')
+                {
+                    if (isNotFirst)
+                        break;
+
+                    isNotFirst = true;
+                }
+
+                i += 1;
             }
-        }
+
+            return input.Substring(0, i);
+        } // GetAssemblyQualifiedNoVersionName
+
+
+        private static string GetAssemblyQualifiedNoVersionName(System.Type type)
+        {
+            if (type == null)
+                return null;
+
+            return GetAssemblyQualifiedNoVersionName(type.AssemblyQualifiedName);
+        } // GetAssemblyQualifiedNoVersionName
+
+
+        private static string GetTypeName(System.Type type, XmlRenderType_t renderType)
+        {
+            if (type == null)
+                return null;
+
+            if (renderType.HasFlag(XmlRenderType_t.AssemblyQualifiedName))
+                return GetAssemblyQualifiedNoVersionName(type);
+
+            if (renderType.HasFlag(XmlRenderType_t.LongName))
+                return type.FullName;
+
+            return type.Name;
+        } // GetAssemblyQualifiedNoVersionName
+
         
-    
-        
-        private static async System.Threading.Tasks.Task LargeDataToArrributeXML(
+        private static async System.Threading.Tasks.Task WriteColumnDefinition(
+               System.Xml.XmlWriter writer
+             , System.Data.IDataReader dr 
+            ,  XmlRenderType_t renderType)
+        {
+            await writer.WriteStartElementAsync(null, "columns", null);
+
+            for (int i = 0; i <= dr.FieldCount - 1; i++)
+            {
+                await writer.WriteStartElementAsync(null, "column", null);
+
+                await writer.WriteAttributeStringAsync(null, "name", null, dr.GetName(i));
+                await writer.WriteAttributeStringAsync(null, "index", null, i.ToString(System.Globalization.CultureInfo.InvariantCulture));
+
+                if (renderType.HasFlag(XmlRenderType_t.WithDetail))
+                {
+                    await writer.WriteAttributeStringAsync(null, "fieldType", null, GetTypeName(dr.GetFieldType(i), renderType));
+                }
+
+                await writer.WriteEndElementAsync(); // column
+            }
+
+            await writer.WriteEndElementAsync(); // columns 
+        } // WriteColumnDefinition
+
+
+
+        private static async System.Threading.Tasks.Task WriteAsXmlAsync(
               string table_schema
             , string table_name
+            , XmlRenderType_t format
             , System.Xml.XmlWriter writer
             , System.Data.IDataReader dr)
         {
@@ -223,13 +291,21 @@ namespace OnlineYournal
             await writer.WriteStartElementAsync(null, "table", null);
             // await writer.WriteStartElementAsync(null, table_name, null);
 
-            if (table_schema != null)
+            bool dataAsAttributes = format.HasFlag(XmlRenderType_t.DataInAttributes);
+
+                if (table_schema != null)
                 await writer.WriteAttributeStringAsync(null, "table_schema", null, table_schema);
             
             if(table_name != null)
                 await writer.WriteAttributeStringAsync(null, "table_name", null, table_name);
             
+            if(!dataAsAttributes)
+                await writer.WriteAttributeStringAsync("xmlns", "xsi", null, System.Xml.Schema.XmlSchema.InstanceNamespace);
+            
             int fc = dr.FieldCount;
+
+            if(format.HasFlag(XmlRenderType_t.WithColumnDefinition))
+                await WriteColumnDefinition(writer, dr, format);
 
             string[] columnNames = new string[fc];
             System.Type[] columnTypes = new System.Type[fc];
@@ -246,6 +322,9 @@ namespace OnlineYournal
 
                 for (int i = 0; i < fc; ++i)
                 {
+                    if (!dataAsAttributes)
+                        await writer.WriteStartElementAsync(null, columnNames[i], null);
+
                     object obj = dr.GetValue(i);
 
                     if (obj != System.DBNull.Value)
@@ -254,88 +333,35 @@ namespace OnlineYournal
 
                         if (object.ReferenceEquals(columnTypes[i], typeof(System.DateTime)))
                         {
-                            System.DateTime dt = (System.DateTime) obj;
-                            value = dt.ToString("yyyy-MM-dd'T'HH':'mm':'ss'.'fff",
-                                System.Globalization.CultureInfo.InvariantCulture);
+                            System.DateTime dt = (System.DateTime)obj;
+                            value = dt.ToString("yyyy-MM-dd'T'HH':'mm':'ss'.'fff", System.Globalization.CultureInfo.InvariantCulture);
                         }
                         else
                             value = System.Convert.ToString(obj, System.Globalization.CultureInfo.InvariantCulture);
-                        
-                        await writer.WriteAttributeStringAsync(null, columnNames[i], null, value);
-                    }
-                    
-                } // Next i
 
-                await writer.WriteEndElementAsync();
-            } // Whend
-            
-            await writer.WriteEndElementAsync();
-            await writer.FlushAsync();
-        } // End Sub LargeDataToArrributeXML 
-
-        
-        private static async System.Threading.Tasks.Task LargeDataToElementXML(
-              string table_schema
-            , string table_name
-            , System.Xml.XmlWriter writer
-            , System.Data.IDataReader dr)
-        {
-            await writer.WriteStartDocumentAsync(true);
-            await writer.WriteStartElementAsync(null, "table", null);
-            // await writer.WriteStartElementAsync(null, table_name, null);
-
-            if (table_schema != null)
-                await writer.WriteAttributeStringAsync(null, "table_schema", null, table_schema);
-            
-            if(table_name != null)
-                await writer.WriteAttributeStringAsync(null, "table_name", null, table_name);
-            
-            await writer.WriteAttributeStringAsync("xmlns", "xsi", null, System.Xml.Schema.XmlSchema.InstanceNamespace);
-            
-            int fc = dr.FieldCount;
-
-            string[] columnNames = new string[fc];
-            System.Type[] columnTypes = new System.Type[fc];
-
-            for (int i = 0; i < dr.FieldCount; ++i)
-            {
-                columnNames[i] = dr.GetName(i);
-                columnTypes[i] = dr.GetFieldType(i);
-            } // Next i 
-
-            while (dr.Read())
-            {
-                await writer.WriteStartElementAsync(null, "row", null);
-
-                for (int i = 0; i < fc; ++i)
-                {
-                    await writer.WriteStartElementAsync(null, columnNames[i], null);
-                    object obj = dr.GetValue(i);
-
-                    if (obj != System.DBNull.Value)
-                    {
-                        if (object.ReferenceEquals(columnTypes[i], typeof(System.DateTime)))
-                        {
-                            System.DateTime dt = (System.DateTime)obj;
-                            writer.WriteValue(dt.ToString("yyyy-MM-dd'T'HH':'mm':'ss'.'fff",
-                                System.Globalization.CultureInfo.InvariantCulture));
-                        }
+                        if (dataAsAttributes)
+                            await writer.WriteAttributeStringAsync(null, columnNames[i], null, value);
                         else
-                            writer.WriteValue(System.Convert.ToString(obj, System.Globalization.CultureInfo.InvariantCulture));
-                    }
+                            writer.WriteValue(value);
+                    } // End if (obj != System.DBNull.Value) 
                     else
-                        await writer.WriteAttributeStringAsync("xsi", "nil", System.Xml.Schema.XmlSchema.InstanceNamespace, "true");
+                    {
+                        if (!dataAsAttributes)
+                            await writer.WriteAttributeStringAsync("xsi", "nil", System.Xml.Schema.XmlSchema.InstanceNamespace, "true");
+                    }
 
-                    await writer.WriteEndElementAsync();
+                    if (!dataAsAttributes)
+                        await writer.WriteEndElementAsync();
                 } // Next i
 
                 await writer.WriteEndElementAsync();
             } // Whend 
 
             await writer.WriteEndElementAsync();
-        } // End Sub LargeDataToElementXML 
-        
-        
+            await writer.FlushAsync();
+        } // End Sub WriteAsXmlAsync 
+
+
     } // End Class SqlMapper 
     
     

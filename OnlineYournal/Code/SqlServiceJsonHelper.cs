@@ -15,9 +15,9 @@ namespace AnySqlWebAdmin
         Columns_Associative = 16,
         Columns_ObjectArray = 32,
         WithDetail = 64,
-        ShortName = 128,
-        LongName = 256,
-        AssemblyQualifiedName = 512
+        
+        LongName = 128,
+        AssemblyQualifiedName = 256
     }
 
 
@@ -58,14 +58,11 @@ namespace AnySqlWebAdmin
             if (type == null)
                 return null;
 
-            if (renderType.HasFlag(RenderType_t.ShortName))
-                return type.Name;
+            if (renderType.HasFlag(RenderType_t.AssemblyQualifiedName))
+                return GetAssemblyQualifiedNoVersionName(type);
 
             if (renderType.HasFlag(RenderType_t.LongName))
                 return type.FullName;
-
-            if (renderType.HasFlag(RenderType_t.AssemblyQualifiedName))
-                return GetAssemblyQualifiedNoVersionName(type);
 
             return type.Name;
         } // GetAssemblyQualifiedNoVersionName
