@@ -326,13 +326,21 @@ namespace OnlineYournal.Controllers
 
         public IActionResult XmlData()
         {
-            string sql = "SELECT * FROM T_BlogPost";
+            string sql = @"
+
+SELECT * FROM T_BlogPost; 
+
+SELECT * FROM geoip.geoip_locations_temp; 
+
+SELECT TOP 10 * FROM geoip.geoip_blocks_temp; 
+
+";
             System.Collections.Generic.Dictionary<string, object> pars =
                 new System.Collections.Generic.Dictionary<string, object>();
             
             return new XmlStreamingResult(
                   this.m_fac
-                , XmlRenderType_t.Default | XmlRenderType_t.Indented | XmlRenderType_t.DataInAttributes // | XmlRenderType_t.WithColumnDefinition | XmlRenderType_t.WithDetail | XmlRenderType_t.LongName
+                , XmlRenderType_t.Default | XmlRenderType_t.Indented  | XmlRenderType_t.DataInAttributes  // | XmlRenderType_t.DataTable | XmlRenderType_t.WithColumnDefinition | XmlRenderType_t.WithDetail | XmlRenderType_t.LongName
                 , XmlStreamingResult.XmlRequestBehavior_t.AllowGet
                 , sql
                 , pars

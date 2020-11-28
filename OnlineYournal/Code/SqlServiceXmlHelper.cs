@@ -188,17 +188,40 @@ namespace OnlineYournal
                 // using (System.Xml.XmlWriter writer = CreateXmlWriter(xmlBuilder, format))
                 using (System.Xml.XmlWriter writer = CreateXmlWriter(output, format))
                 {
-
-                    using (System.Data.Common.DbDataReader dr = await cnn.ExecuteDbReaderAsync(sql, param, transaction, commandTimeout, commandType))
+                    try
                     {
-                        if (context != null)
-                        {
-                            context.Response.StatusCode = (int) System.Net.HttpStatusCode.OK;
-                            context.Response.ContentType = "application/xml; charset=utf-8";
-                        } // End if (context != null) 
 
-                        await WriteAsXmlAsync(tableSchema, tableName, format, writer, dr);
-                    } // End Using dr 
+
+
+                        using (System.Data.Common.DbDataReader dr = await cnn.ExecuteDbReaderAsync(sql, param, transaction, commandTimeout, commandType))
+                        {
+                            if (context != null)
+                            {
+                                context.Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
+                                context.Response.ContentType = "application/xml; charset=utf-8";
+                            } // End if (context != null) 
+
+                            await WriteAsXmlAsync(tableSchema, tableName, format, writer, dr);
+                        } // End Using dr 
+
+                    }
+                    catch (System.Exception ex)
+                    {
+                        context.Response.StatusCode = (int)System.Net.HttpStatusCode.InternalServerError;
+                        context.Response.ContentType = "application/xml; charset=utf-8";
+
+                        await writer.WriteStartDocumentAsync(true);
+
+                        await writer.WriteStartElementAsync(null, "error", null);
+                        await writer.WriteStartElementAsync(null, "Message", null);
+                        writer.WriteValue(ex.Message);
+                        await writer.WriteEndElementAsync(); // Message
+
+                        await writer.WriteStartElementAsync(null, "StackTrace", null);
+                        writer.WriteValue(ex.StackTrace);
+                        await writer.WriteEndElementAsync(); // StackTrace
+                        await writer.WriteEndElementAsync(); // error
+                    }
 
                     await writer.FlushAsync();
                 } // End Using writer 
@@ -288,77 +311,101 @@ namespace OnlineYournal
             , System.Data.IDataReader dr)
         {
             await writer.WriteStartDocumentAsync(true);
-            await writer.WriteStartElementAsync(null, "table", null);
-            // await writer.WriteStartElementAsync(null, table_name, null);
-
             bool dataAsAttributes = format.HasFlag(XmlRenderType_t.DataInAttributes);
 
-                if (table_schema != null)
-                await writer.WriteAttributeStringAsync(null, "table_schema", null, table_schema);
-            
-            if(table_name != null)
-                await writer.WriteAttributeStringAsync(null, "table_name", null, table_name);
-            
-            if(!dataAsAttributes)
-                await writer.WriteAttributeStringAsync("xmlns", "xsi", null, System.Xml.Schema.XmlSchema.InstanceNamespace);
-            
-            int fc = dr.FieldCount;
 
-            if(format.HasFlag(XmlRenderType_t.WithColumnDefinition))
-                await WriteColumnDefinition(writer, dr, format);
+            bool dataTableOnly = format.HasFlag(XmlRenderType_t.DataTable);
 
-            string[] columnNames = new string[fc];
-            System.Type[] columnTypes = new System.Type[fc];
+            if (!dataTableOnly)
+                await writer.WriteStartElementAsync(null, "dataset", null);
 
-            for (int i = 0; i < dr.FieldCount; ++i)
+            do
             {
-                columnNames[i] = dr.GetName(i);
-                columnTypes[i] = dr.GetFieldType(i);
-            } // Next i 
+                await writer.WriteStartElementAsync(null, "table", null);
 
-            while (dr.Read())
-            {
-                await writer.WriteStartElementAsync(null, "row", null);
-
-                for (int i = 0; i < fc; ++i)
+                if (dataTableOnly)
                 {
-                    if (!dataAsAttributes)
-                        await writer.WriteStartElementAsync(null, columnNames[i], null);
+                    if (table_schema != null)
+                        await writer.WriteAttributeStringAsync(null, "table_schema", null, table_schema);
 
-                    object obj = dr.GetValue(i);
+                    if (table_name != null)
+                        await writer.WriteAttributeStringAsync(null, "table_name", null, table_name);
+                }
 
-                    if (obj != System.DBNull.Value)
-                    {
-                        string value = null;
+                if (!dataAsAttributes)
+                    await writer.WriteAttributeStringAsync("xmlns", "xsi", null, System.Xml.Schema.XmlSchema.InstanceNamespace);
 
-                        if (object.ReferenceEquals(columnTypes[i], typeof(System.DateTime)))
-                        {
-                            System.DateTime dt = (System.DateTime)obj;
-                            value = dt.ToString("yyyy-MM-dd'T'HH':'mm':'ss'.'fff", System.Globalization.CultureInfo.InvariantCulture);
-                        }
-                        else
-                            value = System.Convert.ToString(obj, System.Globalization.CultureInfo.InvariantCulture);
+                int fc = dr.FieldCount;
 
-                        if (dataAsAttributes)
-                            await writer.WriteAttributeStringAsync(null, columnNames[i], null, value);
-                        else
-                            writer.WriteValue(value);
-                    } // End if (obj != System.DBNull.Value) 
-                    else
+                if (format.HasFlag(XmlRenderType_t.WithColumnDefinition))
+                    await WriteColumnDefinition(writer, dr, format);
+
+                string[] columnNames = new string[fc];
+                System.Type[] columnTypes = new System.Type[fc];
+
+                for (int i = 0; i < dr.FieldCount; ++i)
+                {
+                    columnNames[i] = dr.GetName(i);
+                    columnTypes[i] = dr.GetFieldType(i);
+                } // Next i 
+
+
+                while (dr.Read())
+                {
+                    await writer.WriteStartElementAsync(null, "row", null);
+
+                    for (int i = 0; i < fc; ++i)
                     {
                         if (!dataAsAttributes)
-                            await writer.WriteAttributeStringAsync("xsi", "nil", System.Xml.Schema.XmlSchema.InstanceNamespace, "true");
-                    }
+                            await writer.WriteStartElementAsync(null, columnNames[i], null);
 
-                    if (!dataAsAttributes)
-                        await writer.WriteEndElementAsync();
-                } // Next i
+                        object obj = dr.GetValue(i);
 
-                await writer.WriteEndElementAsync();
-            } // Whend 
+                        if (obj != System.DBNull.Value)
+                        {
+                            string value = null;
 
-            await writer.WriteEndElementAsync();
-            await writer.FlushAsync();
+                            if (object.ReferenceEquals(columnTypes[i], typeof(System.DateTime)))
+                            {
+                                System.DateTime dt = (System.DateTime)obj;
+                                value = dt.ToString("yyyy-MM-dd'T'HH':'mm':'ss'.'fff", System.Globalization.CultureInfo.InvariantCulture);
+                            }
+                            else
+                                value = System.Convert.ToString(obj, System.Globalization.CultureInfo.InvariantCulture);
+
+                            if (dataAsAttributes)
+                                await writer.WriteAttributeStringAsync(null, columnNames[i], null, value);
+                            else
+                                writer.WriteValue(value);
+                        } // End if (obj != System.DBNull.Value) 
+                        else
+                        {
+                            if (!dataAsAttributes)
+                                await writer.WriteAttributeStringAsync("xsi", "nil", System.Xml.Schema.XmlSchema.InstanceNamespace, "true");
+                        }
+
+                        if (!dataAsAttributes)
+                            await writer.WriteEndElementAsync(); // column 
+                    } // Next i
+
+                    await writer.WriteEndElementAsync(); // row 
+                } // Whend 
+
+                await writer.WriteEndElementAsync(); // table 
+                await writer.FlushAsync();
+
+                if (dataTableOnly)
+                    break;
+            } while (dr.NextResult());
+
+
+
+            if (!dataTableOnly)
+            {
+                await writer.WriteEndElementAsync(); // dataset 
+                await writer.FlushAsync();
+            }
+
         } // End Sub WriteAsXmlAsync 
 
 
