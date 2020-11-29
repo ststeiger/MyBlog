@@ -1,0 +1,15 @@
+﻿
+https://github.com/mikebrind/RazorEngineViewOptionsFileProviders
+https://www.mikesdotnetting.com/article/301/loading-asp-net-core-mvc-views-from-a-database-or-other-location
+https://khalidabuhakmeh.com/generate-outputs-with-razor-engine-in-dotnet-core
+https://stackoverflow.com/questions/38247080/using-razor-outside-of-mvc-in-net-core
+
+https://www.twilio.com/blog/dropdown-lists-aspnet-core-razor-pages-view-models-ajax
+https://docs.microsoft.com/en-us/aspnet/core/data/ef-rp/intro?view=aspnetcore-5.0&tabs=visual-studio
+
+
+https://social.msdn.microsoft.com/Forums/office/en-US/87b9cd73-a41b-4fd0-94c7-dfe53e92947e/office-2003-mime-types-for-excel?forum=exceldev
+https://github.com/miladsoft/npoi/blob/master/npoi_Example/Controllers/HomeController.cs
+
+
+https://steemit.com/utopian-io/@haig/how-to-create-excel-spreadsheets-using-npoi

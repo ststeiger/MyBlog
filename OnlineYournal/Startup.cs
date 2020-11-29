@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Routing; // for GetRouteData
 using Microsoft.Extensions.Hosting; // for IsDevelopment
 // using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection; // for AddSingleton, AddOptions, AddControllersWithViews 
+using Microsoft.Extensions.Configuration; // for GetConnectionString 
 
 
 
@@ -28,6 +29,11 @@ namespace OnlineYournal
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(Microsoft.Extensions.DependencyInjection.IServiceCollection services)
         {
+            services.AddSingleton<Microsoft.AspNetCore.Http.IHttpContextAccessor, Microsoft.AspNetCore.Http.HttpContextAccessor>();
+
+            services.AddSingleton<SearchValueTransformer>();
+
+
             // This method configures the MVC services for the commonly used features with controllers with views. 
             // This combines the effects of Microsoft.Extensions.DependencyInjection.MvcCoreServiceCollectionExtensions.AddMvcCore(Microsoft.Extensions.DependencyInjection.IServiceCollection),
             // Microsoft.Extensions.DependencyInjection.MvcApiExplorerMvcCoreBuilderExtensions.AddApiExplorer(Microsoft.Extensions.DependencyInjection.IMvcCoreBuilder),
@@ -40,16 +46,42 @@ namespace OnlineYournal
             // and Microsoft.Extensions.DependencyInjection.MvcRazorMvcCoreBuilderExtensions.AddRazorViewEngine(Microsoft.Extensions.DependencyInjection.IMvcCoreBuilder).
             // To add services for pages call Microsoft.Extensions.DependencyInjection.MvcServiceCollectionExtensions.AddRazorPages(Microsoft.Extensions.DependencyInjection.IServiceCollection)
             // services.AddControllersWithViews();
+            /// string cs = Configuration.GetConnectionString("DefaultConnection"); 
 
 
-            services.AddSingleton<Microsoft.AspNetCore.Http.IHttpContextAccessor, Microsoft.AspNetCore.Http.HttpContextAccessor>();
 
-            services.AddSingleton<SearchValueTransformer>();
+            services.AddControllersWithViews(
+                    delegate (Microsoft.AspNetCore.Mvc.MvcOptions opts)
+                    {
+                        // opts.default
+                    }
+                ).AddRazorRuntimeCompilation(
+                    delegate (Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation.MvcRazorRuntimeCompilationOptions options)
+                    {
+                        // options.FileProviders.Clear();
+                        options.FileProviders.Add(new DatabaseFileProvider("cs"));
+                        // https://github.com/aspnet/FileSystem/blob/master/src/FS.Embedded/EmbeddedFileProvider.cs
+                        // options.FileProviders.Add( new Microsoft.Extensions.FileProviders.EmbeddedFileProvider(typeof(Startup).Assembly) );
+                    }
+                )
+            ;
 
-            services.AddControllersWithViews(delegate (Microsoft.AspNetCore.Mvc.MvcOptions opts)
-            {
-                // opts.default
-            });
+            
+
+            // https://www.mikesdotnetting.com/article/301/loading-asp-net-core-mvc-views-from-a-database-or-other-location
+            // https://stackoverflow.com/questions/38247080/using-razor-outside-of-mvc-in-net-core
+            // https://github.com/dotnet/AspNetCore.Docs/issues/14593
+            //services.Configure<Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation.MvcRazorRuntimeCompilationOptions>(
+            //    delegate(Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation.MvcRazorRuntimeCompilationOptions options) 
+            //    {
+            //        // Requires adding nuget Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation
+            //        // options.FileProviders.Clear();
+            //        options.FileProviders.Add(new DatabaseFileProvider("cs"));
+            //    }
+            //);
+
+
+
 
             services.AddOptions<Microsoft.AspNetCore.Builder.StaticFileOptions>()
                 .Configure<Microsoft.AspNetCore.Http.IHttpContextAccessor, Microsoft.AspNetCore.Hosting.IWebHostEnvironment>(
@@ -96,7 +128,7 @@ namespace OnlineYournal
                 }
             );
 
-            app.UseStaticFiles();
+
             app.UseStaticFiles(
                 new Microsoft.AspNetCore.Builder.StaticFileOptions()
                 {
@@ -162,7 +194,7 @@ namespace OnlineYournal
 
                     // if (splittedUrl != null && (splittedUrl.Length > 0 && splittedUrl[0] == "admin"))
                     // {
-                    // context.GetRouteData().Values.Add("area", "Admin");
+                    //     context.GetRouteData().Values.Add("area", "Admin");
                     // }
 
 
@@ -194,10 +226,10 @@ namespace OnlineYournal
                     endpoints.MapDynamicControllerRoute<SearchValueTransformer>("search/{**product}");
 
                     endpoints.MapControllerRoute(
-                        name: "default",
-                        // pattern: "{controller=Home}/{action=Index}/{id?}"
-                        //pattern: "{controller=Blog}/{action=Index}/{id?}" 
-                        pattern: "{controller=Blog}/{action=ShowEntry}/{id?}"
+                        name: "default", 
+                        // pattern: "{controller=Home}/{action=Index}/{id?}", 
+                        // pattern: "{controller=Blog}/{action=Index}/{id?}", 
+                        pattern: "{controller=Blog}/{action=ShowEntry}/{id?}" 
                     );
                 }
             );
