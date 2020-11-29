@@ -42,15 +42,21 @@ namespace OnlineYournal
 
             services.AddSingleton<SearchValueTransformer>();
 
-            services.AddControllersWithViews(delegate(Microsoft.AspNetCore.Mvc.MvcOptions opts) { 
+            services.AddControllersWithViews(delegate(Microsoft.AspNetCore.Mvc.MvcOptions opts)
+            {
                 // opts.default
             });
-
-
             
-
+            services.AddOptions<StaticFileOptions>()
+                .Configure<IHttpContextAccessor, Microsoft.AspNetCore.Hosting.IHostingEnvironment>(
+                    delegate(StaticFileOptions options, IHttpContextAccessor httpContext, Microsoft.AspNetCore.Hosting.IHostingEnvironment env)
+                    {
+                        options.FileProvider = new ClientAppFileProvider(httpContext, env);
+                    }
+                );
         }
-
+        
+        
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
@@ -64,6 +70,7 @@ namespace OnlineYournal
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
@@ -86,8 +93,8 @@ namespace OnlineYournal
                 // context.GetRouteData().Values.Add("area", "Admin");
                 // }
 
-                    // Call the next delegate/middleware in the pipeline
-                    await next();
+                // Call the next delegate/middleware in the pipeline
+                await next();
             });
 
 
@@ -111,9 +118,8 @@ namespace OnlineYournal
                     name: "default",
                     // pattern: "{controller=Home}/{action=Index}/{id?}"
                     //pattern: "{controller=Blog}/{action=Index}/{id?}" 
-                    pattern: "{controller=Blog}/{action=ShowEntry}/{id?}" 
+                    pattern: "{controller=Blog}/{action=ShowEntry}/{id?}"
                 );
-                
             });
         }
     } // End Class Startup 
@@ -126,7 +132,7 @@ namespace OnlineYournal
         : DynamicRouteValueTransformer
     {
         // private readonly IProductLocator _productLocator;
-        public SearchValueTransformer(/*IProductLocator productLocator*/)
+        public SearchValueTransformer( /*IProductLocator productLocator*/)
         {
             // this._productLocator = productLocator;
         }
@@ -147,6 +153,4 @@ namespace OnlineYournal
             return values;
         }
     }
-
-
 }
