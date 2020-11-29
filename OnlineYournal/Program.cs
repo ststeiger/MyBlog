@@ -14,20 +14,24 @@ namespace OnlineYournal
         public static void Main(string[] args)
         {
             CreateHostBuilder(args).Build().Run();
-        }
+        } // End Sub Main 
 
 
         public static IHostBuilder CreateHostBuilder(string[] args)
         {
-            return Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>();
-                });
-        }
-        
-        
-    }
-    
-    
-}
+            return Host
+                .CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(
+                    delegate(IWebHostBuilder webBuilder)
+                    {
+                        webBuilder.UseStartup<Startup>();
+                    }
+                )
+            ;
+        } // End Function CreateHostBuilder 
+
+
+    } // End Class Program 
+
+
+} // End Namespace OnlineYournal 

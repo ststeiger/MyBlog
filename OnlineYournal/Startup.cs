@@ -1,31 +1,32 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.AspNetCore.Mvc.Routing;
-using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+
+using Microsoft.AspNetCore.Builder; // for app.Use*
+using Microsoft.AspNetCore.Routing; // for GetRouteData 
+
+using Microsoft.Extensions.Hosting; // for IsDevelopment
+// using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection; // for AddSingleton, AddOptions, AddControllersWithViews 
+
+
 
 namespace OnlineYournal
 {
+
+
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+
+
+        public Microsoft.Extensions.Configuration.IConfiguration Configuration { get; }
+
+
+        public Startup(Microsoft.Extensions.Configuration.IConfiguration configuration)
         {
             Configuration = configuration;
         }
 
-        public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
+        public void ConfigureServices(Microsoft.Extensions.DependencyInjection.IServiceCollection services)
         {
             // This method configures the MVC services for the commonly used features with controllers with views. 
             // This combines the effects of Microsoft.Extensions.DependencyInjection.MvcCoreServiceCollectionExtensions.AddMvcCore(Microsoft.Extensions.DependencyInjection.IServiceCollection),
@@ -40,29 +41,37 @@ namespace OnlineYournal
             // To add services for pages call Microsoft.Extensions.DependencyInjection.MvcServiceCollectionExtensions.AddRazorPages(Microsoft.Extensions.DependencyInjection.IServiceCollection)
             // services.AddControllersWithViews();
 
-            
+
             services.AddSingleton<Microsoft.AspNetCore.Http.IHttpContextAccessor, Microsoft.AspNetCore.Http.HttpContextAccessor>();
-            
+
             services.AddSingleton<SearchValueTransformer>();
 
-            services.AddControllersWithViews(delegate(Microsoft.AspNetCore.Mvc.MvcOptions opts)
+            services.AddControllersWithViews(delegate (Microsoft.AspNetCore.Mvc.MvcOptions opts)
             {
                 // opts.default
             });
-            
-            services.AddOptions<StaticFileOptions>()
-                .Configure<IHttpContextAccessor, Microsoft.AspNetCore.Hosting.IWebHostEnvironment>(
-                    delegate(StaticFileOptions options, IHttpContextAccessor httpContext, Microsoft.AspNetCore.Hosting.IWebHostEnvironment env)
+
+            services.AddOptions<Microsoft.AspNetCore.Builder.StaticFileOptions>()
+                .Configure<Microsoft.AspNetCore.Http.IHttpContextAccessor, Microsoft.AspNetCore.Hosting.IWebHostEnvironment>(
+                    delegate (Microsoft.AspNetCore.Builder.StaticFileOptions options, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContext, Microsoft.AspNetCore.Hosting.IWebHostEnvironment env)
                     {
                         options.FileProvider = new DomainSpecificFileProvider(httpContext, env);
                     }
-                );
-        }
-        
-        
+            );
+        } // End Sub ConfigureServices 
+
+
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(Microsoft.AspNetCore.Builder.IApplicationBuilder app, Microsoft.AspNetCore.Hosting.IWebHostEnvironment env)
         {
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders =    Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor
+                                    | Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto
+            });
+
+
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -75,85 +84,128 @@ namespace OnlineYournal
             }
 
             app.UseHttpsRedirection();
+
+
+            app.UseDefaultFiles(
+                new Microsoft.AspNetCore.Builder.DefaultFilesOptions()
+                {
+                    DefaultFileNames = new System.Collections.Generic.List<string>()
+                    {
+                        "index.htm", "index.html" 
+                    }
+                }
+            );
+
             app.UseStaticFiles();
+            app.UseStaticFiles(
+                new Microsoft.AspNetCore.Builder.StaticFileOptions()
+                {
+                    ServeUnknownFileTypes = true,
+                    DefaultContentType = "application/octet-stream",
+                    ContentTypeProvider = new ExtensionContentTypeProvider(),
+
+                    OnPrepareResponse = delegate (Microsoft.AspNetCore.StaticFiles.StaticFileResponseContext context)
+                    {
+                        // https://stackoverflow.com/questions/49547/how-do-we-control-web-page-caching-across-all-browsers
+
+                        // The Cache-Control is per the HTTP 1.1 spec for clients and proxies
+                        // If you don't care about IE6, then you could omit Cache-Control: no-cache.
+                        // (some browsers observe no-store and some observe must-revalidate)
+                        context.Context.Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0";
+                        // Other Cache-Control parameters such as max-age are irrelevant 
+                        // if the abovementioned Cache-Control parameters (no-cache,no-store,must-revalidate) are specified.
+
+
+                        // Expires is per the HTTP 1.0 and 1.1 specs for clients and proxies. 
+                        // In HTTP 1.1, the Cache-Control takes precedence over Expires, so it's after all for HTTP 1.0 proxies only.
+                        // If you don't care about HTTP 1.0 proxies, then you could omit Expires.
+                        context.Context.Response.Headers["Expires"] = "-1, 0, Tue, 01 Jan 1980 1:00:00 GMT";
+
+                        // The Pragma is per the HTTP 1.0 spec for prehistoric clients, such as Java WebClient
+                        // If you don't care about IE6 nor HTTP 1.0 clients 
+                        // (HTTP 1.1 was introduced 1997), then you could omit Pragma.
+                        context.Context.Response.Headers["pragma"] = "no-cache";
+
+
+                        // On the other hand, if the server auto-includes a valid Date header, 
+                        // then you could theoretically omit Cache-Control too and rely on Expires only.
+
+                        // Date: Wed, 24 Aug 2016 18:32:02 GMT
+                        // Expires: 0
+
+                        // But that may fail if e.g. the end-user manipulates the operating system date 
+                        // and the client software is relying on it.
+                        // https://stackoverflow.com/questions/21120882/the-date-time-format-used-in-http-headers
+                    } // End Sub OnPrepareResponse 
+
+                }
+            );
+
+
 
             app.UseRouting();
 
+
             // https://stackoverflow.com/questions/60791843/changing-routedata-in-asp-net-core-3-1-in-middleware
-            app.Use(async (context, next) =>
-            {
-                string url = context.Request.Headers["HOST"];
-                string[] splittedUrl = url.Split('.');
-
-                if (splittedUrl != null && (splittedUrl.Length > 0))
+            app.Use(
+                async delegate (Microsoft.AspNetCore.Http.HttpContext context, System.Func<System.Threading.Tasks.Task> next)
                 {
-                    context.GetRouteData().Values.Add("Host", splittedUrl[0]);
-                    // context.GetRouteData().Values["controller"] = "test";
+                    string url = context.Request.Headers["HOST"];
+                    string[] splittedUrl = url.Split('.');
+
+                    if (splittedUrl != null && (splittedUrl.Length > 0))
+                    {
+                        context.GetRouteData().Values.Add("Host", splittedUrl[0]);
+                        // context.GetRouteData().Values["controller"] = "test";
+                    } // End if (splittedUrl != null && (splittedUrl.Length > 0)) 
+
+
+                    // if (splittedUrl != null && (splittedUrl.Length > 0 && splittedUrl[0] == "admin"))
+                    // {
+                    // context.GetRouteData().Values.Add("area", "Admin");
+                    // }
+
+
+                    // Call the next delegate/middleware in the pipeline
+                    await next();
                 }
-
-                // if (splittedUrl != null && (splittedUrl.Length > 0 && splittedUrl[0] == "admin"))
-                // {
-                // context.GetRouteData().Values.Add("area", "Admin");
-                // }
-
-                // Call the next delegate/middleware in the pipeline
-                await next();
-            });
+            );
 
 
             app.UseAuthorization();
 
             /*
-            app.UseMvc(routes =>
-            {
-                routes.DefaultHandler = new AreaRouter();
-                // routes.MapRoute(name: "areaRoute", template: "{controller=Home}/{action=Index}");
-            });
+            app.UseMvc(
+                delegate(IRouteBuilder routes)
+                {
+                    routes.DefaultHandler = new Microsoft.AspNetCore.Mvc.Routing.AreaRouter();
+                    // routes.MapRoute(name: "areaRoute", template: "{controller=Home}/{action=Index}");
+                }
+            );
             */
+
+
             // https://stackoverflow.com/questions/278668/is-it-possible-to-make-an-asp-net-mvc-route-based-on-a-subdomain
 
             // https://stackoverflow.com/questions/57172884/mapping-subdomains-to-areas-in-asp-net-core-3
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapDynamicControllerRoute<SearchValueTransformer>("search/{**product}");
+            app.UseEndpoints(
+                delegate (Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints)
+                {
+                    endpoints.MapDynamicControllerRoute<SearchValueTransformer>("search/{**product}");
 
-                endpoints.MapControllerRoute(
-                    name: "default",
-                    // pattern: "{controller=Home}/{action=Index}/{id?}"
-                    //pattern: "{controller=Blog}/{action=Index}/{id?}" 
-                    pattern: "{controller=Blog}/{action=ShowEntry}/{id?}"
-                );
-            });
-        }
+                    endpoints.MapControllerRoute(
+                        name: "default",
+                        // pattern: "{controller=Home}/{action=Index}/{id?}"
+                        //pattern: "{controller=Blog}/{action=Index}/{id?}" 
+                        pattern: "{controller=Blog}/{action=ShowEntry}/{id?}"
+                    );
+                }
+            );
+
+        } // End Sub Configure 
+
+
     } // End Class Startup 
 
-    // https://stackoverflow.com/questions/32582232/imlementing-a-custom-irouter-in-asp-net-5-vnext-mvc-6
-    // https://stackoverflow.com/questions/32565768/change-route-collection-of-mvc6-after-startup
 
-
-    class SearchValueTransformer
-        : DynamicRouteValueTransformer
-    {
-        // private readonly IProductLocator _productLocator;
-        public SearchValueTransformer( /*IProductLocator productLocator*/)
-        {
-            // this._productLocator = productLocator;
-        }
-
-        // https://weblogs.asp.net/ricardoperes/dynamic-routing-in-asp-net-core-3#:~:text=ASP.NET%20Core%203%20introduced,request%20will%20be%20dispatched%20to.
-        public override async ValueTask<RouteValueDictionary> TransformAsync(
-            HttpContext httpContext, RouteValueDictionary values)
-        {
-            string productString = values["product"] as string;
-            object controller = "Blog";
-            object action = "Dataa";
-            object id = 123; // await this._productLocator.FindProduct("product", out var controller);
-
-            values["controller"] = controller;
-            values["action"] = action;
-            values["id"] = id;
-
-            return values;
-        }
-    }
-}
+} // End Namespace OnlineYournal 
