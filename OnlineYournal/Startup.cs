@@ -40,6 +40,9 @@ namespace OnlineYournal
             // To add services for pages call Microsoft.Extensions.DependencyInjection.MvcServiceCollectionExtensions.AddRazorPages(Microsoft.Extensions.DependencyInjection.IServiceCollection)
             // services.AddControllersWithViews();
 
+            
+            services.AddSingleton<Microsoft.AspNetCore.Http.IHttpContextAccessor, Microsoft.AspNetCore.Http.HttpContextAccessor>();
+            
             services.AddSingleton<SearchValueTransformer>();
 
             services.AddControllersWithViews(delegate(Microsoft.AspNetCore.Mvc.MvcOptions opts)
@@ -48,10 +51,10 @@ namespace OnlineYournal
             });
             
             services.AddOptions<StaticFileOptions>()
-                .Configure<IHttpContextAccessor, Microsoft.AspNetCore.Hosting.IHostingEnvironment>(
-                    delegate(StaticFileOptions options, IHttpContextAccessor httpContext, Microsoft.AspNetCore.Hosting.IHostingEnvironment env)
+                .Configure<IHttpContextAccessor, Microsoft.AspNetCore.Hosting.IWebHostEnvironment>(
+                    delegate(StaticFileOptions options, IHttpContextAccessor httpContext, Microsoft.AspNetCore.Hosting.IWebHostEnvironment env)
                     {
-                        options.FileProvider = new ClientAppFileProvider(httpContext, env);
+                        options.FileProvider = new DomainSpecificFileProvider(httpContext, env);
                     }
                 );
         }
