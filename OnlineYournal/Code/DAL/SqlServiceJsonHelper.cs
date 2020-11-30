@@ -1,9 +1,11 @@
-﻿using Dapper;
-using MyBlogCore;
+﻿
+using Dapper;
 
 
 namespace AnySqlWebAdmin
 {
+
+
     [System.Flags]
     public enum RenderType_t : int
     {
@@ -144,6 +146,7 @@ namespace AnySqlWebAdmin
             , string sql
             , RenderType_t format
             , Microsoft.AspNetCore.Http.HttpContext context
+            , System.Text.Encoding encoding 
             , object parameters = null
             , System.Data.IDbTransaction transaction = null
             , int? commandTimeout = null
@@ -153,7 +156,7 @@ namespace AnySqlWebAdmin
             // DynamicParameters dbArgs = new DynamicParameters();
 
 
-            using (System.IO.StreamWriter responseWriter = new System.IO.StreamWriter(context.Response.Body, System.Text.Encoding.UTF8))
+            using (System.IO.StreamWriter responseWriter = new System.IO.StreamWriter(context.Response.Body, encoding))
             {
                 using (Newtonsoft.Json.JsonTextWriter jsonWriter =
                     new Newtonsoft.Json.JsonTextWriter(responseWriter))
@@ -168,7 +171,7 @@ namespace AnySqlWebAdmin
                         using (System.Data.Common.DbDataReader dr = await cnn.ExecuteDbReaderAsync(sql, parameters, transaction, commandTimeout, commandType))
                         {
                             context.Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
-                            context.Response.ContentType = "application/json; charset=utf-8";
+                            context.Response.ContentType = "application/json; charset=" + encoding.WebName;
 
                             await jsonWriter.WriteStartObjectAsync();
 
@@ -268,7 +271,7 @@ namespace AnySqlWebAdmin
                     catch (System.Exception ex)
                     {
                         context.Response.StatusCode = (int)System.Net.HttpStatusCode.InternalServerError;
-                        context.Response.ContentType = "application/json; charset=utf-8";
+                        context.Response.ContentType = "application/json; charset=" + encoding.WebName;
 
                         await jsonWriter.WriteStartObjectAsync();
 

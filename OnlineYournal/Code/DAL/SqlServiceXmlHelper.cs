@@ -67,28 +67,34 @@ namespace OnlineYournal
 
         private static System.Xml.XmlWriter CreateXmlWriter(System.Text.StringBuilder builder, XmlRenderType_t renderType)
         {
-            return CreateXmlWriter(builder, null, renderType);
+            return CreateXmlWriter(builder, null, System.Text.Encoding.Unicode, renderType);
+        }
+
+
+        private static System.Xml.XmlWriter CreateXmlWriter(System.Text.StringBuilder builder, System.Text.Encoding encoding, XmlRenderType_t renderType)
+        {
+            return CreateXmlWriter(builder, null, encoding, renderType);
         }
 
 
         private static System.Xml.XmlWriter CreateXmlWriter(System.IO.StreamWriter writer, XmlRenderType_t renderType)
         {
-            return CreateXmlWriter(null, writer, renderType);
+            return CreateXmlWriter(null, writer, writer.Encoding, renderType);
         }
 
-        private static System.Xml.XmlWriter CreateXmlWriter(System.IO.Stream stream, XmlRenderType_t renderType)
+        private static System.Xml.XmlWriter CreateXmlWriter(System.IO.Stream stream, System.Text.Encoding encoding, XmlRenderType_t renderType)
         {
-            System.IO.TextWriter tw = new System.IO.StreamWriter(stream, System.Text.Encoding.UTF8);
+            System.IO.TextWriter tw = new System.IO.StreamWriter(stream, encoding);
 
-            return CreateXmlWriter(null, tw, renderType);
+            return CreateXmlWriter(null, tw, encoding, renderType);
         }
 
-        private static System.Xml.XmlWriter CreateXmlWriter(Microsoft.AspNetCore.Http.HttpContext context, XmlRenderType_t renderType)
+        private static System.Xml.XmlWriter CreateXmlWriter(Microsoft.AspNetCore.Http.HttpContext context, System.Text.Encoding encoding, XmlRenderType_t renderType)
         {
-            return CreateXmlWriter(context.Response.Body, renderType);
+            return CreateXmlWriter(context.Response.Body, encoding, renderType);
         }
         
-        private static System.Xml.XmlWriter CreateXmlWriter(System.Text.StringBuilder builder, System.IO.TextWriter writer, XmlRenderType_t renderType)
+        private static System.Xml.XmlWriter CreateXmlWriter(System.Text.StringBuilder builder, System.IO.TextWriter writer, System.Text.Encoding encoding, XmlRenderType_t renderType)
         {
             System.Xml.XmlWriterSettings xs = new System.Xml.XmlWriterSettings();
             
@@ -103,7 +109,7 @@ namespace OnlineYournal
             xs.OmitXmlDeclaration = false; // // <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
             // xs.Encoding = System.Text.Encoding.UTF8; // doesn't work with pgsql 
             // xs.Encoding = new System.Text.UTF8Encoding(false);
-            xs.Encoding = new System.Text.UnicodeEncoding(false, false);
+            xs.Encoding = encoding;
             xs.CloseOutput = true;
 
             // string exportFilename = System.IO.Path.Combine(@"d:\", table_name + ".xml");
@@ -156,12 +162,15 @@ namespace OnlineYournal
             , object param = null
             , string tableSchema = null
             , string tableName = null
-            , XmlRenderType_t format = XmlRenderType_t.Default
-            , Microsoft.AspNetCore.Http.HttpContext context = null
-            , System.Data.IDbTransaction transaction = null
-            , int? commandTimeout = null
+            , System.Text.Encoding encoding = null
+            , XmlRenderType_t format = XmlRenderType_t.Default 
+            , Microsoft.AspNetCore.Http.HttpContext context = null 
+            , System.Data.IDbTransaction transaction = null 
+            , int? commandTimeout = null 
             , System.Data.CommandType? commandType = null)
         {
+            if (encoding == null)
+                encoding = System.Text.Encoding.UTF8;
 
             if (string.IsNullOrEmpty(sql))
             {
@@ -182,23 +191,21 @@ namespace OnlineYournal
             System.Text.StringBuilder xmlBuilder = new System.Text.StringBuilder();
             
             using (System.IO.StreamWriter output =
-                new System.IO.StreamWriter(context.Response.Body, System.Text.Encoding.UTF8))
+                new System.IO.StreamWriter(context.Response.Body, encoding))
             {
-
+                
                 // using (System.Xml.XmlWriter writer = CreateXmlWriter(xmlBuilder, format))
                 using (System.Xml.XmlWriter writer = CreateXmlWriter(output, format))
                 {
                     try
                     {
 
-
-
                         using (System.Data.Common.DbDataReader dr = await cnn.ExecuteDbReaderAsync(sql, param, transaction, commandTimeout, commandType))
                         {
                             if (context != null)
                             {
                                 context.Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
-                                context.Response.ContentType = "application/xml; charset=utf-8";
+                                context.Response.ContentType = "application/xml; charset=" + encoding.WebName;
                             } // End if (context != null) 
 
                             await WriteAsXmlAsync(tableSchema, tableName, format, writer, dr);
@@ -208,7 +215,7 @@ namespace OnlineYournal
                     catch (System.Exception ex)
                     {
                         context.Response.StatusCode = (int)System.Net.HttpStatusCode.InternalServerError;
-                        context.Response.ContentType = "application/xml; charset=utf-8";
+                        context.Response.ContentType = "application/xml; charset=" + encoding.WebName;
 
                         bool dataAsAttributes = format.HasFlag(XmlRenderType_t.DataInAttributes);
 

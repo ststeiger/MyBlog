@@ -7,13 +7,27 @@ using Microsoft.Extensions.Logging;
 
 namespace OnlineYournal
 {
+
+
     public class Program
     {
-        
+
 
         public static void Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+            using (System.IO.FileSystemWatcher watcher = new System.IO.FileSystemWatcher())
+            {
+                // listenOptions.UseHttps("testCert.pfx", "testPassword");                                
+                watcher.NotifyFilter = System.IO.NotifyFilters.Size
+                    | System.IO.NotifyFilters.LastWrite
+                    | System.IO.NotifyFilters.CreationTime
+                    | System.IO.NotifyFilters.FileName // Needed if text-file is changed with Visual Studio ...
+                ;
+
+
+                CreateHostBuilder(args, watcher).Build().Run();
+            }
+
         } // End Sub Main 
 
 
@@ -24,95 +38,55 @@ namespace OnlineYournal
         // https://medium.com/@MaartenSikkema/automatically-request-and-use-lets-encrypt-certificates-in-dotnet-core-9d0d152a59b5
         // https://github.com/dotnet/aspnetcore/issues/1190
         // https://docs.microsoft.com/en-us/aspnet/core/fundamentals/servers/kestrel?view=aspnetcore-5.0#code-try-30
-        public static IHostBuilder CreateHostBuilder(string[] args)
+        public static IHostBuilder CreateHostBuilder(string[] args, System.IO.FileSystemWatcher watcher)
         {
+            // Microsoft.AspNetCore.Server.IIS
+
             return Host
                 .CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(
-                    delegate(IWebHostBuilder webBuilder)
+                    delegate (IWebHostBuilder webBuilder)
                     {
-                        webBuilder.UseStartup<Startup>();
-                        // webBuilder.ConfigureKestrel(serverOptions 
+
+#if true
 
                         // https://docs.microsoft.com/en-us/aspnet/core/fundamentals/servers/kestrel?view=aspnetcore-5.0#code-try-30
                         webBuilder.ConfigureKestrel(
-                                delegate (Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerOptions serverOptions)
-                                {
-                                    // On Linux, CipherSuitesPolicy can be used to filter TLS handshakes on a per-connection basis:
-                                    serverOptions.ConfigureHttpsDefaults(
-                                        delegate (Microsoft.AspNetCore.Server.Kestrel.Https.HttpsConnectionAdapterOptions listenOptions)
-                                        {
-                                            
-                                            listenOptions.OnAuthenticate = 
-                                                delegate (Microsoft.AspNetCore.Connections.ConnectionContext connectionContext, System.Net.Security.SslServerAuthenticationOptions sslOptions)
-                                                {
-                                                    sslOptions.CipherSuitesPolicy = new System.Net.Security.CipherSuitesPolicy(
-                                                           new System.Net.Security.TlsCipherSuite[]
-                                                           {
-                                                            System.Net.Security.TlsCipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
-                                                            System.Net.Security.TlsCipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
-                                                            System.Net.Security.TlsCipherSuite.TLS_CHACHA20_POLY1305_SHA256,
-                                                               // ...
-                                                           });
-                                                }; // End OnAuthenticate 
+                            delegate (
+                                 WebHostBuilderContext builderContext
+                                , Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerOptions serverOptions)
+                            {
+                                // https://github.com/dotnet/aspnetcore/pull/24286
+                                // From config-file with reload on change 
+                                // serverOptions.Configure(builderContext.Configuration.GetSection("Kestrel"), reloadOnChange: false);
 
-                                        }); // End ConfigureHttpsDefaults 
+                                // On Linux, CipherSuitesPolicy can be used to filter TLS handshakes on a per-connection basis:
+                                serverOptions.ConfigureHttpsDefaults(Configuration.Kestrel.Https.HttpsDefaults); // End ConfigureHttpsDefaults 
 
+                                // serverOptions.Listen(System.Net.IPAddress.Loopback, 5001,
+                                serverOptions.ListenAnyIP(5005,
+                                    delegate (Microsoft.AspNetCore.Server.Kestrel.Core.ListenOptions listenOptions)
+                                    {
+                                        Configuration.Kestrel.Https.ListenAnyIP(listenOptions, watcher);
+                                    }
+                                ); // End ListenAnyIp 
 
-                                    // serverOptions.Listen(System.Net.IPAddress.Loopback, 5001,
-                                    serverOptions.ListenAnyIP(5005, 
-                                        delegate (Microsoft.AspNetCore.Server.Kestrel.Core.ListenOptions listenOptions)
-                                        {
-                                            // listenOptions.UseHttps("testCert.pfx", "testPassword");
+                            }
+                        ); // End ConfigureKestrel 
+#endif
 
-                                            
+                        if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
+                        {
+                            webBuilder.UseIISIntegration();
+                        }
+                        // else webBuilder.UseKestrel();
 
-                                            listenOptions.UseHttps(
-                                                delegate (Microsoft.AspNetCore.Server.Kestrel.Https.HttpsConnectionAdapterOptions httpsOptions)
-                                                {
-                                                    System.Security.Cryptography.X509Certificates.X509Certificate2 localhostCert = Microsoft.AspNetCore.Server.Kestrel.Https.CertificateLoader.LoadFromStoreCert(
-                                                        "localhost", "My", System.Security.Cryptography.X509Certificates.StoreLocation.CurrentUser,
-                                                        allowInvalid: true);
-
-                                                    System.Security.Cryptography.X509Certificates.X509Certificate2 exampleCert = Microsoft.AspNetCore.Server.Kestrel.Https.CertificateLoader.LoadFromStoreCert(
-                                                        "example.com", "My", System.Security.Cryptography.X509Certificates.StoreLocation.CurrentUser,
-                                                        allowInvalid: true);
-
-                                                    System.Security.Cryptography.X509Certificates.X509Certificate2 subExampleCert = Microsoft.AspNetCore.Server.Kestrel.Https.CertificateLoader.LoadFromStoreCert(
-                                                        "sub.example.com", "My", System.Security.Cryptography.X509Certificates.StoreLocation.CurrentUser,
-                                                        allowInvalid: true);
-
-                                                    System.Collections.Generic.Dictionary<string, System.Security.Cryptography.X509Certificates.X509Certificate2> certs = 
-                                                        new System.Collections.Generic.Dictionary<string, System.Security.Cryptography.X509Certificates.X509Certificate2>(
-                                                            System.StringComparer.OrdinalIgnoreCase
-                                                    );
-
-                                                    certs["localhost"] = localhostCert;
-                                                    certs["example.com"] = exampleCert;
-                                                    certs["sub.example.com"] = subExampleCert;
-
-
-                                                    httpsOptions.ServerCertificateSelector = 
-                                                        delegate(Microsoft.AspNetCore.Connections.ConnectionContext connectionContext, string name) 
-                                                        {
-                                                            if (name != null && certs.TryGetValue(name, out var cert))
-                                                            {
-                                                                return cert;
-                                                            }
-
-                                                            return exampleCert;
-                                                        };
-
-                                                }); // End ListenOptions.UseHttps
-
-                                        }); // End ListenAnyIp 
-
-                                }) // End ConfigureKestrel 
+                        webBuilder.UseStartup<Startup>()
+                        // .UseApplicationInsights()
                         ;
 
-                    } // End ConfigureWebHostDefaults 
-                )
-            ;
+            }); // End ConfigureWebHostDefaults 
+
         } // End Function CreateHostBuilder 
 
 

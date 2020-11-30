@@ -1,9 +1,9 @@
 ﻿
-namespace OnlineYournal 
+namespace OnlineYournal
 {
 
 
-    public static class DbParameterCollectionExtensions 
+    public static class DbCommandExtensions
     {
 
 
@@ -42,30 +42,37 @@ namespace OnlineYournal
         } // End Function GetDbType
 
 
-        public static System.Data.IDbDataParameter AddWithValue(this System.Data.IDataParameterCollection col, string parameterName, object value)
-        {
-            return AddWithValue((System.Data.Common.DbParameterCollection)col, parameterName, value);
-        }
+        //public static System.Data.IDbDataParameter AddWithValue(this System.Data.IDbCommand cmd, string parameterName, object value)
+        //{
+        //    return AddWithValue((System.Data.Common.DbCommand)cmd, parameterName, value, null);
+        //}
 
 
-        public static System.Data.Common.DbParameter AddWithValue(this System.Data.Common.DbParameterCollection col, string parameterName, object value) 
+        public static System.Data.IDbDataParameter AddWithValue(this System.Data.IDbCommand cmd, string parameterName, object value, System.Data.DbType? dbType = null)
         {
             if (value == null)
             {
                 value = System.DBNull.Value;
             } // End if (objValue == null)
 
-            System.Type tDataType = value.GetType();
+            if (!dbType.HasValue)
+            {
+                dbType = GetDbType(value.GetType());
+            }
 
-            int i = col.Add(value); 
-            col[i].ParameterName = parameterName;
-            col[i].DbType = GetDbType(tDataType);
+            System.Data.IDbDataParameter p = cmd.CreateParameter();
+            p.ParameterName = parameterName;
+            p.DbType = dbType.Value;
+            p.Value = value;
 
-            return col[i]; 
-        } // End Function AddWithValue 
+            cmd.Parameters.Add(p);
+
+            return p;
+        }
 
 
     } // End Class DbParameterCollectionExtensions 
 
 
-} // End Namespace OnlineYournal 
+} // End Namespace SSRS_Manager 
+
