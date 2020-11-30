@@ -206,7 +206,7 @@ namespace OnlineYournal
                             {
                                 context.Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
                                 context.Response.ContentType = "application/xml; charset=" + encoding.WebName;
-                                context.Response.Headers["Transfer-Encoding"] = "chunked";
+                                // context.Response.Headers["Transfer-Encoding"] = "chunked";
                             } // End if (context != null) 
 
                             await WriteAsXmlAsync(tableSchema, tableName, format, writer, dr);
@@ -247,15 +247,8 @@ namespace OnlineYournal
                     
                     await writer.FlushAsync();
                     await output.FlushAsync();
-                    
-                    /*
-                    await output.WriteAsync('0');
-                    await output.WriteAsync('\r');
-                    await output.WriteAsync('\n');
-                    await output.WriteAsync('\r');
-                    await output.WriteAsync('\n');
-                    */
-                    await output.FlushAsync();
+
+                    await context.Response.CompleteAsync();
                 } // End Using writer   
 
             }// Wnd Using output 
@@ -278,7 +271,7 @@ namespace OnlineYournal
                 }
 
                 i += 1;
-            }
+            } // Whend 
 
             return input.Substring(0, i);
         } // GetAssemblyQualifiedNoVersionName

@@ -75,12 +75,14 @@ namespace OnlineYournal
                         ); // End ConfigureKestrel 
 #endif
 
+                        /*
                         if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
                         {
                             webBuilder.UseIISIntegration();
                         }
                         else webBuilder.UseKestrel();
-                        
+                        */
+
                         webBuilder.UseStartup<Startup>()
                         // .UseApplicationInsights()
                         ;

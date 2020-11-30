@@ -40,7 +40,7 @@ namespace AnySqlWebAdmin
                 }
 
                 i += 1;
-            }
+            } // Whend 
 
             return input.Substring(0, i);
         } // GetAssemblyQualifiedNoVersionName
@@ -263,8 +263,6 @@ namespace AnySqlWebAdmin
 
                             await jsonWriter.FlushAsync();
                             await responseWriter.FlushAsync();
-
-
                         } // End Using dr 
 
                     }
@@ -289,15 +287,17 @@ namespace AnySqlWebAdmin
                     }
 
                     await jsonWriter.FlushAsync();
+                    await responseWriter.FlushAsync();
+
+                    await context.Response.CompleteAsync();
                 } // End Using jsonWriter 
 
-                await responseWriter.FlushAsync();
             } // End Using responseWriter 
 
         } // End Sub AnyDataReaderToJson 
-        
-        
-    } // End Class 
-    
-    
-} // End Namespace 
+
+
+    } // End Class SqlServiceJsonHelper 
+
+
+} // End Namespace AnySqlWebAdmin 
