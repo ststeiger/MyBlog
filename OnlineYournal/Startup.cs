@@ -26,6 +26,16 @@ namespace OnlineYournal
         }
 
 
+        private static MyBlogCore.SqlFactory CreateAppropriateFactory()
+        {
+            if (System.Environment.OSVersion.Platform == System.PlatformID.Unix)
+                return MyBlogCore.SqlFactory.CreateInstance<Npgsql.NpgsqlFactory>();
+
+            return MyBlogCore.SqlFactory.CreateInstance<System.Data.SqlClient.SqlClientFactory>();
+        }
+
+        
+        
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(Microsoft.Extensions.DependencyInjection.IServiceCollection services)
         {
@@ -33,7 +43,10 @@ namespace OnlineYournal
 
             services.AddSingleton<SearchValueTransformer>();
 
-
+            MyBlogCore.SqlFactory fac = CreateAppropriateFactory();
+            services.AddSingleton<MyBlogCore.SqlFactory>(fac);
+            
+            
             // This method configures the MVC services for the commonly used features with controllers with views. 
             // This combines the effects of Microsoft.Extensions.DependencyInjection.MvcCoreServiceCollectionExtensions.AddMvcCore(Microsoft.Extensions.DependencyInjection.IServiceCollection),
             // Microsoft.Extensions.DependencyInjection.MvcApiExplorerMvcCoreBuilderExtensions.AddApiExplorer(Microsoft.Extensions.DependencyInjection.IMvcCoreBuilder),
@@ -59,7 +72,7 @@ namespace OnlineYournal
                     delegate (Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation.MvcRazorRuntimeCompilationOptions options)
                     {
                         // options.FileProviders.Clear();
-                        options.FileProviders.Add(new DatabaseFileProvider("cs"));
+                        options.FileProviders.Add(new DatabaseFileProvider(fac));
                         // https://github.com/aspnet/FileSystem/blob/master/src/FS.Embedded/EmbeddedFileProvider.cs
                         // options.FileProviders.Add( new Microsoft.Extensions.FileProviders.EmbeddedFileProvider(typeof(Startup).Assembly) );
                     }

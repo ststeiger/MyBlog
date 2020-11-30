@@ -13,7 +13,7 @@ namespace OnlineYournal
         private byte[] _viewContent;
         private System.DateTimeOffset _lastModified;
         private bool _exists;
-
+        
 
         public bool Exists => _exists;
 
@@ -22,10 +22,10 @@ namespace OnlineYournal
         public System.DateTimeOffset LastModified => _lastModified;
 
 
-        public DatabaseFileInfo(string connection, string viewPath)
+        public DatabaseFileInfo(MyBlogCore.SqlFactory factory, string viewPath)
         {
             _viewPath = viewPath;
-            GetView(connection, viewPath);
+            GetView(factory, viewPath);
         }
 
 
@@ -49,19 +49,21 @@ namespace OnlineYournal
             return new System.IO.MemoryStream(_viewContent);
         }
 
-        private void GetView(string connection, string viewPath)
+        private void GetView(MyBlogCore.SqlFactory factory, string viewPath)
         {
-            string query = @"SELECT Content, LastModified FROM Views WHERE Location = @Path;
-                    UPDATE Views SET LastRequested = GetUtcDate() WHERE Location = @Path";
+            string query = @"
+SELECT Content, LastModified FROM Views WHERE Location = @Path; 
+UPDATE Views SET LastRequested = GetUtcDate() WHERE Location = @Path; 
+";
             try
             {
-                using (System.Data.Common.DbConnection cnn = new SqlConnection(connection))
+                using (System.Data.Common.DbConnection cnn = factory.Connection)
                 {
                     using (System.Data.Common.DbCommand cmd = cnn.CreateCommand())
                     {
                         cmd.CommandText = query;
-                        cmd.Parameters.AddWithValue("@Path", viewPath);
-
+                        cmd.AddWithValue("@Path", viewPath);
+                        
                         if (cnn.State != System.Data.ConnectionState.Open)
                             cnn.Open();
 

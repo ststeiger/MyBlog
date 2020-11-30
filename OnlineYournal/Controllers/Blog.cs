@@ -1,5 +1,4 @@
 ﻿
-using System;
 using System.Linq;
 // using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Mvc;
@@ -25,18 +24,15 @@ namespace OnlineYournal.Controllers
 
     public class Blog : Controller
     {
-
-        private static SqlFactory CreateAppropriateFactory()
+        private SqlFactory m_fac;
+        
+        
+        public Blog(SqlFactory factory)
         {
-            if (System.Environment.OSVersion.Platform == PlatformID.Unix)
-                return SqlFactory.CreateInstance<Npgsql.NpgsqlFactory>();
-
-            return SqlFactory.CreateInstance<System.Data.SqlClient.SqlClientFactory>();
+            this.m_fac = factory;
         }
-
-        protected SqlFactory m_fac = CreateAppropriateFactory();
-
-
+        
+        
         public IActionResult IndexABC()
         {
             // return View();
@@ -55,8 +51,13 @@ SELECT * FROM T_BlogPost;
 
 SELECT * FROM geoip.geoip_locations_temp WHERE (1=2); 
 
-SELECT TOP 10 * FROM geoip.geoip_blocks_temp; 
+-- SELECT TOP 10 * FROM geoip.geoip_blocks_temp; 
 
+
+SELECT * FROM geoip.geoip_blocks_temp 
+ORDER BY network 
+OFFSET 0 ROWS FETCH NEXT 10 ROWS ONLY 
+;
 ";
             System.Collections.Generic.Dictionary<string, object> pars =
                 new System.Collections.Generic.Dictionary<string, object>();
@@ -79,8 +80,10 @@ SELECT * FROM T_BlogPost;
 
 SELECT * FROM geoip.geoip_locations_temp WHERE (1=2); 
 
-SELECT TOP 10 * FROM geoip.geoip_blocks_temp; 
-
+SELECT * FROM geoip.geoip_blocks_temp 
+ORDER BY network 
+OFFSET 0 ROWS FETCH NEXT 10 ROWS ONLY 
+; 
 ";
             System.Collections.Generic.Dictionary<string, object> pars =
                 new System.Collections.Generic.Dictionary<string, object>();

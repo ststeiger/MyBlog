@@ -41,14 +41,14 @@ namespace OnlineYournal
         public static IHostBuilder CreateHostBuilder(string[] args, System.IO.FileSystemWatcher watcher)
         {
             // Microsoft.AspNetCore.Server.IIS
-
+            
             return Host
                 .CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(
                     delegate (IWebHostBuilder webBuilder)
                     {
 
-#if true
+#if false 
 
                         // https://docs.microsoft.com/en-us/aspnet/core/fundamentals/servers/kestrel?view=aspnetcore-5.0#code-try-30
                         webBuilder.ConfigureKestrel(
@@ -79,8 +79,8 @@ namespace OnlineYournal
                         {
                             webBuilder.UseIISIntegration();
                         }
-                        // else webBuilder.UseKestrel();
-
+                        else webBuilder.UseKestrel();
+                        
                         webBuilder.UseStartup<Startup>()
                         // .UseApplicationInsights()
                         ;

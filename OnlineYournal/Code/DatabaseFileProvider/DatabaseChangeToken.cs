@@ -13,32 +13,30 @@ namespace OnlineYournal
         private string _connection;
         private string _viewPath;
 
-
+        private MyBlogCore.SqlFactory m_factory;
+        
         public bool ActiveChangeCallbacks => false;
 
 
-        public DatabaseChangeToken(string connection, string viewPath)
+        public DatabaseChangeToken(MyBlogCore.SqlFactory factory, string viewPath)
         {
-            _connection = connection;
+            this.m_factory = factory;
             _viewPath = viewPath;
         }
-
         
-
+        
         public bool HasChanged
         {
             get
             {
-
-                string query = "SELECT LastRequested, LastModified FROM Views WHERE Location = @Path;";
                 try
                 {
-                    using (System.Data.Common.DbConnection cnn = new SqlConnection(_connection))
+                    using (System.Data.Common.DbConnection cnn =  this.m_factory.Connection)
                     {
                         using (System.Data.Common.DbCommand cmd = cnn.CreateCommand())
                         {
-                            cmd.CommandText = query;
-                            cmd.Parameters.AddWithValue("@Path", _viewPath);
+                            cmd.CommandText = "SELECT LastRequested, LastModified FROM Views WHERE Location = @Path;";
+                            cmd.AddWithValue("@Path", _viewPath);
 
                             if (cnn.State != System.Data.ConnectionState.Open)
                                 cnn.Open();

@@ -1,4 +1,6 @@
 ﻿
+using OnlineYournal;
+
 namespace MyBlogCore
 {
 
@@ -15,20 +17,20 @@ namespace MyBlogCore
             {
                 Npgsql.NpgsqlConnectionStringBuilder csb = new Npgsql.NpgsqlConnectionStringBuilder();
                 csb.Host = "127.0.0.1";
-                csb.Database = "blogz";
+                csb.Database = SecretManager.GetSecret<string>("DefaultDb");
                 csb.Port = 5432;
-
+                
                 csb.IntegratedSecurity = false;
-
+                
                 if (!csb.IntegratedSecurity)
                 {
-                    csb.Username = "postgres";
-                    csb.Password = "test123";
+                    csb.Username = SecretManager.GetSecret<string>("DefaultDbUser");
+                    csb.Password = SecretManager.GetSecret<string>("DefaultDbPassword");
                 }
-
+                
                 csb.Pooling = true;
                 csb.ApplicationName = "MyBlog";
-
+                
                 return csb.ConnectionString;
             }
         }
