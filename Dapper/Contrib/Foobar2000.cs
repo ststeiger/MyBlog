@@ -140,7 +140,28 @@ ON CONFLICT(myid) DO UPDATE
 
     public abstract class BaseTable
     { 
-        public virtual string foo { get; set; }
+        public virtual string PK { get; set; }
+
+
+
+        public virtual void SetValue(int index, object value)
+        {
+            System.Reflection.PropertyInfo[] pis = null;
+
+
+            // pis[i].SetValue(this, value);
+        }
+
+
+        public virtual void SetValue(string columnName, object value)
+        {
+            System.Reflection.PropertyInfo[] pis = null;
+
+            // pis[i].SetValue(this, value);
+        }
+
+
+
     }
 
 
@@ -283,19 +304,16 @@ ON CONFLICT(myid) DO UPDATE
         }
 
 
-        public static bool Gaga<T>(T con) where T : System.Data.IDbConnection
+        public static bool CheckPropertyForGetterAndSetter<T>(T con) where T : System.Data.IDbConnection
         {
             System.Type t = typeof(T);
             System.Reflection.PropertyInfo[] pis = t.GetProperties();
 
-
             System.Reflection.PropertyInfo[] readProperties = System.Linq.Enumerable.ToArray(
                 System.Linq.Enumerable.Where(pis, x => x.CanRead));
 
-
             System.Reflection.PropertyInfo[] writeProperties = System.Linq.Enumerable.ToArray(
                 System.Linq.Enumerable.Where(pis, x => x.CanWrite));
-
 
             return true;
         }
