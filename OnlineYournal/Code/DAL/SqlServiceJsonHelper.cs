@@ -93,7 +93,7 @@ namespace AnySqlWebAdmin
                 }
 
                 await jsonWriter.WriteEndObjectAsync();
-            }
+            } // Next i 
 
             await jsonWriter.WriteEndObjectAsync();
         } // WriteAssociativeArray

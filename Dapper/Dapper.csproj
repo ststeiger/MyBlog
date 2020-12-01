@@ -5,10 +5,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Contrib\computed_columns.sql" />
     <None Remove="Contrib\Info.txt" />
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="Contrib\computed_columns.sql" />
     <Content Include="Contrib\Info.txt" />
   </ItemGroup>
 

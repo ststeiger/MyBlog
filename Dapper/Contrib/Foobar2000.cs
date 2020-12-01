@@ -163,23 +163,142 @@ ON CONFLICT(myid) DO UPDATE
 
 
 
-    }
+    } // End Class BaseTable 
+
 
 
     [Table("blog", "posts")]
-    public class Post 
+    public partial class Post 
         : BaseTable
     {
-        [IdentityInsert()]
-        public int Id { get; set; }
 
-        
-        // DB: bla_name
+
+        [IdentityInsert()]
+        [Column(1, "bp_uid", ColumnTypes.@int)]
+        public int BP_UID { get; set; }
+
+
+        [Column(2, "bp_title", ColumnTypes.nvarchar, size:200)]
         public int BlaName { get; set; }
 
 
-        public string _id { get; } // Computed column 
+        [Column(3, "bp_content", ColumnTypes.nvarchar)]
+        public int BP_Content { get; set; }
 
+
+        [Column(4, "bp_creoletext", ColumnTypes.nvarchar)]
+        public int BP_CreoleText { get; set; }
+
+
+        [Column(5, "bp_bbcode", ColumnTypes.nvarchar)]
+        public int BP_BBCode { get; set; }
+
+
+        [Column(6, "bp_htmlcontent", ColumnTypes.nvarchar)]
+        public int BP_HtmlContent { get; set; }
+
+
+        [Column(7, "bp_entrydate", ColumnTypes.datetime)]
+        public System.DateTime BP_EntryDate { get; set; }
+
+
+        // [Column(8, "_id", dataType: ColumnTypes.nvarchar, size:200)]
+        // public string _id { get; } // Computed column 
+
+    } // End Class Post 
+
+
+    public class Mapper
+    {
+
+
+
+        public static void AbstractToSqlServer()
+        {
+            System.Collections.Generic.Dictionary<string, string> dict = new System.Collections.Generic.Dictionary<string, string>(System.StringComparer.InvariantCultureIgnoreCase);
+
+
+            dict.Add("boolean", "bit");
+            dict.Add("int8", "tinyint");
+            dict.Add("int16", "smallint");
+            dict.Add("int32", "int");
+            dict.Add("int64", "bigint");
+            dict.Add("int128", "uniqueidentifier");
+
+            dict.Add("float", "real");
+            dict.Add("double", "float");
+
+            dict.Add("numeric", "numeric");
+            dict.Add("smallmoney", "smallmoney");
+            dict.Add("money", "money");
+
+            dict.Add("ansi", "char");
+            dict.Add("unicode", "nchar");
+
+            dict.Add("ansi_text", "varchar");
+            dict.Add("unicode_text", "nvarchar");
+            dict.Add("xml", "xml");
+
+            dict.Add("datetime", "datetime2");
+            dict.Add("datetimeoffset", "datetimeoffset");
+
+            dict.Add("time", "time");
+            dict.Add("timestamp", "timestamp");
+
+            dict.Add("byte", "binary");
+            dict.Add("bytes", "varbinary");
+
+            dict.Add("filestream", "filestream");
+            dict.Add("sql_variant", "sql_variant");
+
+        }
+
+
+        public static void SqlServerToAbstract()
+        {
+            System.Collections.Generic.Dictionary<string, string> dict = new System.Collections.Generic.Dictionary<string, string>(System.StringComparer.InvariantCultureIgnoreCase);
+
+            dict.Add("bit", "boolean");
+            dict.Add("tinyint", "int8");
+            dict.Add("smallint", "int16");
+            dict.Add("int", "int32");
+            dict.Add("bigint", "int64");
+            dict.Add("uniqueidentifier", "int128");
+
+            dict.Add("real", "float");
+            dict.Add("float", "double");
+
+            dict.Add("numeric", "numeric");
+            dict.Add("decimal", "numeric");
+            dict.Add("smallmoney", "smallmoney");
+            dict.Add("money", "money");
+
+            dict.Add("char", "ansi");
+            dict.Add("nchar", "unicode");
+
+            dict.Add("varchar", "ansi_text");
+            dict.Add("nvarchar", "unicode_text");
+            dict.Add("text", "ansi_text");
+            dict.Add("ntext", "unicode_text");
+            dict.Add("sysname", "unicode_text");
+            dict.Add("xml", "xml");
+
+            dict.Add("smalldatetime", "datetime");
+            dict.Add("datetime", "datetime");
+            dict.Add("datetime2", "datetime");
+            dict.Add("datetimeoffset", "datetimeoffset");
+
+            dict.Add("time", "time");
+            dict.Add("timestamp", "timestamp");
+
+            dict.Add("binary", "byte");
+
+            dict.Add("varbinary", "bytes");
+            dict.Add("image", "bytes");
+
+            dict.Add("filestream", "filestream");
+            dict.Add("sql_variant", "sql_variant");
+        }
     }
 
 
