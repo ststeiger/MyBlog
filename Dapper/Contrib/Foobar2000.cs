@@ -1,8 +1,8 @@
 ﻿
 namespace Dapper.Contrib
 {
-
-
+    
+    
     public class TableInfo
     {
         public bool NeedsIdentityInsert;
@@ -77,21 +77,22 @@ ON CONFLICT(myid) DO UPDATE
 -- DROP TABLE public.foobar;
 
         */
-
-
+        
+        
         public string[] Columns;
         public string[] KeyColumns;
 
+        
         public string InsertColumns;
         public string SelectColumns;
-
-
+        
+        
         public System.Action<object>[] Setters;
         public System.Action<object>[] Getters;
-
+        
     }
-
-
+    
+    
     public class TableInfoCache<TableType>
     {
         public static object s_lock = new object();
