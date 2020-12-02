@@ -74,7 +74,11 @@ namespace OnlineYournal
                             }
                         ); // End ConfigureKestrel 
 #endif
-
+                        
+                        // https://developers.redhat.com/blog/2018/07/24/improv-net-core-kestrel-performance-linux/
+                        webBuilder.UseLinuxTransport();
+                        Newtonsoft.Json.JsonConvert.DefaultSettings = null;
+                        
                         /*
                         if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
                         {

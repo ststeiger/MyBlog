@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 
 using Dapper;
+using Microsoft.AspNetCore.Mvc.Routing;
 using MyBlogCore;
 using MyBlogCore.Controllers;
 
@@ -426,9 +427,64 @@ ORDER BY BP_EntryDate DESC
         } // End Function GetMachineId 
 
 
+        public ActionResult ShowEntry(System.Guid? id, string domain)
+        {
+            // var routeHandler = this.HttpContext.RequestServices.GetService(typeof(MvcRouteHandler));
+            // System.Console.WriteLine(routeHandler);
+            
+            
+            T_BlogPost bp = new T_BlogPost();
+            bp.BP_UID = System.Guid.NewGuid();
+            bp.BP_Title = "hello";
+            bp.BP_Content = "<html><body><h1>"+domain+"</h1></body></html>";
+            // bp.BP_PostType = null; 
+          
+            
+            ViewData["myList"] =
+                new SelectList(new[] { "10", "15", "25", "50", "100", "1000" }
+                        .Select(x => new { value = x, text = x }),
+                    "value", "text", "15");
+
+            System.Collections.Generic.List<SelectListItem> ls = new System.Collections.Generic.List<SelectListItem>();
+
+            ls.Add(new SelectListItem() { Text = "Yes", Value = "true", Selected = true });
+            ls.Add(new SelectListItem() { Text = "No", Value = "false", Selected = false });
+            ls.Add(new SelectListItem() { Text = "Not Applicable", Value = "NULL", Selected = false });
+
+            ViewData["myList"] = ls;
+
+            ViewData["myList"] = new[] { "10", "15", "25", "50", "100", "1000" }
+                .Select(x => new SelectListItem
+                {
+                    Selected = x == "25",
+                    Text = x,
+                    Value = x
+                });
+
+            ViewData["myList"] =
+                new SelectList(new[] { "10", "15", "25", "50", "100", "1000" }
+                        .Select(x => new SelectListItem { Value = x, Text = x }),
+                    "Value", "Text", "15");
+
+            ViewData["myList"] =
+                from c in new[] { "10", "15", "25", "50", "100", "1000" }
+                select new SelectListItem
+                {
+                    Selected = (c == "25"),
+                    Text = c,
+                    Value = c
+                };
+
+            
+            
+            // If you do return View("~/Views/Wherever/SomeDir/MyView.aspx") You can return any View you'd like.
+            return View(bp);
+        }
+
+
         //
         // GET: /Blog/Delete/5
-        public ActionResult ShowEntry(System.Guid? id)
+        public ActionResult ShowEntry_old(System.Guid? id)
         {
             string host = (string)this.RouteData.Values["Host"];
             System.Console.WriteLine(host);

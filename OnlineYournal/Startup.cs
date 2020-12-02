@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection; // for AddSingleton, AddOptions,
 using Microsoft.Extensions.Configuration; // for GetConnectionString 
 using OnlineYournal.Log; // for AddSyslog
 
+using Open.Infrastructure.Web.DomainMatcher;
 
 namespace OnlineYournal
 {
@@ -239,6 +240,8 @@ namespace OnlineYournal
             );
             */
 
+            
+            
 
             // https://stackoverflow.com/questions/278668/is-it-possible-to-make-an-asp-net-mvc-route-based-on-a-subdomain
 
@@ -247,7 +250,8 @@ namespace OnlineYournal
                 delegate (Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints)
                 {
                     endpoints.MapDynamicControllerRoute<SearchValueTransformer>("search/{**product}");
-
+                    // de.bar.int:5001/
+                    
                     endpoints.MapControllerRoute(
                         name: "default", 
                         // pattern: "{controller=Home}/{action=Index}/{id?}", 
