@@ -6,7 +6,7 @@ using Microsoft.Extensions.Hosting; // for IsDevelopment
 // using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection; // for AddSingleton, AddOptions, AddControllersWithViews 
 using Microsoft.Extensions.Configuration; // for GetConnectionString 
-
+using OnlineYournal.Log; // for AddSyslog
 
 
 namespace OnlineYournal
@@ -107,8 +107,18 @@ namespace OnlineYournal
 
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(Microsoft.AspNetCore.Builder.IApplicationBuilder app, Microsoft.AspNetCore.Hosting.IWebHostEnvironment env)
+        public void Configure(
+              Microsoft.AspNetCore.Builder.IApplicationBuilder app
+            , Microsoft.AspNetCore.Hosting.IWebHostEnvironment env
+            , Microsoft.Extensions.Logging.ILoggerFactory loggerFactory)
         {
+            // https://gunnarpeipman.com/aspnet-core-syslog/
+            // https://stackoverflow.com/questions/20951667/how-to-write-to-kiwi-syslog-server-log-c-
+            // https://github.com/emertechie/SyslogNet/tree/master/SyslogNet.Client/Transport
+            // https://maxbelkov.github.io/visualsyslog/
+            loggerFactory.AddSyslog("192.168.210.56", 514);
+            
+            
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
                 ForwardedHeaders =    Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor
