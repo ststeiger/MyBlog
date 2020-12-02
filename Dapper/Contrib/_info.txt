@@ -1,0 +1,3 @@
+﻿
+Microsoft.CSharp & System.Reflection.Emit (excluding Lightweight)
+are only necessary for Dapper.Contrib. 

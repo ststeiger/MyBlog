@@ -1,8 +1,8 @@
 ﻿
 namespace Dapper.Contrib
 {
-    
-    
+
+
     public class TableInfo
     {
         public bool NeedsIdentityInsert;
@@ -14,6 +14,7 @@ namespace Dapper.Contrib
         public string InsertStatement;
         public string UpdateStatement;
         public string UpsertStatement;
+
         // insert into dummy(id, name, size) values(1, 'new_name', 3)
         // on conflict on constraint dummy_pkey
         // do update set name = 'new_name', size = 4;
@@ -77,22 +78,22 @@ ON CONFLICT(myid) DO UPDATE
 -- DROP TABLE public.foobar;
 
         */
-        
-        
+
+
         public string[] Columns;
         public string[] KeyColumns;
 
-        
+
         public string InsertColumns;
         public string SelectColumns;
-        
-        
+
+
         public System.Action<object>[] Setters;
         public System.Action<object>[] Getters;
-        
+
     }
-    
-    
+
+
     public class TableInfoCache<TableType>
     {
         public static object s_lock = new object();
@@ -140,7 +141,7 @@ ON CONFLICT(myid) DO UPDATE
 
 
     public abstract class BaseTable
-    { 
+    {
         public virtual string PK { get; set; }
 
 
@@ -168,7 +169,7 @@ ON CONFLICT(myid) DO UPDATE
 
 
     [Table("blog", "posts")]
-    public partial class Post 
+    public partial class Post
         : BaseTable
     {
 
@@ -178,7 +179,7 @@ ON CONFLICT(myid) DO UPDATE
         public int BP_UID { get; set; }
 
 
-        [Column(2, "bp_title", ColumnTypes.nvarchar, size:200)]
+        [Column(2, "bp_title", ColumnTypes.nvarchar, size: 200)]
         public int BlaName { get; set; }
 
 
@@ -208,314 +209,222 @@ ON CONFLICT(myid) DO UPDATE
     } // End Class Post 
 
 
-    public class Mapper
-    {
 
 
 
-        public static void AbstractToSqlServer()
+        static class Foobar2000
         {
-            System.Collections.Generic.Dictionary<string, string> dict = new System.Collections.Generic.Dictionary<string, string>(System.StringComparer.InvariantCultureIgnoreCase);
 
 
-            dict.Add("boolean", "bit");
-            dict.Add("int8", "tinyint");
-            dict.Add("int16", "smallint");
-            dict.Add("int32", "int");
-            dict.Add("int64", "bigint");
-            dict.Add("int128", "uniqueidentifier");
-
-            dict.Add("float", "real");
-            dict.Add("double", "float");
-
-            dict.Add("numeric", "numeric");
-            dict.Add("smallmoney", "smallmoney");
-            dict.Add("money", "money");
-
-            dict.Add("ansi", "char");
-            dict.Add("unicode", "nchar");
-
-            dict.Add("ansi_text", "varchar");
-            dict.Add("unicode_text", "nvarchar");
-            dict.Add("xml", "xml");
-
-            dict.Add("datetime", "datetime2");
-            dict.Add("datetimeoffset", "datetimeoffset");
-
-            dict.Add("time", "time");
-            dict.Add("timestamp", "timestamp");
-
-            dict.Add("byte", "binary");
-            dict.Add("bytes", "varbinary");
-
-            dict.Add("filestream", "filestream");
-            dict.Add("sql_variant", "sql_variant");
-
-        }
-
-
-        public static void SqlServerToAbstract()
-        {
-            System.Collections.Generic.Dictionary<string, string> dict = new System.Collections.Generic.Dictionary<string, string>(System.StringComparer.InvariantCultureIgnoreCase);
-
-            dict.Add("bit", "boolean");
-            dict.Add("tinyint", "int8");
-            dict.Add("smallint", "int16");
-            dict.Add("int", "int32");
-            dict.Add("bigint", "int64");
-            dict.Add("uniqueidentifier", "int128");
-
-            dict.Add("real", "float");
-            dict.Add("float", "double");
-
-            dict.Add("numeric", "numeric");
-            dict.Add("decimal", "numeric");
-            dict.Add("smallmoney", "smallmoney");
-            dict.Add("money", "money");
-
-            dict.Add("char", "ansi");
-            dict.Add("nchar", "unicode");
-
-            dict.Add("varchar", "ansi_text");
-            dict.Add("nvarchar", "unicode_text");
-            dict.Add("text", "ansi_text");
-            dict.Add("ntext", "unicode_text");
-            dict.Add("sysname", "unicode_text");
-            dict.Add("xml", "xml");
-
-            dict.Add("smalldatetime", "datetime");
-            dict.Add("datetime", "datetime");
-            dict.Add("datetime2", "datetime");
-            dict.Add("datetimeoffset", "datetimeoffset");
-
-            dict.Add("time", "time");
-            dict.Add("timestamp", "timestamp");
-
-            dict.Add("binary", "byte");
-
-            dict.Add("varbinary", "bytes");
-            dict.Add("image", "bytes");
-
-            dict.Add("filestream", "filestream");
-            dict.Add("sql_variant", "sql_variant");
-        }
-    }
-
-
-
-    static class Foobar2000
-    {
-        
-
-        public static int Ins<T>(this System.Data.IDbConnection cnn
-            , T entity
-            , System.Data.IDbTransaction transaction = null
-            , int? commandTimeout = null
-            , System.Data.CommandType? commandType = null)
-        {
-            int ret = -1;
-
-            // string sql = "INSERT INTO T VALUES (@A, @B)";
-            string sql = TableInfoCache<T>.Instance.InsertStatement;
-            ret = cnn.Execute(sql, entity);
-            return ret;
-        }
-
-
-        public static int Ins<T>(this System.Data.IDbConnection cnn
-            , System.Collections.Generic.IEnumerable<T> entities
-            , int? commandTimeout = null
-            , System.Data.CommandType? commandType = null)
-        {
-            int ret = -1;
-            bool wasOpen = false;
-
-            if (cnn.State != System.Data.ConnectionState.Open)
-                cnn.Open();
-            else
-                wasOpen = true;
-
-            System.Data.IDbTransaction transaction = cnn.BeginTransaction();
-
-            // string sql = "INSERT INTO T VALUES (@A, @B)";
-            string sql = TableInfoCache<T>.Instance.InsertStatement;
-            try
+            public static int Ins<T>(this System.Data.IDbConnection cnn
+                , T entity
+                , System.Data.IDbTransaction transaction = null
+                , int? commandTimeout = null
+                , System.Data.CommandType? commandType = null)
             {
-                ret = cnn.Execute(sql, entities, transaction);
-                transaction.Commit();
+                int ret = -1;
+
+                // string sql = "INSERT INTO T VALUES (@A, @B)";
+                string sql = TableInfoCache<T>.Instance.InsertStatement;
+                ret = cnn.Execute(sql, entity);
+                return ret;
             }
-            catch (System.Exception ex)
-            {
-                System.Console.WriteLine("Commit Exception Type: {0}", ex.GetType().FullName);
-                System.Console.WriteLine("  Message: {0}", ex.Message);
 
-                // Attempt to roll back the transaction. 
+
+            public static int Ins<T>(this System.Data.IDbConnection cnn
+                , System.Collections.Generic.IEnumerable<T> entities
+                , int? commandTimeout = null
+                , System.Data.CommandType? commandType = null)
+            {
+                int ret = -1;
+                bool wasOpen = false;
+
+                if (cnn.State != System.Data.ConnectionState.Open)
+                    cnn.Open();
+                else
+                    wasOpen = true;
+
+                System.Data.IDbTransaction transaction = cnn.BeginTransaction();
+
+                // string sql = "INSERT INTO T VALUES (@A, @B)";
+                string sql = TableInfoCache<T>.Instance.InsertStatement;
                 try
                 {
-                    transaction.Rollback();
+                    ret = cnn.Execute(sql, entities, transaction);
+                    transaction.Commit();
                 }
-                catch (System.Exception ex2)
+                catch (System.Exception ex)
                 {
-                    // This catch block will handle any errors that may have occurred 
-                    // on the server that would cause the rollback to fail, such as a closed connection.
-                    System.Console.WriteLine("Rollback Exception Type: {0}", ex2.GetType().FullName);
-                    System.Console.WriteLine("  Message: {0}", ex2.Message);
+                    System.Console.WriteLine("Commit Exception Type: {0}", ex.GetType().FullName);
+                    System.Console.WriteLine("  Message: {0}", ex.Message);
+
+                    // Attempt to roll back the transaction. 
+                    try
+                    {
+                        transaction.Rollback();
+                    }
+                    catch (System.Exception ex2)
+                    {
+                        // This catch block will handle any errors that may have occurred 
+                        // on the server that would cause the rollback to fail, such as a closed connection.
+                        System.Console.WriteLine("Rollback Exception Type: {0}", ex2.GetType().FullName);
+                        System.Console.WriteLine("  Message: {0}", ex2.Message);
+                    }
+
+                    throw;
+                }
+                finally
+                {
+                    if (!wasOpen && cnn.State != System.Data.ConnectionState.Closed)
+                        cnn.Close();
                 }
 
-                throw;
+                return ret;
             }
-            finally
+
+
+            public static T GetCustomAttribute<T>(System.Reflection.MemberInfo mi)
             {
-                if (!wasOpen && cnn.State != System.Data.ConnectionState.Closed)
-                    cnn.Close();
+                object[] objs = mi.GetCustomAttributes(typeof(T), false);
+
+                if (objs == null || objs.Length < 1)
+                    return default(T);
+
+                T attr = (T)objs[0];
+                return attr;
             }
 
-            return ret;
-        }
-
-
-        public static T GetCustomAttribute<T>(System.Reflection.MemberInfo mi)
-        {
-            object[] objs = mi.GetCustomAttributes(typeof(T), false);
-
-            if (objs == null || objs.Length < 1)
-                return default(T);
-
-            T attr = (T)objs[0];
-            return attr;
-        }
-
-        public static System.Reflection.MemberInfo GetFieldOrProperty(System.Type t, string memberName, System.Reflection.BindingFlags flags)
-        {
-            System.Reflection.MemberInfo retValue = t.GetProperty(memberName, flags);
-            if (retValue == null)
-                retValue = t.GetField(memberName, flags);
-
-            return retValue;
-        }
-
-        public static TAttribute GetMemberAttribute<T, TAttribute>(string memberName)
-        {
-            TAttribute attr = GetCustomAttribute<TAttribute>(
-                GetFieldOrProperty(typeof(T), memberName, System.Reflection.BindingFlags.Public
-                | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.IgnoreCase)
-                );
-
-            return attr;
-        }
-
-
-        public static void CheckAttribute<T>(string memberName)
-        {
-            KeyAttribute attr = GetMemberAttribute<T, KeyAttribute>(memberName);
-
-            System.Console.WriteLine(attr.Name);
-            System.Console.WriteLine(attr.Fields[0]);
-        }
-
-
-        private static bool IsWriteable(System.Reflection.PropertyInfo pi)
-        {
-            var attributes = pi.GetCustomAttributes(typeof(WriteAttribute), false).AsList();
-            if (attributes.Count != 1) return true;
-
-            var writeAttribute = (WriteAttribute)attributes[0];
-            return writeAttribute.Write;
-        }
-
-
-        public static bool CheckPropertyForGetterAndSetter<T>(T con) where T : System.Data.IDbConnection
-        {
-            System.Type t = typeof(T);
-            System.Reflection.PropertyInfo[] pis = t.GetProperties();
-
-            System.Reflection.PropertyInfo[] readProperties = System.Linq.Enumerable.ToArray(
-                System.Linq.Enumerable.Where(pis, x => x.CanRead));
-
-            System.Reflection.PropertyInfo[] writeProperties = System.Linq.Enumerable.ToArray(
-                System.Linq.Enumerable.Where(pis, x => x.CanWrite));
-
-            return true;
-        }
-
-
-        public static bool IsReservedKeyword(System.Data.IDbConnection con, string objectName)
-        {
-            if (string.IsNullOrEmpty(objectName))
-                throw new System.ArgumentNullException(nameof(objectName));
-
-            if (con is System.Data.SqlClient.SqlConnection)
+            public static System.Reflection.MemberInfo GetFieldOrProperty(System.Type t, string memberName, System.Reflection.BindingFlags flags)
             {
-                return ms_specific.ReservedKeywords.Contains(objectName);
+                System.Reflection.MemberInfo retValue = t.GetProperty(memberName, flags);
+                if (retValue == null)
+                    retValue = t.GetField(memberName, flags);
+
+                return retValue;
             }
-            else if (con is Npgsql.NpgsqlConnection)
+
+            public static TAttribute GetMemberAttribute<T, TAttribute>(string memberName)
             {
-                return pg_specific.ReservedKeywords.Contains(objectName);
+                TAttribute attr = GetCustomAttribute<TAttribute>(
+                    GetFieldOrProperty(typeof(T), memberName, System.Reflection.BindingFlags.Public
+                    | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.IgnoreCase)
+                    );
+
+                return attr;
             }
 
-            return false;
-        }
+
+            public static void CheckAttribute<T>(string memberName)
+            {
+                KeyAttribute attr = GetMemberAttribute<T, KeyAttribute>(memberName);
+
+                System.Console.WriteLine(attr.Name);
+                System.Console.WriteLine(attr.Fields[0]);
+            }
 
 
-        public static bool IsReservedKeyword(string objectName)
-        {
-            if (string.IsNullOrEmpty(objectName))
-                throw new System.ArgumentNullException(nameof(objectName));
+            private static bool IsWriteable(System.Reflection.PropertyInfo pi)
+            {
+                var attributes = pi.GetCustomAttributes(typeof(WriteAttribute), false).AsList();
+                if (attributes.Count != 1) return true;
 
-            return false;
-        }
+                var writeAttribute = (WriteAttribute)attributes[0];
+                return writeAttribute.Write;
+            }
 
-        public static bool ObjectNameNeedsEscaping(string objectName)
-        {
-            if (string.IsNullOrEmpty(objectName))
-                throw new System.ArgumentNullException(nameof(objectName));
 
-            if (string.IsNullOrEmpty(objectName))
+            public static bool CheckPropertyForGetterAndSetter<T>(T con) where T : System.Data.IDbConnection
+            {
+                System.Type t = typeof(T);
+                System.Reflection.PropertyInfo[] pis = t.GetProperties();
+
+                System.Reflection.PropertyInfo[] readProperties = System.Linq.Enumerable.ToArray(
+                    System.Linq.Enumerable.Where(pis, x => x.CanRead));
+
+                System.Reflection.PropertyInfo[] writeProperties = System.Linq.Enumerable.ToArray(
+                    System.Linq.Enumerable.Where(pis, x => x.CanWrite));
+
+                return true;
+            }
+
+
+            public static bool IsReservedKeyword(System.Data.IDbConnection con, string objectName)
+            {
+                if (string.IsNullOrEmpty(objectName))
+                    throw new System.ArgumentNullException(nameof(objectName));
+
+                if (con is System.Data.SqlClient.SqlConnection)
+                {
+                    return ms_specific.ReservedKeywords.Contains(objectName);
+                }
+                else if (con is Npgsql.NpgsqlConnection)
+                {
+                    return pg_specific.ReservedKeywords.Contains(objectName);
+                }
+
                 return false;
-
-            if (IsReservedKeyword(objectName))
-                return true;
-
-            if (objectName.StartsWith("@"))
-                return true;
-
-
-            // The underscore (_), at sign (@), or number sign (#).
-            // %^&({}+-/ ]['''
-            char[] lsIllegalCharacters = "+-*/%<>=&|^(){}[]\"'´`\t\n\r \\,.;?!~¨¦§°¢£€".ToCharArray();
-
-            for (int i = 0; i < lsIllegalCharacters.Length; ++i)
-            {
-                if (objectName.IndexOf(lsIllegalCharacters[i]) != -1)
-                    return true;
             }
 
-            return false;
-        } // End Function MustEscape 
+
+            public static bool IsReservedKeyword(string objectName)
+            {
+                if (string.IsNullOrEmpty(objectName))
+                    throw new System.ArgumentNullException(nameof(objectName));
+
+                return false;
+            }
+
+            public static bool ObjectNameNeedsEscaping(string objectName)
+            {
+                if (string.IsNullOrEmpty(objectName))
+                    throw new System.ArgumentNullException(nameof(objectName));
+
+                if (string.IsNullOrEmpty(objectName))
+                    return false;
+
+                if (IsReservedKeyword(objectName))
+                    return true;
+
+                if (objectName.StartsWith("@"))
+                    return true;
 
 
-        public static string QuoteObject(string objectName)
-        {
-            if (string.IsNullOrEmpty(objectName))
-                throw new System.ArgumentNullException(nameof(objectName));
+                // The underscore (_), at sign (@), or number sign (#).
+                // %^&({}+-/ ]['''
+                char[] lsIllegalCharacters = "+-*/%<>=&|^(){}[]\"'´`\t\n\r \\,.;?!~¨¦§°¢£€".ToCharArray();
 
-            return "\"" + objectName.Replace("\"", "\"\"") + "\"";
+                for (int i = 0; i < lsIllegalCharacters.Length; ++i)
+                {
+                    if (objectName.IndexOf(lsIllegalCharacters[i]) != -1)
+                        return true;
+                }
+
+                return false;
+            } // End Function MustEscape 
+
+
+            public static string QuoteObject(string objectName)
+            {
+                if (string.IsNullOrEmpty(objectName))
+                    throw new System.ArgumentNullException(nameof(objectName));
+
+                return "\"" + objectName.Replace("\"", "\"\"") + "\"";
+            }
+
+
+            public static string QuoteObjectWhereNecessary(string objectName)
+            {
+                if (string.IsNullOrEmpty(objectName))
+                    throw new System.ArgumentNullException(nameof(objectName));
+
+                if (ObjectNameNeedsEscaping(objectName))
+                    return QuoteObject(objectName);
+
+                return objectName;
+            } // End Function QuoteObjectWhereNecessary
+
+
         }
-
-
-        public static string QuoteObjectWhereNecessary(string objectName)
-        {
-            if (string.IsNullOrEmpty(objectName))
-                throw new System.ArgumentNullException(nameof(objectName));
-
-            if (ObjectNameNeedsEscaping(objectName))
-                return QuoteObject(objectName);
-
-            return objectName;
-        } // End Function QuoteObjectWhereNecessary
 
 
     }
-
-
-}

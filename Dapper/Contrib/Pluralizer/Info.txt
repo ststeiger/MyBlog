@@ -1,11 +1,4 @@
 ﻿
-Microsoft.CSharp & System.Reflection.Emit (excluding Lightweight)
-are only necessary for Dapper.Contrib. 
-
-
-[TableName("dbo", "foo")]
-
-
 Pluralizer: 
 
 Post => Posts
@@ -45,28 +38,6 @@ bus – buses
 tax – taxes
 
 
-PluralizationService
-
 https://blob.perl.org/tpc/1998/User_Applications/Algorithmic%20Approach%20Plurals/Algorithmic_Plurals.html
 http://users.monash.edu/~damian/papers/HTML/Plurals.html
 https://www.grammarly.com/blog/plural-nouns
-
-
-public class PluralFormatProvider : IFormatProvider, ICustomFormatter 
-{
-
-  public object GetFormat(Type formatType) 
-  {
-    return this;
-  }
-
-
-  public string Format(string format, object arg, IFormatProvider formatProvider) 
-  {
-    string[] forms = format.Split(';');
-    int value = (int)arg;
-    int form = value == 1 ? 0 : 1;
-    return value.ToString() + " " + forms[form];
-  }
-
-}

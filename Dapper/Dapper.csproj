@@ -6,12 +6,14 @@
 
   <ItemGroup>
     <None Remove="Contrib\computed_columns.sql" />
-    <None Remove="Contrib\Info.txt" />
+    <None Remove="Contrib\Pluralizer\Info.txt" />
+    <None Remove="Contrib\_info.txt" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Contrib\computed_columns.sql" />
-    <Content Include="Contrib\Info.txt" />
+    <Content Include="Contrib\Mapper\computed_columns.sql" />
+    <Content Include="Contrib\_info.txt" />
+    <Content Include="Contrib\Pluralizer\Info.txt" />
   </ItemGroup>
 
   <ItemGroup>
@@ -21,10 +23,6 @@
     <PackageReference Include="System.Reflection.Emit" Version="4.7.0" />
     <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.3.0" />
     <PackageReference Include="System.Reflection.TypeExtensions" Version="4.5.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Contrib\Pluralizer\" />
   </ItemGroup>
 
 </Project>
