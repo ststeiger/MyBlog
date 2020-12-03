@@ -15,6 +15,7 @@ namespace OnlineYournal
 
         public static void Main(string[] args)
         {
+
             using (System.IO.FileSystemWatcher watcher = new System.IO.FileSystemWatcher())
             {
                 // listenOptions.UseHttps("testCert.pfx", "testPassword");                                
@@ -24,9 +25,8 @@ namespace OnlineYournal
                     | System.IO.NotifyFilters.FileName // Needed if text-file is changed with Visual Studio ...
                 ;
 
-
                 CreateHostBuilder(args, watcher).Build().Run();
-            }
+            } // End Using watcher 
 
         } // End Sub Main 
 
