@@ -5,8 +5,10 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 
+
 namespace OnlineYournal
 {
+
 
 
     public class Program
@@ -29,6 +31,9 @@ namespace OnlineYournal
             } // End Using watcher 
 
         } // End Sub Main 
+
+
+
 
 
         // https://github.com/dotnet/aspnetcore/discussions/28238
