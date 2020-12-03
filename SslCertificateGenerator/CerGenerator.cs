@@ -419,7 +419,7 @@ namespace SslCertificateGenerator
         } // End Function GenerateCertificate 
 
 
-        static bool ValidateSelfSignedCert(
+        public static bool ValidateSelfSignedCert(
             Org.BouncyCastle.X509.X509Certificate cert,
             Org.BouncyCastle.Crypto.ICipherParameters pubKey
             )
