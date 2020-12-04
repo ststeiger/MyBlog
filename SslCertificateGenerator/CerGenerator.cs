@@ -104,9 +104,27 @@ namespace SslCertificateGenerator
 
 
         public static Org.BouncyCastle.X509.X509Certificate GenerateSslCertificate(
+            CertificateInfo certificateInfo
+          , Org.BouncyCastle.Security.SecureRandom secureRandom
+          , Org.BouncyCastle.X509.X509Certificate rootCertificate
+      )
+        {
+            Org.BouncyCastle.Crypto.AsymmetricKeyParameter subjectPublicKey =
+           KeyImportExport.ReadPublicKey(certificateInfo.SubjectKeyPair.PublicKey);
+
+            Org.BouncyCastle.Crypto.AsymmetricKeyParameter issuerPrivateKey =
+                KeyImportExport.ReadPrivateKey(certificateInfo.IssuerKeyPair.PrivateKey);
+
+            return GenerateSslCertificate(certificateInfo, subjectPublicKey, issuerPrivateKey, rootCertificate, secureRandom);
+        }
+
+
+        public static Org.BouncyCastle.X509.X509Certificate GenerateSslCertificate(
               CertificateInfo certificateInfo
-            , Org.BouncyCastle.Security.SecureRandom secureRandom
+            , Org.BouncyCastle.Crypto.AsymmetricKeyParameter subjectPublicKey
+            , Org.BouncyCastle.Crypto.AsymmetricKeyParameter issuerPrivateKey
             , Org.BouncyCastle.X509.X509Certificate rootCertificate
+            , Org.BouncyCastle.Security.SecureRandom secureRandom
         )
         {
             // The Certificate Generator
@@ -129,13 +147,6 @@ namespace SslCertificateGenerator
 
             certificateGenerator.SetNotBefore(certificateInfo.ValidFrom);
             certificateGenerator.SetNotAfter(certificateInfo.ValidTo);
-
-            Org.BouncyCastle.Crypto.AsymmetricKeyParameter subjectPublicKey =
-                KeyImportExport.ReadPublicKey(certificateInfo.SubjectKeyPair.PublicKey);
-
-            Org.BouncyCastle.Crypto.AsymmetricKeyParameter issuerPrivateKey =
-                KeyImportExport.ReadPrivateKey(certificateInfo.IssuerKeyPair.PrivateKey);
-
 
             certificateGenerator.AddExtension(Org.BouncyCastle.Asn1.X509.X509Extensions.SubjectAlternativeName.Id
                 , false
