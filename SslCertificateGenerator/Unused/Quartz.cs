@@ -21,7 +21,9 @@ namespace RamMonitor
     {
         public async System.Threading.Tasks.Task Execute( Quartz.IJobExecutionContext context)
         {
-            await System.IO.File.AppendAllLinesAsync(@"c:\temp\job1.txt", new[] { System.DateTime.Now.ToLongTimeString() });
+            // await System.IO.File.AppendAllLinesAsync(@"c:\temp\job1.txt", new[] { System.DateTime.Now.ToLongTimeString() });
+            System.Console.WriteLine("Job One");
+            await System.Threading.Tasks.Task.CompletedTask;
         }
     }
     
@@ -30,24 +32,26 @@ namespace RamMonitor
     {
         public async System.Threading.Tasks.Task Execute( Quartz.IJobExecutionContext context)
         {
-            await System.IO.File.AppendAllLinesAsync(@"c:\temp\job2.txt", new[] { System.DateTime.Now.ToLongTimeString() });
+            // await System.IO.File.AppendAllLinesAsync(@"c:\temp\job2.txt", new[] { System.DateTime.Now.ToLongTimeString() });
+            System.Console.WriteLine("Job Two");
+            await System.Threading.Tasks.Task.CompletedTask;
         }
     }
 
 
 
-    public class sch
+    public class TaskScheduler
     {
         private Quartz.Impl.StdSchedulerFactory _schedulerFactory;
         private  Quartz.IScheduler _scheduler;
         private System.Threading.CancellationToken _stopppingToken;
         
         
-        public sch()
+        public TaskScheduler()
         { } // End Constructor 
         
         
-        protected async System.Threading.Tasks.Task StartJobs(System.Threading.CancellationToken stoppingToken)
+        public async System.Threading.Tasks.Task StartJobs(System.Threading.CancellationToken stoppingToken)
         {
             this._stopppingToken = stoppingToken;
             this._schedulerFactory = new Quartz.Impl.StdSchedulerFactory();
@@ -80,7 +84,7 @@ namespace RamMonitor
             
             await this._scheduler.ScheduleJob(job1, trigger1, this._stopppingToken);
             await this._scheduler.ScheduleJob(job2, trigger2, this._stopppingToken);
-        }
+        } // End Task StartJobs
         
         
     } // End Class sch  

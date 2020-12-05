@@ -9,6 +9,10 @@ namespace SslCertificateGenerator
 
         public static async System.Threading.Tasks.Task Main(string[] args)
         {
+            RamMonitor.TaskScheduler ts = new RamMonitor.TaskScheduler();
+            await ts.StartJobs(System.Threading.CancellationToken.None);
+            
+            
             Test();
 
             System.Console.WriteLine(" --- Press any key to continue --- ");
