@@ -1,19 +1,4 @@
 
-// PemWriter: which one ?
-// using Org.BouncyCastle.OpenSsl;
-// using Org.BouncyCastle.Utilities.IO.Pem;
-
-
-// using Org.BouncyCastle.OpenSsl;
-
-// using System.Security.Cryptography.X509Certificates;
-
-using MimeKit.Cryptography;
-using Org.BouncyCastle.Asn1.X509;
-using Org.BouncyCastle.Crypto;
-using Org.BouncyCastle.Crypto.Parameters;
-using Org.BouncyCastle.X509;
-
 namespace SslCertificateGenerator 
 {
 
@@ -46,7 +31,7 @@ namespace SslCertificateGenerator
                 {
                     Org.BouncyCastle.Pkcs.AsymmetricKeyEntry keyEntry = store.GetKey(alias);
                     System.Console.WriteLine(keyEntry);
-                    AsymmetricKeyParameter privateKey = keyEntry.Key;
+                    Org.BouncyCastle.Crypto.AsymmetricKeyParameter privateKey = keyEntry.Key;
                     System.Console.WriteLine(privateKey.IsPrivate);
                 } // End if (store.IsKeyEntry((string)alias))
                 
@@ -54,8 +39,8 @@ namespace SslCertificateGenerator
                 Org.BouncyCastle.Pkcs.X509CertificateEntry certEntry = store.GetCertificate(alias);
                 Org.BouncyCastle.X509.X509Certificate cert = certEntry.Certificate;
                 System.Console.WriteLine(cert);
-                
-                AsymmetricKeyParameter publicKey = cert.GetPublicKey();
+
+                Org.BouncyCastle.Crypto.AsymmetricKeyParameter publicKey = cert.GetPublicKey();
                 System.Console.WriteLine(publicKey);
                 
                 // Org.BouncyCastle.Pkcs.X509CertificateEntry[] chain = store.GetCertificateChain(alias);
@@ -99,18 +84,18 @@ namespace SslCertificateGenerator
 
             X509CertificateStore xs = new X509CertificateStore();
             xs.Import(pfxLocation);
-            foreach (X509Certificate thisCert in xs.Certificates)
+            foreach (Org.BouncyCastle.X509.X509Certificate thisCert in xs.Certificates)
             {
                 System.Console.WriteLine(thisCert);
                 thisCert.GetPublicKey();
 
-                // var signer = Org.BouncyCastle.Security.SignerUtilities.GetSigner(Sdk.SIGNATURE_ALGORITHM);
+                // Org.BouncyCastle.Crypto.ISigner signer = Org.BouncyCastle.Security.SignerUtilities.GetSigner(Sdk.SIGNATURE_ALGORITHM);
             }
 
 
-            X509CertificateParser certParser = new X509CertificateParser();
+            Org.BouncyCastle.X509.X509CertificateParser certParser = new Org.BouncyCastle.X509.X509CertificateParser();
 
-            using (var fs = System.IO.File.OpenRead(pfxLocation))
+            using (System.IO.Stream fs = System.IO.File.OpenRead(pfxLocation))
             {
                 certParser.ReadCertificate(fs);
             }
@@ -121,14 +106,15 @@ namespace SslCertificateGenerator
 
 
 
-        public static AsymmetricKeyParameter TransformRSAPrivateKey(System.Security.Cryptography.AsymmetricAlgorithm privateKey)
+        public static Org.BouncyCastle.Crypto.AsymmetricKeyParameter 
+            TransformRSAPrivateKey(System.Security.Cryptography.AsymmetricAlgorithm privateKey)
         {
             System.Security.Cryptography.RSACryptoServiceProvider prov = privateKey as System.Security.Cryptography.RSACryptoServiceProvider;
             System.Security.Cryptography.RSAParameters parameters = prov.ExportParameters(true);
 
             // Obviously this assumes that the certificate includes a RSA Key but the same result can be achieved for DSA with DSACryptoServiceProvider and DSAParameters
 
-            return new RsaPrivateCrtKeyParameters(
+            return new Org.BouncyCastle.Crypto.Parameters.RsaPrivateCrtKeyParameters(
                 new Org.BouncyCastle.Math.BigInteger(1, parameters.Modulus),
                 new Org.BouncyCastle.Math.BigInteger(1, parameters.Exponent),
                 new Org.BouncyCastle.Math.BigInteger(1, parameters.D),
@@ -143,7 +129,9 @@ namespace SslCertificateGenerator
 
         // https://www.csharpcodi.com/csharp-examples/Org.BouncyCastle.X509.X509Certificate.GetPublicKey()/
         public static bool CheckRequestSignature(
-            byte[] serializedSpeechletRequest, string expectedSignature, Org.BouncyCastle.X509.X509Certificate cert)
+              byte[] serializedSpeechletRequest
+            , string expectedSignature
+            , Org.BouncyCastle.X509.X509Certificate cert)
         {
 
             byte[] expectedSig = null;
@@ -156,8 +144,12 @@ namespace SslCertificateGenerator
                 return false;
             }
 
-            var publicKey = (Org.BouncyCastle.Crypto.Parameters.RsaKeyParameters)cert.GetPublicKey();
-            var signer = Org.BouncyCastle.Security.SignerUtilities.GetSigner("Sdk.SIGNATURE_ALGORITHM");
+            Org.BouncyCastle.Crypto.Parameters.RsaKeyParameters publicKey = 
+                (Org.BouncyCastle.Crypto.Parameters.RsaKeyParameters)cert.GetPublicKey();
+
+            Org.BouncyCastle.Crypto.ISigner signer = 
+                Org.BouncyCastle.Security.SignerUtilities.GetSigner("Sdk.SIGNATURE_ALGORITHM");
+
             signer.Init(false, publicKey);
             signer.BlockUpdate(serializedSpeechletRequest, 0, serializedSpeechletRequest.Length);
 
@@ -176,21 +168,21 @@ namespace SslCertificateGenerator
             // https://overcoder.net/q/429916/bouncycastle-privatekey-to-x509%D1%81%D0%B5%D1%80%D1%82%D0%B8%D1%84%D0%B8%D0%BA%D0%B0%D1%822-privatekey
             // https://www.csharpcodi.com/csharp-examples/Org.BouncyCastle.X509.X509Certificate.GetPublicKey()/
 
-            AsymmetricKeyParameter Akp = Org.BouncyCastle.Security.DotNetUtilities.GetKeyPair(mycert.PrivateKey).Private;
+            Org.BouncyCastle.Crypto.AsymmetricKeyParameter Akp = Org.BouncyCastle.Security.DotNetUtilities.GetKeyPair(mycert.PrivateKey).Private;
 
 
             // if(mycert.HasPrivateKey)
-            AsymmetricKeyParameter bouncyCastlePrivateKey = TransformRSAPrivateKey(mycert.PrivateKey);
+            Org.BouncyCastle.Crypto.AsymmetricKeyParameter bouncyCastlePrivateKey = TransformRSAPrivateKey(mycert.PrivateKey);
 
 
 
 
-            X509CertificateParser certParser = new X509CertificateParser();
-            X509Certificate bouncyCertificate = certParser.ReadCertificate(mycert.GetRawCertData());
+            Org.BouncyCastle.X509.X509CertificateParser certParser = new Org.BouncyCastle.X509.X509CertificateParser();
+            Org.BouncyCastle.X509.X509Certificate bouncyCertificate = certParser.ReadCertificate(mycert.GetRawCertData());
             Org.BouncyCastle.Crypto.AsymmetricKeyParameter pubKey = bouncyCertificate.GetPublicKey();
 
-            var algorithm = Org.BouncyCastle.Security.DigestUtilities.GetDigest(bouncyCertificate.SigAlgOid);
-            // var signature = new X509Certificate2Signature(mycert, algorithm);
+            Org.BouncyCastle.Crypto.IDigest algorithm = Org.BouncyCastle.Security.DigestUtilities.GetDigest(bouncyCertificate.SigAlgOid);
+            // X509Certificate2Signature signature = new X509Certificate2Signature(mycert, algorithm);
             // https://github.com/kusl/itextsharp/blob/master/tags/iTextSharp_5_4_5/src/core/iTextSharp/text/pdf/security/X509Certificate2Signature.cs
             // Sign
 

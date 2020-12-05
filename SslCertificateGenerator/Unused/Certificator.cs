@@ -1,7 +1,4 @@
 
-using System.Security.Cryptography.X509Certificates;
-
-
 // https://gist.github.com/ststeiger/aa7da5031e689fd66527af86ad962cc0
 // https://dotnetcodr.com/2016/01/21/using-client-certificates-in-net-part-4-working-with-client-certificates-in-code/
 namespace SslCertificateGenerator 
@@ -12,12 +9,14 @@ namespace SslCertificateGenerator
     {
 
 
-        public static string GetPath(X509Store store )
+        public static string GetPath(System.Security.Cryptography.X509Certificates.X509Store store )
         {
-            System.Type t = typeof(X509Store);
+            System.Type t = typeof(System.Security.Cryptography.X509Certificates.X509Store);
             System.Reflection.FieldInfo fi = t.GetField("_storePal"
                 , System.Reflection.BindingFlags.Instance 
-                | System.Reflection.BindingFlags.NonPublic);
+                | System.Reflection.BindingFlags.NonPublic
+            );
+
             object obj = fi.GetValue(store);
             // System.Console.WriteLine(obj);
 
@@ -51,18 +50,18 @@ namespace SslCertificateGenerator
             System.Console.WriteLine("\r\nExists Certs Name and Location");
             System.Console.WriteLine("------ ----- -------------------------");
             
-            foreach (StoreLocation storeLocation in (StoreLocation[]) 
-                System.Enum.GetValues(typeof(StoreLocation)))
+            foreach (System.Security.Cryptography.X509Certificates.StoreLocation storeLocation in (System.Security.Cryptography.X509Certificates.StoreLocation[]) 
+                System.Enum.GetValues(typeof(System.Security.Cryptography.X509Certificates.StoreLocation)))
             {
-                foreach (StoreName storeName in (StoreName[])
-                    System.Enum.GetValues(typeof(StoreName)))
+                foreach (System.Security.Cryptography.X509Certificates.StoreName storeName in (System.Security.Cryptography.X509Certificates.StoreName[])
+                    System.Enum.GetValues(typeof(System.Security.Cryptography.X509Certificates.StoreName)))
                 {
-                    using (X509Store store = new X509Store(storeName, storeLocation))
+                    using (System.Security.Cryptography.X509Certificates.X509Store store = new System.Security.Cryptography.X509Certificates.X509Store(storeName, storeLocation))
                     { 
 
                         try
                         {
-                            store.Open(OpenFlags.OpenExistingOnly);
+                            store.Open(System.Security.Cryptography.X509Certificates.OpenFlags.OpenExistingOnly);
                             string path = GetPath(store);
                             System.Console.WriteLine("{0}.{1}:{2}", storeLocation, storeName, path);
                             // Console.WriteLine("Yes {0,4}  {1}, {2}", store.Certificates.Count, store.Name, store.Location);
@@ -82,7 +81,7 @@ namespace SslCertificateGenerator
         } // End Sub ListCertificates 
 
 
-        public static X509Certificate2 CreateRootCertificate()
+        public static System.Security.Cryptography.X509Certificates.X509Certificate2 CreateRootCertificate()
         {
             return null;
         }
@@ -94,7 +93,7 @@ namespace SslCertificateGenerator
         /// </summary>
         public void EnsureRootCertificate()
         {
-            X509Certificate2 rootCertificate = null;
+            System.Security.Cryptography.X509Certificates.X509Certificate2 rootCertificate = null;
             bool machineTrustRoot = false;
 
             if (rootCertificate == null)
@@ -110,36 +109,49 @@ namespace SslCertificateGenerator
         ///     Trusts the root certificate in user store, optionally also in machine store.
         ///     Machine trust would require elevated permissions (will silently fail otherwise).
         /// </summary>
-        public void TrustRootCertificate(X509Certificate2 cert, bool machineTrusted = false)
+        public void TrustRootCertificate(
+            System.Security.Cryptography.X509Certificates.X509Certificate2 cert, 
+            bool machineTrusted = false)
         {
             // currentUser\personal
-            InstallCertificate(cert, StoreName.My, StoreLocation.CurrentUser);
+            InstallCertificate(cert, System.Security.Cryptography.X509Certificates.StoreName.My
+                , System.Security.Cryptography.X509Certificates.StoreLocation.CurrentUser);
 
             if (!machineTrusted)
             {
                 // currentUser\Root
-                InstallCertificate(cert, StoreName.Root, StoreLocation.CurrentUser);
+                InstallCertificate(cert, System.Security.Cryptography.X509Certificates.StoreName.Root
+                    , System.Security.Cryptography.X509Certificates.StoreLocation.CurrentUser);
             }
             else
             {
                 // current system
-                InstallCertificate(cert, StoreName.My, StoreLocation.LocalMachine);
+                InstallCertificate(cert, System.Security.Cryptography.X509Certificates.StoreName.My
+                    , System.Security.Cryptography.X509Certificates.StoreLocation.LocalMachine);
 
                 // this adds to both currentUser\Root & currentMachine\Root
-                InstallCertificate(cert, StoreName.Root, StoreLocation.LocalMachine);
+                InstallCertificate(cert, System.Security.Cryptography.X509Certificates.StoreName.Root
+                    , System.Security.Cryptography.X509Certificates.StoreLocation.LocalMachine);
             }
         } // End Sub TrustRootCertificate 
 
 
-        private static X509Certificate Find(string serialNumber, StoreLocation location)
+        private static System.Security.Cryptography.X509Certificates.X509Certificate Find(
+            string serialNumber, System.Security.Cryptography.X509Certificates.StoreLocation location)
         {
-            using (X509Store store = new X509Store(location))
+            using (System.Security.Cryptography.X509Certificates.X509Store store = 
+                new System.Security.Cryptography.X509Certificates.X509Store(location))
             {
-                store.Open(OpenFlags.OpenExistingOnly);
-                X509Certificate2Collection certs = store.Certificates.Find(X509FindType.FindBySerialNumber, serialNumber, true);
+                store.Open(System.Security.Cryptography.X509Certificates.OpenFlags.OpenExistingOnly);
+                System.Security.Cryptography.X509Certificates.X509Certificate2Collection certs = 
+                    store.Certificates.Find(
+                        System.Security.Cryptography.X509Certificates.X509FindType
+                        .FindBySerialNumber, serialNumber, true);
+
                 //return certs.OfType<X509Certificate>().FirstOrDefault();
 
-                foreach (X509Certificate2 thisCertificate in certs)
+                foreach (System.Security.Cryptography.X509Certificates.X509Certificate2 thisCertificate 
+                    in certs)
                 {
                     return thisCertificate;
                 }
@@ -154,14 +166,17 @@ namespace SslCertificateGenerator
             // TODO: 
             // StoreLocation.CurrentUser)
 
-            using (X509Store store = new X509Store(StoreName.Root, StoreLocation.LocalMachine))
+            using (System.Security.Cryptography.X509Certificates.X509Store store = 
+                new System.Security.Cryptography.X509Certificates.X509Store(System.Security.Cryptography.X509Certificates.StoreName.Root, System.Security.Cryptography.X509Certificates.StoreLocation.LocalMachine))
             {
-                store.Open(OpenFlags.ReadOnly);
+                store.Open(System.Security.Cryptography.X509Certificates.OpenFlags.ReadOnly);
 
-                X509Certificate2Collection certificates = store.Certificates.Find(
-                    X509FindType.FindBySubjectName,
-                    "subjectName",
-                    false);
+                System.Security.Cryptography.X509Certificates.X509Certificate2Collection certificates = 
+                    store.Certificates.Find(
+                        System.Security.Cryptography.X509Certificates.X509FindType.FindBySubjectName,
+                        "subjectName",
+                        false
+                );
 
                 if (certificates != null && certificates.Count > 0)
                 {
@@ -174,7 +189,7 @@ namespace SslCertificateGenerator
         }
 
 
-        public static void PrintCertificateInfo(X509Certificate2 certificate)
+        public static void PrintCertificateInfo(System.Security.Cryptography.X509Certificates.X509Certificate2 certificate)
         {
             System.Console.WriteLine("Name: {0}", certificate.FriendlyName);
             System.Console.WriteLine("Issuer: {0}", certificate.IssuerName.Name);
@@ -188,14 +203,17 @@ namespace SslCertificateGenerator
             System.Console.WriteLine();
         }
 
-        public static void EnumCertificates(StoreName name, StoreLocation location)
+        public static void EnumCertificates(System.Security.Cryptography.X509Certificates.StoreName name
+            , System.Security.Cryptography.X509Certificates.StoreLocation location)
         {
-            using (X509Store store = new X509Store(name, location))
+            using (System.Security.Cryptography.X509Certificates.X509Store store = 
+                new System.Security.Cryptography.X509Certificates.X509Store(name, location))
             {
                 try
                 {
-                    store.Open(OpenFlags.ReadOnly);
-                    foreach (X509Certificate2 certificate in store.Certificates)
+                    store.Open(System.Security.Cryptography.X509Certificates.OpenFlags.ReadOnly);
+                    foreach (System.Security.Cryptography.X509Certificates.X509Certificate2 certificate 
+                        in store.Certificates)
                     {
                         PrintCertificateInfo(certificate);
                     }
@@ -211,14 +229,18 @@ namespace SslCertificateGenerator
             }
         }
 
-        public static void EnumCertificates(string name, StoreLocation location)
+        public static void EnumCertificates(
+              string name
+            , System.Security.Cryptography.X509Certificates.StoreLocation location)
         {
-            using (X509Store store = new X509Store(name, location))
+            using (System.Security.Cryptography.X509Certificates.X509Store store = 
+                new System.Security.Cryptography.X509Certificates.X509Store(name, location))
             {
                 try
                 {
-                    store.Open(OpenFlags.ReadOnly);
-                    foreach (X509Certificate2 certificate in store.Certificates)
+                    store.Open(System.Security.Cryptography.X509Certificates.OpenFlags.ReadOnly);
+                    foreach (System.Security.Cryptography.X509Certificates.X509Certificate2 certificate 
+                        in store.Certificates)
                     {
                         PrintCertificateInfo(certificate);
                     }
@@ -240,28 +262,37 @@ namespace SslCertificateGenerator
         /// </summary>
         /// <param name="storeLocation"></param>
         /// <returns></returns>
-        private bool RootCertificateInstalled(StoreLocation storeLocation, string issuer)
+        private bool RootCertificateInstalled(
+            System.Security.Cryptography.X509Certificates.StoreLocation storeLocation, 
+            string issuer)
         {
             //string issuer = $"{RootCertificate.Issuer}";
             // && (CertificateEngine != CertificateEngine.DefaultWindows
-            return FindCertificates(StoreName.Root, storeLocation, issuer).Count > 0 
-                       || FindCertificates(StoreName.My, storeLocation, issuer).Count > 0;
+            return FindCertificates(
+                System.Security.Cryptography.X509Certificates.StoreName.Root, storeLocation, issuer).Count > 0  
+                       || FindCertificates(
+                           System.Security.Cryptography.X509Certificates.StoreName.My, 
+                           storeLocation, issuer).Count > 0;
         } // End Function FindCertificates 
 
 
-        private static X509Certificate2Collection FindCertificates(
-              StoreName storeName
-            , StoreLocation storeLocation
+        private static System.Security.Cryptography.X509Certificates.X509Certificate2Collection 
+            FindCertificates(
+              System.Security.Cryptography.X509Certificates.StoreName storeName
+            , System.Security.Cryptography.X509Certificates.StoreLocation storeLocation
             , string findValue)
         {
-            X509Certificate2Collection results = null;
+            System.Security.Cryptography.X509Certificates.X509Certificate2Collection results = null;
 
-            using (X509Store x509Store = new X509Store(storeName, storeLocation))
+            using (System.Security.Cryptography.X509Certificates.X509Store x509Store = 
+                new System.Security.Cryptography.X509Certificates.X509Store(storeName, storeLocation))
             {
                 try
                 {
-                    x509Store.Open(OpenFlags.OpenExistingOnly);
-                    results = x509Store.Certificates.Find(X509FindType.FindBySubjectDistinguishedName, findValue, false);
+                    x509Store.Open(System.Security.Cryptography.X509Certificates.OpenFlags.OpenExistingOnly);
+                    results = x509Store.Certificates.Find(
+                        System.Security.Cryptography.X509Certificates.X509FindType
+                        .FindBySubjectDistinguishedName, findValue, false);
                 }
                 finally
                 {
@@ -277,21 +308,28 @@ namespace SslCertificateGenerator
         public static bool ExportCertificate(
            string certificateName,
            string path,
-           StoreName storeName,
-           StoreLocation location)
+           System.Security.Cryptography.X509Certificates.StoreName storeName,
+           System.Security.Cryptography.X509Certificates.StoreLocation location)
         {
             bool success = false;
 
-            X509Store store = new X509Store(storeName, location);
-            store.Open(OpenFlags.ReadOnly);
+            System.Security.Cryptography.X509Certificates.X509Store store = 
+                new System.Security.Cryptography.X509Certificates.X509Store(storeName, location);
+
+            store.Open(System.Security.Cryptography.X509Certificates.OpenFlags.ReadOnly);
             try
             {
-                X509Certificate2Collection certs
-                   = store.Certificates.Find(X509FindType.FindBySubjectName, certificateName, true);
+                System.Security.Cryptography.X509Certificates.X509Certificate2Collection certs
+                   = store.Certificates.Find(
+                       System.Security.Cryptography.X509Certificates.X509FindType.FindBySubjectName, 
+                       certificateName, true
+                );
 
                 if (certs != null && certs.Count > 0)
                 {
-                    byte[] data = certs[0].Export(X509ContentType.Cert);
+                    byte[] data = certs[0].Export(
+                        System.Security.Cryptography.X509Certificates.X509ContentType.Cert
+                    );
                     success = WriteFile(data, path);
                 }
             }
@@ -311,21 +349,27 @@ namespace SslCertificateGenerator
            string certificateName,
            string path,
            string storeName,
-           StoreLocation location)
+           System.Security.Cryptography.X509Certificates.StoreLocation location)
         {
             bool success = false;
 
-            using (X509Store store = new X509Store(storeName, location))
+            using (System.Security.Cryptography.X509Certificates.X509Store store = 
+                new System.Security.Cryptography.X509Certificates.X509Store(storeName, location))
             {
-                store.Open(OpenFlags.ReadOnly);
+                store.Open(System.Security.Cryptography.X509Certificates.OpenFlags.ReadOnly);
                 try
                 {
-                    X509Certificate2Collection certs
-                       = store.Certificates.Find(X509FindType.FindBySubjectName, certificateName, true);
+                    System.Security.Cryptography.X509Certificates.X509Certificate2Collection certs
+                       = store.Certificates.Find(
+                           System.Security.Cryptography.X509Certificates.X509FindType.FindBySubjectName, 
+                           certificateName, true
+                    );
 
                     if (certs != null && certs.Count > 0)
                     {
-                        byte[] data = certs[0].Export(X509ContentType.Cert);
+                        byte[] data = certs[0].Export(
+                            System.Security.Cryptography.X509Certificates.X509ContentType.Cert
+                            );
                         success = WriteFile(data, path);
                     }
                 }
@@ -370,10 +414,13 @@ namespace SslCertificateGenerator
         ///     Loads root certificate from current executing assembly location with expected name rootCert.pfx.
         /// </summary>
         /// <returns></returns>
-        public X509Certificate2 LoadRootCertificate(string fileName
+        public System.Security.Cryptography.X509Certificates.X509Certificate2 
+            LoadRootCertificate(string fileName
             , string pfxPassword)
         {
-            return LoadRootCertificate(fileName, pfxPassword, X509KeyStorageFlags.Exportable);
+            return LoadRootCertificate(fileName, pfxPassword, 
+                System.Security.Cryptography.X509Certificates.X509KeyStorageFlags.Exportable
+            );
         } // End Function LoadRootCertificate 
 
 
@@ -381,9 +428,11 @@ namespace SslCertificateGenerator
         ///     Loads root certificate from current executing assembly location with expected name rootCert.pfx.
         /// </summary>
         /// <returns></returns>
-        public X509Certificate2 LoadRootCertificate(string fileName
-        ,string pfxPassword
-            ,X509KeyStorageFlags StorageFlag )
+        public System.Security.Cryptography.X509Certificates.X509Certificate2 
+            LoadRootCertificate(
+            string fileName,
+            string pfxPassword,
+            System.Security.Cryptography.X509Certificates.X509KeyStorageFlags StorageFlag )
         {
             bool pfxFileExists = System.IO.File.Exists(fileName);
             if (!pfxFileExists)
@@ -393,7 +442,8 @@ namespace SslCertificateGenerator
 
             try
             {
-                return new X509Certificate2(fileName, pfxPassword, StorageFlag);
+                return new System.Security.Cryptography.X509Certificates.X509Certificate2(
+                    fileName, pfxPassword, StorageFlag);
             }
             catch (System.Exception e)
             {
@@ -410,9 +460,9 @@ namespace SslCertificateGenerator
         /// <param name="storeLocation"></param>
         /// <param name="certificate"></param>
         public static void UninstallCertificate(
-              X509Certificate2 certificate
-            , StoreName storeName
-            , StoreLocation storeLocation
+              System.Security.Cryptography.X509Certificates.X509Certificate2 certificate
+            , System.Security.Cryptography.X509Certificates.StoreName storeName
+            , System.Security.Cryptography.X509Certificates.StoreLocation storeLocation
             )
         {
             if (certificate == null)
@@ -420,11 +470,12 @@ namespace SslCertificateGenerator
                 throw new System.Exception("Could not remove certificate as it is null or empty.");
             }
 
-            using (X509Store x509Store = new X509Store(storeName, storeLocation))
+            using (System.Security.Cryptography.X509Certificates.X509Store x509Store = 
+                new System.Security.Cryptography.X509Certificates.X509Store(storeName, storeLocation))
             {
                 try
                 {
-                    x509Store.Open(OpenFlags.ReadWrite);
+                    x509Store.Open(System.Security.Cryptography.X509Certificates.OpenFlags.ReadWrite);
                     x509Store.Remove(certificate);
                 }
                 catch (System.Exception e)
@@ -450,8 +501,8 @@ namespace SslCertificateGenerator
         /// <param name="certificate"></param>
         public static void InstallCertificate(
               System.Security.Cryptography.X509Certificates.X509Certificate2 certificate
-            , StoreName storeName
-            , StoreLocation storeLocation
+            , System.Security.Cryptography.X509Certificates.StoreName storeName
+            , System.Security.Cryptography.X509Certificates.StoreLocation storeLocation
             
         )
         {
@@ -461,13 +512,14 @@ namespace SslCertificateGenerator
                 throw new System.Exception("Could not install certificate as it is null or empty.");
             }
 
-            using (X509Store x509Store = new X509Store(storeName, storeLocation))
+            using (System.Security.Cryptography.X509Certificates.X509Store x509Store = 
+                new System.Security.Cryptography.X509Certificates.X509Store(storeName, storeLocation))
             {
                 // todo
                 // also it should do not duplicate if certificate already exists
                 try
                 {
-                    x509Store.Open(OpenFlags.ReadWrite);
+                    x509Store.Open(System.Security.Cryptography.X509Certificates.OpenFlags.ReadWrite);
                     x509Store.Add(certificate);
                 }
                 catch (System.Exception e)

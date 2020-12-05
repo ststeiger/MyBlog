@@ -102,7 +102,7 @@ namespace SslCertificateGenerator
             kpk.PrivateKey = System.IO.File.ReadAllText(kpk.PrivateKey);
 
 
-            SelfSignSslCertificate(random, rootCertificate, kpk);
+            // SelfSignSslCertificate(random, rootCertificate, kpk);
 
 
             System.Security.Cryptography.X509Certificates.X509Certificate2 c0 = new System.Security.Cryptography.X509Certificates.X509Certificate2("obelix.pfx", "");
@@ -123,7 +123,7 @@ namespace SslCertificateGenerator
             // Org.BouncyCastle.X509.X509Certificate
             // Org.BouncyCastle.Security.DotNetUtilities.ToX509Certificate(cert);
 
-            // var x509 = new Org.BouncyCastle.X509.X509CertificateParser(); ;
+            // Org.BouncyCastle.X509.X509CertificateParser x509 = new Org.BouncyCastle.X509.X509CertificateParser(); 
             // x509.ReadCertificate()
 
             // https://docs.microsoft.com/en-us/dotnet/api/system.security.cryptography.x509certificates.x509certificate2.createfrompem?view=net-5.0
@@ -194,7 +194,7 @@ namespace SslCertificateGenerator
             // without sending the private key, which must be kept secret.
             // An X509Certificate2 object may have a private key associated with it (via its PrivateKey property), 
             // but that's only a convenience as part of the design of this class.
-            // var cc = new System.Security.Cryptography.X509Certificates.X509Certificate2(caRoot.GetEncoded());
+            // System.Security.Cryptography.X509Certificates.X509Certificate2 = new System.Security.Cryptography.X509Certificates.X509Certificate2(caRoot.GetEncoded());
             // System.Console.WriteLine(cc.PublicKey);
             // System.Console.WriteLine(cc.PrivateKey);
 
@@ -317,7 +317,7 @@ namespace SslCertificateGenerator
                 bs = System.MemoryExtensions.AsSpan(reader.ReadToEnd());
                 // bs = reader.ReadToEnd().AsSpan(); // requires using System; 
                 // getting string from Span
-                // var str = span.ToString();
+                // string str = span.ToString();
             }
 
             System.Security.Cryptography.X509Certificates.X509Certificate2 c1 = System.Security.Cryptography.X509Certificates.X509Certificate2.CreateFromPemFile("cert", "key");

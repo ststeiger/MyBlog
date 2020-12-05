@@ -6,7 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MimeKit" Version="2.10.0" />
     <PackageReference Include="Portable.BouncyCastle" Version="1.8.8" />
     <PackageReference Include="Quartz" Version="3.2.3" />
     <PackageReference Include="Quartz.Jobs" Version="3.2.3" />
