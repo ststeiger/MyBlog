@@ -9,81 +9,13 @@ namespace SslCertificateGenerator
 
         public static async System.Threading.Tasks.Task Main(string[] args)
         {
-            // 1. Root certificate to pfx 
-            // 2. Read root certificate 
-            // 3. Sign SSL certificate
             Test();
-
-            // https://www.selfsignedcertificate.com/
-            // https://askubuntu.com/questions/73287/how-do-i-install-a-root-certificate
-            // https://www.digicert.com/kb/csr-ssl-installation/nginx-openssl.htm
-            // https://serverfault.com/questions/10854/nginx-https-serving-with-same-config-as-http
-            // https://nginx.org/en/docs/http/configuring_https_servers.html#single_http_https_server
-            // https://www.thesslstore.com/knowledgebase/ssl-install/nginx-ssl-installation/
-            // https://www.digitalocean.com/community/tutorials/how-to-secure-nginx-with-let-s-encrypt-on-ubuntu-18-04
-            // https://www.digitalocean.com/community/tutorials/how-to-create-a-self-signed-ssl-certificate-for-nginx-in-ubuntu-18-04
-
-            ReadPkFromCertificate();
 
             System.Console.WriteLine(" --- Press any key to continue --- ");
             System.Console.ReadKey();
 
             await System.Threading.Tasks.Task.CompletedTask;
         } // End Sub Main 
-
-
-        public static void ReadPkFromCertificate()
-        {
-            string pfxLocation = @"obelix.pfx";
-
-
-            Org.BouncyCastle.Pkcs.Pkcs12Store store = null;
-
-            using (System.IO.Stream pfxStream = System.IO.File.OpenRead(pfxLocation))
-            {
-                store = new Org.BouncyCastle.Pkcs.Pkcs12Store(pfxStream, "".ToCharArray());
-            }
-
-            System.Console.WriteLine(store);
-
-            foreach (string alias in store.Aliases)
-            {
-                System.Console.WriteLine(alias);
-
-                // https://7thzero.com/blog/bouncy-castle-convert-a-bouncycastle-asymmetrickeyentry-to-a-.ne
-                if (store.IsKeyEntry(alias))
-                {
-                    Org.BouncyCastle.Pkcs.AsymmetricKeyEntry keyEntry = store.GetKey(alias);
-                    System.Console.WriteLine(keyEntry);
-                    Org.BouncyCastle.Crypto.AsymmetricKeyParameter privateKey = keyEntry.Key;
-                    System.Console.WriteLine(privateKey.IsPrivate);
-                } // End if (store.IsKeyEntry((string)alias))
-
-
-                Org.BouncyCastle.Pkcs.X509CertificateEntry certEntry = store.GetCertificate(alias);
-                Org.BouncyCastle.X509.X509Certificate cert = certEntry.Certificate;
-                System.Console.WriteLine(cert);
-
-                Org.BouncyCastle.Crypto.AsymmetricKeyParameter publicKey = cert.GetPublicKey();
-                System.Console.WriteLine(publicKey);
-
-                // Org.BouncyCastle.Pkcs.X509CertificateEntry[] chain = store.GetCertificateChain(alias);
-
-                // System.Security.Cryptography.X509Certificates.X509Certificate2 cert2 = new System.Security.Cryptography.X509Certificates.X509Certificate2(cert.GetEncoded());
-                // Org.BouncyCastle.Security.DotNetUtilities.ToX509Certificate(cert);
-
-                System.Security.Cryptography.X509Certificates.X509Certificate2 cert2 = new System.Security.Cryptography.X509Certificates.X509Certificate2(pfxLocation);
-                // cert2.PrivateKey = null;
-
-                if (cert2.HasPrivateKey)
-                {
-                    System.Console.WriteLine(cert2.PrivateKey);
-                }
-
-            }
-
-        }
-
 
 
         public static void Test()
@@ -325,21 +257,6 @@ namespace SslCertificateGenerator
             // System.Security.Cryptography.X509Certificates.X509Certificate2 c3 = System.Security.Cryptography.X509Certificates.X509Certificate2.CreateFromCertFile("crt");
 
             return c1;
-        }
-
-
-        public static System.Security.Cryptography.X509Certificates.X509Certificate2 CertFromPfx()
-        {
-            string pfxLocation = "";
-            string password = "";
-
-            System.Security.Cryptography.X509Certificates.X509Certificate2 cert2 =
-                  new System.Security.Cryptography.X509Certificates.X509Certificate2(
-                  pfxLocation
-                , password
-            );
-
-            return cert2;
         }
 
 
