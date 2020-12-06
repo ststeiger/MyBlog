@@ -13,11 +13,20 @@ namespace OnlineYournal
 
     public class Program
     {
-
-
+        
+        // https://github.com/Tondas/LetsEncrypt
+        // https://blogs.akamai.com/2018/10/best-practices-for-ultra-low-latency-streaming-using-chunked-encoded-and-chunk-transferred-cmaf.html
+        // https://www.monitis.com/blog/how-to-log-to-postgresql-with-syslog-ng/
+        // https://github.com/sshnet/SSH.NET
+        // https://labs.rebex.net/syslog
+        // https://github.com/moovspace/HotSsl
+        // https://github.com/jchristn/WatsonSyslogServer
+        // https://github.com/dotnet/aspnetcore/discussions/28238#discussioncomment-142844
+        // https://learn.akamai.com/en-us/webhelp/media-services-live/media-services-live-encoder-compatibility-testing-and-qualification-guide-v4.0/GUID-A7D10A31-F4BC-49DD-92B2-8A5BA409BAFE.html#:~:text=The%20transmission%20ends%20when%20a%20zero%2Dlength%20chunk%20is%20received.&text=The%20Content%2DLength%20header%20is,regular%20chunk%20with%20zero%20length.
+        // https://www.drunkcode.net/en/posts/2020/6/10/parsing-with-ReadOnlySpan-and-first-try-of-OBJ-reader
+        
         public static void Main(string[] args)
         {
-
             using (System.IO.FileSystemWatcher watcher = new System.IO.FileSystemWatcher())
             {
                 // listenOptions.UseHttps("testCert.pfx", "testPassword");                                
