@@ -36,6 +36,12 @@ https://tirania.org/blog/
 Coding Horror
 https://blog.codinghorror.com/
 
+Andrew Lock | .NET Escapades
+https://andrewlock.net/
+https://andrewlock.net/5-ways-to-set-the-urls-for-an-aspnetcore-app/
+https://github.com/andrewlock
+
+
 Shawn Wildermuth's Blog
 http://wildermuth.com/2016/04/14/Welcome-to-the-New-Wildermuth-com
 
